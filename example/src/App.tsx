@@ -1,12 +1,12 @@
-import { Text, View, StyleSheet } from 'react-native';
-import { multiply } from 'react-native-light-calendar';
-
-const result = multiply(3, 7);
+import { View, StyleSheet, ScrollView } from 'react-native';
+import { MonthCalendar } from 'react-native-light-calendar';
 
 export default function App() {
   return (
     <View style={styles.container}>
-      <Text>Result: {result}</Text>
+      <ScrollView style={styles.scrollView}>
+        <MonthCalendar date={new Date()} />
+      </ScrollView>
     </View>
   );
 }
@@ -14,7 +14,10 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+  },
+  scrollView: {
+    marginVertical: 80,
+    width: '100%',
+    borderWidth: 0.5,
   },
 });
