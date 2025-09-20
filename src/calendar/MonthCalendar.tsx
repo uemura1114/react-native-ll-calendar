@@ -70,6 +70,9 @@ export const MonthCalendar = (props: {
       }}
       showsHorizontalScrollIndicator={false}
       scrollEnabled={true}
+      windowSize={5}
+      initialNumToRender={5}
+      maxToRenderPerBatch={5}
     />
   );
 };
