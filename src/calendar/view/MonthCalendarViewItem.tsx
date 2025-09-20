@@ -74,12 +74,14 @@ export const MonthCalendarViewItem = (props: {
 
 const styles = StyleSheet.create({
   container: {
-    borderWidth: 0.3,
+    borderWidth: 0.2,
+    borderColor: 'lightslategrey',
     alignSelf: 'flex-start',
   },
   monthContainer: {
     padding: 2,
     borderWidth: 0.2,
+    borderColor: 'lightslategrey',
   },
   monthText: {
     textAlign: 'center',
@@ -91,8 +93,8 @@ const styles = StyleSheet.create({
   },
   dayCellCountainer: {
     minHeight: 80,
-    borderWidth: 0.3,
-    borderColor: 'gray',
+    borderWidth: 0.2,
+    borderColor: 'lightslategrey',
   },
   dayCellLabel: {
     paddingVertical: 1,
@@ -107,9 +109,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   headerCellCountainer: {
-    borderWidth: 0.3,
+    borderWidth: 0.2,
+    borderColor: 'lightslategrey',
     paddingVertical: 2,
-    borderColor: 'gray',
   },
   headerCellText: {
     textAlign: 'center',

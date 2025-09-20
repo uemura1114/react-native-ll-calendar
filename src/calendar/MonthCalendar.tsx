@@ -1,19 +1,21 @@
 import { useWindowDimensions, FlatList } from 'react-native';
 import { MonthCalendarViewItem } from './view/MonthCalendarViewItem';
 import dayjs from 'dayjs';
+import { useState } from 'react';
 
 export type WeekStartsOn = 0 | 1;
 
-const HALF_PANEL_LENGTH = 100;
+const HALF_PANEL_LENGTH = 120; // 10 years
 
 export const MonthCalendar = (props: {
-  date: Date;
-  defaultDate?: Date;
+  defaultDate: Date;
   weekStartsOn?: WeekStartsOn;
+  onChangeDate?: (date: Date) => void;
 }) => {
-  const { date, defaultDate = date, weekStartsOn = 0 } = props;
-
-  const defaultDateDjs = dayjs(defaultDate);
+  const { defaultDate, weekStartsOn = 0, onChangeDate } = props;
+  const [dateState] = useState(defaultDate);
+  const [_activeIndex, setActiveIndex] = useState(HALF_PANEL_LENGTH);
+  const defaultDateDjs = dayjs(dateState);
   const startOfDefaultDateDjs = defaultDateDjs.startOf('month');
   const prevPanels: string[] = Array.from(
     { length: HALF_PANEL_LENGTH },
@@ -51,9 +53,14 @@ export const MonthCalendar = (props: {
       onMomentumScrollEnd={(e) => {
         const scrollX = e.nativeEvent.contentOffset.x;
         const newIndex = Math.round(scrollX / width);
-        console.log('newIndex', newIndex);
+        const month = panels[newIndex];
+        if (month) {
+          const newDate = new Date(month);
+          onChangeDate?.(newDate);
+        }
+        setActiveIndex(newIndex);
       }}
-      initialScrollIndex={100}
+      initialScrollIndex={HALF_PANEL_LENGTH}
       decelerationRate={'fast'}
       data={panels}
       renderItem={({ item }) => {
