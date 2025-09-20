@@ -5,6 +5,15 @@ export const MonthCalendarView = (props: { rows: dayjs.Dayjs[][] }) => {
   const { rows } = props;
   return (
     <View style={styles.container}>
+      <View style={styles.rowContainer}>
+        {rows[0]?.map((date) => {
+          return (
+            <View key={date.get('day')} style={styles.headerCellCountainer}>
+              <Text style={styles.dayCellText}>{date.format('ddd')}</Text>
+            </View>
+          );
+        })}
+      </View>
       {rows.map((row, index) => {
         return (
           <View key={`row-${index}`} style={styles.rowContainer}>
@@ -18,9 +27,6 @@ export const MonthCalendarView = (props: { rows: dayjs.Dayjs[][] }) => {
                     <Text
                       style={styles.dayCellText}
                     >{`${date.format('D')}`}</Text>
-                    <Text
-                      style={styles.dayCellText}
-                    >{`${date.format('ddd')}`}</Text>
                   </View>
                 </TouchableOpacity>
               );
@@ -59,5 +65,15 @@ const styles = StyleSheet.create({
   weekContainer: {
     display: 'flex',
     flexDirection: 'row',
+  },
+  headerCellCountainer: {
+    borderWidth: 0.2,
+    paddingVertical: 2,
+    borderColor: 'gray',
+    width: `${100 / 7}%`,
+  },
+  headerCellText: {
+    textAlign: 'center',
+    fontSize: 12,
   },
 });
