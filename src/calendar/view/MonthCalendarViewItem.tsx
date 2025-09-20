@@ -39,10 +39,7 @@ export const MonthCalendarViewItem = (props: {
       <View style={styles.rowContainer}>
         {rows[0]?.map((djs) => {
           return (
-            <View
-              key={djs.get('day')}
-              style={[styles.headerCellCountainer, { width: width / 7 }]}
-            >
+            <View key={djs.get('day')} style={[styles.headerCellCountainer]}>
               <Text style={styles.dayCellText}>{djs.format('ddd')}</Text>
             </View>
           );
@@ -54,8 +51,8 @@ export const MonthCalendarViewItem = (props: {
             {row.map((djs) => {
               return (
                 <TouchableOpacity
-                  style={[styles.dayCellCountainer, { width: width / 7 }]}
                   key={djs.get('date')}
+                  style={[styles.dayCellCountainer]}
                 >
                   <View style={styles.dayCellLabel}>
                     <Text
@@ -93,8 +90,10 @@ const styles = StyleSheet.create({
   },
   dayCellCountainer: {
     minHeight: 80,
+    flex: 1,
     borderWidth: 0.2,
     borderColor: 'lightslategrey',
+    backgroundColor: 'white',
   },
   dayCellLabel: {
     paddingVertical: 1,
@@ -110,8 +109,10 @@ const styles = StyleSheet.create({
   },
   headerCellCountainer: {
     borderWidth: 0.2,
+    flex: 1,
     borderColor: 'lightslategrey',
     paddingVertical: 2,
+    backgroundColor: 'white',
   },
   headerCellText: {
     textAlign: 'center',
