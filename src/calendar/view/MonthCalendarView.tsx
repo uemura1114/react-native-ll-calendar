@@ -41,7 +41,7 @@ export const MonthCalendarView = (props: { rows: dayjs.Dayjs[][] }) => {
 const styles = StyleSheet.create({
   container: {
     width: '100%',
-    borderWidth: 0.2,
+    borderWidth: 0.3,
   },
   rowContainer: {
     width: '100%',
@@ -50,7 +50,7 @@ const styles = StyleSheet.create({
   },
   dayCellCountainer: {
     minHeight: 80,
-    borderWidth: 0.2,
+    borderWidth: 0.3,
     borderColor: 'gray',
     width: `${100 / 7}%`,
   },
@@ -67,7 +67,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   headerCellCountainer: {
-    borderWidth: 0.2,
+    borderWidth: 0.3,
     paddingVertical: 2,
     borderColor: 'gray',
     width: `${100 / 7}%`,
