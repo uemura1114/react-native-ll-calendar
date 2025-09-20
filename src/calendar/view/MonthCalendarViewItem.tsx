@@ -1,14 +1,25 @@
 import type dayjs from 'dayjs';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  useWindowDimensions,
+} from 'react-native';
 
-export const MonthCalendarView = (props: { rows: dayjs.Dayjs[][] }) => {
+export const MonthCalendarViewItem = (props: { rows: dayjs.Dayjs[][] }) => {
   const { rows } = props;
+  const { width } = useWindowDimensions();
+
   return (
     <View style={styles.container}>
       <View style={styles.rowContainer}>
         {rows[0]?.map((date) => {
           return (
-            <View key={date.get('day')} style={styles.headerCellCountainer}>
+            <View
+              key={date.get('day')}
+              style={[styles.headerCellCountainer, { width: width / 7 }]}
+            >
               <Text style={styles.dayCellText}>{date.format('ddd')}</Text>
             </View>
           );
@@ -20,7 +31,7 @@ export const MonthCalendarView = (props: { rows: dayjs.Dayjs[][] }) => {
             {row.map((date) => {
               return (
                 <TouchableOpacity
-                  style={styles.dayCellCountainer}
+                  style={[styles.dayCellCountainer, { width: width / 7 }]}
                   key={date.get('date')}
                 >
                   <View style={styles.dayCellLabel}>
@@ -40,7 +51,6 @@ export const MonthCalendarView = (props: { rows: dayjs.Dayjs[][] }) => {
 
 const styles = StyleSheet.create({
   container: {
-    width: '100%',
     borderWidth: 0.3,
   },
   rowContainer: {
@@ -52,7 +62,6 @@ const styles = StyleSheet.create({
     minHeight: 80,
     borderWidth: 0.3,
     borderColor: 'gray',
-    width: `${100 / 7}%`,
   },
   dayCellLabel: {
     paddingVertical: 1,
@@ -70,7 +79,6 @@ const styles = StyleSheet.create({
     borderWidth: 0.3,
     paddingVertical: 2,
     borderColor: 'gray',
-    width: `${100 / 7}%`,
   },
   headerCellText: {
     textAlign: 'center',
