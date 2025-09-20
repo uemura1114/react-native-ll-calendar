@@ -1,7 +1,12 @@
 import useMonthCalendar from './logic/useMonthCalendar';
 import { MonthCalendarView } from './view/MonthCalendarView';
 
-export const MonthCalendar = (props: { date: Date; weekStartsOn?: 0 | 1 }) => {
+type WeekStartsOn = 0 | 1;
+
+export const MonthCalendar = (props: {
+  date: Date;
+  weekStartsOn?: WeekStartsOn;
+}) => {
   const { date, weekStartsOn = 0 } = props;
   const { rows } = useMonthCalendar({ date, weekStartsOn });
 
