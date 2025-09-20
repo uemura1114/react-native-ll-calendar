@@ -1,4 +1,4 @@
-import type dayjs from 'dayjs';
+import dayjs from 'dayjs';
 import {
   StyleSheet,
   Text,
@@ -6,21 +6,44 @@ import {
   View,
   useWindowDimensions,
 } from 'react-native';
+import { monthlyStartDate, monthlyEndDate } from '../../utility/functions';
+import type { WeekStartsOn } from '../MonthCalendar';
 
-export const MonthCalendarViewItem = (props: { rows: dayjs.Dayjs[][] }) => {
-  const { rows } = props;
+export const MonthCalendarViewItem = (props: {
+  month: string;
+  weekStartsOn: WeekStartsOn;
+}) => {
+  const { month, weekStartsOn } = props;
   const { width } = useWindowDimensions();
 
+  const date = new Date(month);
+  const dateDjs = dayjs(date);
+  const startDate = monthlyStartDate({ date, weekStartsOn });
+  const endDate = monthlyEndDate({ date, weekStartsOn });
+  const endDjs = dayjs(endDate);
+  const rows: dayjs.Dayjs[][] = [];
+  let currentDate = dayjs(startDate);
+  while (currentDate.isBefore(endDjs)) {
+    const row = Array.from({ length: 7 }, (_, i) => {
+      return currentDate.add(i, 'day');
+    });
+    rows.push(row);
+    currentDate = currentDate.add(7, 'day');
+  }
+
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { width }]}>
+      <View style={styles.monthContainer}>
+        <Text style={styles.monthText}>{dateDjs.format('YYYY/MM')}</Text>
+      </View>
       <View style={styles.rowContainer}>
-        {rows[0]?.map((date) => {
+        {rows[0]?.map((djs) => {
           return (
             <View
-              key={date.get('day')}
+              key={djs.get('day')}
               style={[styles.headerCellCountainer, { width: width / 7 }]}
             >
-              <Text style={styles.dayCellText}>{date.format('ddd')}</Text>
+              <Text style={styles.dayCellText}>{djs.format('ddd')}</Text>
             </View>
           );
         })}
@@ -28,16 +51,16 @@ export const MonthCalendarViewItem = (props: { rows: dayjs.Dayjs[][] }) => {
       {rows.map((row, index) => {
         return (
           <View key={`row-${index}`} style={styles.rowContainer}>
-            {row.map((date) => {
+            {row.map((djs) => {
               return (
                 <TouchableOpacity
                   style={[styles.dayCellCountainer, { width: width / 7 }]}
-                  key={date.get('date')}
+                  key={djs.get('date')}
                 >
                   <View style={styles.dayCellLabel}>
                     <Text
                       style={styles.dayCellText}
-                    >{`${date.format('D')}`}</Text>
+                    >{`${djs.format('D')}`}</Text>
                   </View>
                 </TouchableOpacity>
               );
@@ -52,6 +75,14 @@ export const MonthCalendarViewItem = (props: { rows: dayjs.Dayjs[][] }) => {
 const styles = StyleSheet.create({
   container: {
     borderWidth: 0.3,
+    alignSelf: 'flex-start',
+  },
+  monthContainer: {
+    padding: 2,
+    borderWidth: 0.2,
+  },
+  monthText: {
+    textAlign: 'center',
   },
   rowContainer: {
     width: '100%',

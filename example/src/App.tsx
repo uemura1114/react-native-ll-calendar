@@ -5,7 +5,7 @@ export default function App() {
   return (
     <View style={styles.container}>
       <ScrollView style={styles.scrollView}>
-        <MonthCalendar date={new Date('2025-09-22')} weekStartsOn={1} />
+        <MonthCalendar date={new Date('2025-09-22')} weekStartsOn={0} />
       </ScrollView>
     </View>
   );
