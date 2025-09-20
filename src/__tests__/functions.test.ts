@@ -13,7 +13,6 @@ describe('monthlyStartDate', () => {
     const date = new Date('2025-09-15');
     const result = monthlyStartDate({ date, weekStartsOn: 1 });
     const expected = new Date('2025-09-01');
-    console.log();
     expect(result.toDateString()).toBe(expected.toDateString());
   });
 
