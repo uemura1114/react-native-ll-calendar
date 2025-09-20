@@ -5,7 +5,7 @@ export default function App() {
   return (
     <View style={styles.container}>
       <ScrollView style={styles.scrollView}>
-        <MonthCalendar date={new Date()} />
+        <MonthCalendar date={new Date('2025-09-22')} weekStartsOn={1} />
       </ScrollView>
     </View>
   );
@@ -18,6 +18,5 @@ const styles = StyleSheet.create({
   scrollView: {
     marginVertical: 80,
     width: '100%',
-    borderWidth: 0.5,
   },
 });

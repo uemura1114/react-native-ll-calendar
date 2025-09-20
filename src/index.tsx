@@ -1,1 +1,1 @@
-export { MonthCalendar } from './calendar/MonthCalendar';
+export { MonthCalendar } from './calendar/MonthCalendarContainer';
