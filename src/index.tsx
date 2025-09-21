@@ -1,3 +1,2 @@
-export function multiply(a: number, b: number): number {
-  return a * b;
-}
+export { MonthCalendar } from './calendar/month-calendar/MonthCalendar';
+export type { CalendarEvent } from './types/month-calendar';
