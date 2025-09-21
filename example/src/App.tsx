@@ -1,12 +1,16 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
-import { MonthCalendar } from 'react-native-light-calendar';
+import { MonthCalendar, type CalendarEvent } from 'react-native-light-calendar';
 
 export default function App() {
   const [date, setDate] = useState(new Date());
 
   const handleChangeDate = useCallback((d: Date) => {
     setDate(d);
+  }, []);
+
+  const events: CalendarEvent[] = useMemo(() => {
+    return [];
   }, []);
 
   return (
@@ -16,6 +20,7 @@ export default function App() {
           defaultDate={date}
           weekStartsOn={0}
           onChangeDate={handleChangeDate}
+          events={events}
         />
       </ScrollView>
     </View>

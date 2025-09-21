@@ -5,12 +5,22 @@ import { useState } from 'react';
 
 export type WeekStartsOn = 0 | 1;
 
+export type CalendarEvent = {
+  id: string;
+  title: string;
+  start: Date;
+  end: Date;
+  backgroundColor: string;
+  borderColor: string;
+};
+
 const HALF_PANEL_LENGTH = 120; // 10 years
 
 export const MonthCalendar = (props: {
   defaultDate: Date;
   weekStartsOn?: WeekStartsOn;
   onChangeDate?: (date: Date) => void;
+  events: CalendarEvent[];
 }) => {
   const { defaultDate, weekStartsOn = 0, onChangeDate } = props;
   const [dateState] = useState(defaultDate);
