@@ -90,9 +90,25 @@ export default function App() {
       },
 
       {
-        id: '10',
+        id: '10-1',
         title: 'Seminar',
         start: new Date(currentYear, currentMonth + 1, 8),
+        end: new Date(currentYear, currentMonth + 1, 10),
+        backgroundColor: '#a29bfe',
+        borderColor: '#6c5ce7',
+      },
+      {
+        id: '10-2',
+        title: 'Seminar',
+        start: new Date(currentYear, currentMonth + 1, 8),
+        end: new Date(currentYear, currentMonth + 1, 9),
+        backgroundColor: '#a29bfe',
+        borderColor: '#6c5ce7',
+      },
+      {
+        id: '10-3',
+        title: 'Seminar',
+        start: new Date(currentYear, currentMonth + 1, 10),
         end: new Date(currentYear, currentMonth + 1, 10),
         backgroundColor: '#a29bfe',
         borderColor: '#6c5ce7',

@@ -2,8 +2,10 @@ import dayjs from 'dayjs';
 import { StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { monthlyStartDate, monthlyEndDate } from '../../utility/functions';
 import type { CalendarEvent, WeekStartsOn } from '../MonthCalendar';
-import { MonthCalendarRow } from './MonthCalendarRow';
+import { MonthCalendarWeekRow } from './MonthCalendarWeekRow';
 import { useEvents } from '../logic/useEvents';
+import MonthCalendarEventPosition from '../../utility/month-calendar-event-position';
+import { CELL_BORDER_WIDTH } from '../../utility/size';
 
 export const MonthCalendarViewItem = (props: {
   month: string;
@@ -12,19 +14,20 @@ export const MonthCalendarViewItem = (props: {
 }) => {
   const { month, weekStartsOn, events } = props;
   const { width } = useWindowDimensions();
+  const eventPosition = new MonthCalendarEventPosition();
 
   const date = new Date(month);
   const dateDjs = dayjs(date);
   const startDate = monthlyStartDate({ date, weekStartsOn });
   const endDate = monthlyEndDate({ date, weekStartsOn });
   const endDjs = dayjs(endDate);
-  const rows: dayjs.Dayjs[][] = [];
+  const weeks: dayjs.Dayjs[][] = [];
   let currentDate = dayjs(startDate);
   while (currentDate.isBefore(endDjs)) {
-    const row = Array.from({ length: 7 }, (_, i) => {
+    const week = Array.from({ length: 7 }, (_, i) => {
       return currentDate.add(i, 'day');
     });
-    rows.push(row);
+    weeks.push(week);
     currentDate = currentDate.add(7, 'day');
   }
 
@@ -36,21 +39,22 @@ export const MonthCalendarViewItem = (props: {
         <Text style={styles.monthText}>{dateDjs.format('YYYY/MM')}</Text>
       </View>
       <View>
-        <MonthCalendarRow row={rows[0] ?? []} isWeekdayHeader={true} />
+        <MonthCalendarWeekRow dates={weeks[0] ?? []} isWeekdayHeader={true} />
       </View>
       <View>
-        {rows.map((row, index) => {
-          const firstDayOfWeek = row[0];
+        {weeks.map((week, index) => {
+          const firstDayOfWeek = week[0];
           if (firstDayOfWeek === undefined) {
             return null;
           }
           const weekId = firstDayOfWeek.format('YYYY-MM-DD');
           const weekEvents = eventsGroupByWeekId[weekId] || [];
           return (
-            <MonthCalendarRow
+            <MonthCalendarWeekRow
               key={`row-${index}`}
-              row={row}
+              dates={week}
               events={weekEvents}
+              eventPosition={eventPosition}
             />
           );
         })}
@@ -61,13 +65,13 @@ export const MonthCalendarViewItem = (props: {
 
 const styles = StyleSheet.create({
   container: {
-    borderWidth: 0.2,
+    borderWidth: CELL_BORDER_WIDTH,
     borderColor: 'lightslategrey',
     alignSelf: 'flex-start',
   },
   monthContainer: {
     padding: 2,
-    borderWidth: 0.2,
+    borderWidth: CELL_BORDER_WIDTH,
     borderColor: 'lightslategrey',
   },
   monthText: {

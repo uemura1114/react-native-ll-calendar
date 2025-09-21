@@ -44,7 +44,6 @@ describe('monthlyEndDate', () => {
     const date = new Date('2025-09-15');
     const result = monthlyEndDate({ date, weekStartsOn: 1 });
     const expected = new Date('2025-10-05');
-    console.log();
     expect(result.toDateString()).toBe(expected.toDateString());
   });
 
