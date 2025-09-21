@@ -1,5 +1,5 @@
 import { Text, View, StyleSheet } from 'react-native';
-import { multiply } from 'react-native-light-calendar';
+import { multiply } from 'react-native-ll-calendar';
 
 const result = multiply(3, 7);
 

@@ -1,5 +1,5 @@
 {
-  "name": "react-native-light-calendar",
+  "name": "react-native-ll-calendar",
   "version": "0.1.0",
   "description": "ReactNative Light Calendar Library",
   "main": "./lib/module/index.js",
@@ -32,7 +32,7 @@
     "!**/.*"
   ],
   "scripts": {
-    "example": "yarn workspace react-native-light-calendar-example",
+    "example": "yarn workspace react-native-ll-calendar-example",
     "test": "jest",
     "typecheck": "tsc",
     "lint": "eslint \"**/*.{js,ts,tsx}\"",
@@ -47,14 +47,14 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/uemura1114/react-native-light-calendar.git"
+    "url": "git+https://github.com/uemura1114/react-native-ll-calendar.git"
   },
   "author": "Wataru Uemura <uemura1114@gmail.com> (https://github.com/uemura1114)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/uemura1114/react-native-light-calendar/issues"
+    "url": "https://github.com/uemura1114/react-native-ll-calendar/issues"
   },
-  "homepage": "https://github.com/uemura1114/react-native-light-calendar#readme",
+  "homepage": "https://github.com/uemura1114/react-native-ll-calendar#readme",
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
   },
