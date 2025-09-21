@@ -1,6 +1,7 @@
 {
   "name": "react-native-light-calendar",
   "version": "0.1.0",
+  "private": true,
   "description": "ReactNative Light Calendar Library",
   "main": "./lib/module/index.js",
   "types": "./lib/typescript/src/index.d.ts",
