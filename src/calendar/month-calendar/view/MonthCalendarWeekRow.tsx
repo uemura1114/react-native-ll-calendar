@@ -12,7 +12,7 @@ export const MonthCalendarWeekRow = (props: {
   eventPosition?: MonthCalendarEventPosition;
 }) => {
   const { dates, isWeekdayHeader, events = [], eventPosition } = props;
-  const eventHeight = 20;
+  const eventHeight = 26;
   const { width: screenWidth } = useWindowDimensions();
   const dateColumnWidth = screenWidth / 7;
   const weekId = dates[0]?.format('YYYY-MM-DD');
@@ -168,7 +168,7 @@ const styles = StyleSheet.create({
   event: {
     borderWidth: 0.5,
     borderRadius: 4,
-    padding: 4,
+    paddingHorizontal: 4,
     flexDirection: 'row',
     alignItems: 'center',
     boxShadow: '0 0 2px 0 rgba(0, 0, 0, 0.1)',
