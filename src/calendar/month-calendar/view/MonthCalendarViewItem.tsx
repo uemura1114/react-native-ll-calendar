@@ -1,11 +1,14 @@
 import dayjs from 'dayjs';
 import { StyleSheet, Text, View, useWindowDimensions } from 'react-native';
-import { monthlyStartDate, monthlyEndDate } from '../../utility/functions';
-import type { CalendarEvent, WeekStartsOn } from '../MonthCalendar';
 import { MonthCalendarWeekRow } from './MonthCalendarWeekRow';
 import { useEvents } from '../logic/useEvents';
-import MonthCalendarEventPosition from '../../utility/month-calendar-event-position';
-import { CELL_BORDER_WIDTH } from '../../utility/size';
+import MonthCalendarEventPosition from '../../../lib/month-calendar-event-position';
+import { monthlyEndDate, monthlyStartDate } from '../../../lib/functions';
+import { CELL_BORDER_WIDTH } from '../../../constants/size';
+import type {
+  CalendarEvent,
+  WeekStartsOn,
+} from '../../../types/month-calendar';
 
 export const MonthCalendarViewItem = (props: {
   month: string;

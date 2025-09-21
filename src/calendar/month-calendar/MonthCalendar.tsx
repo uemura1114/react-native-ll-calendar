@@ -2,17 +2,7 @@ import { useWindowDimensions, FlatList } from 'react-native';
 import { MonthCalendarViewItem } from './view/MonthCalendarViewItem';
 import dayjs from 'dayjs';
 import { useState } from 'react';
-
-export type WeekStartsOn = 0 | 1;
-
-export type CalendarEvent = {
-  id: string;
-  title: string;
-  start: Date;
-  end: Date;
-  backgroundColor: string;
-  borderColor: string;
-};
+import type { CalendarEvent, WeekStartsOn } from '../../types/month-calendar';
 
 const HALF_PANEL_LENGTH = 120; // 10 years
 
