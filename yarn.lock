@@ -11210,9 +11210,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-light-calendar-example@workspace:example":
+"react-native-ll-calendar-example@workspace:example":
   version: 0.0.0-use.local
-  resolution: "react-native-light-calendar-example@workspace:example"
+  resolution: "react-native-ll-calendar-example@workspace:example"
   dependencies:
     "@expo/metro-runtime": ~6.1.2
     expo: ~54.0.9
@@ -11226,9 +11226,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"react-native-light-calendar@workspace:.":
+"react-native-ll-calendar@workspace:.":
   version: 0.0.0-use.local
-  resolution: "react-native-light-calendar@workspace:."
+  resolution: "react-native-ll-calendar@workspace:."
   dependencies:
     "@commitlint/config-conventional": ^19.8.1
     "@eslint/compat": ^1.3.2

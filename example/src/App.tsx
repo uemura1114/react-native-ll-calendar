@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
-import { MonthCalendar, type CalendarEvent } from 'react-native-light-calendar';
+import { MonthCalendar, type CalendarEvent } from 'react-native-ll-calendar';
 
 export default function App() {
   const [date, setDate] = useState(new Date());
