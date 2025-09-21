@@ -2,7 +2,7 @@
   "compilerOptions": {
     "rootDir": ".",
     "paths": {
-      "react-native-light-calendar": ["./src/index"]
+      "react-native-ll-calendar": ["./src/index"]
     },
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,
