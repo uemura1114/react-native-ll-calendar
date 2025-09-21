@@ -87,6 +87,7 @@ const styles = StyleSheet.create({
     width: '100%',
     display: 'flex',
     flexDirection: 'row',
+    flex: 1,
   },
   dayCellCountainer: {
     minHeight: 80,
