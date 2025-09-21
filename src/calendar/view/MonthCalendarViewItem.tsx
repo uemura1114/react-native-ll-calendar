@@ -1,13 +1,8 @@
 import dayjs from 'dayjs';
-import {
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-  useWindowDimensions,
-} from 'react-native';
+import { StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { monthlyStartDate, monthlyEndDate } from '../../utility/functions';
 import type { WeekStartsOn } from '../MonthCalendar';
+import { MonthCalendarRow } from './MonthCalendarRow';
 
 export const MonthCalendarViewItem = (props: {
   month: string;
@@ -36,35 +31,14 @@ export const MonthCalendarViewItem = (props: {
       <View style={styles.monthContainer}>
         <Text style={styles.monthText}>{dateDjs.format('YYYY/MM')}</Text>
       </View>
-      <View style={styles.rowContainer}>
-        {rows[0]?.map((djs) => {
-          return (
-            <View key={djs.get('day')} style={[styles.headerCellCountainer]}>
-              <Text style={styles.dayCellText}>{djs.format('ddd')}</Text>
-            </View>
-          );
+      <View>
+        <MonthCalendarRow row={rows[0] ?? []} isWeekdayHeader={true} />
+      </View>
+      <View>
+        {rows.map((row, index) => {
+          return <MonthCalendarRow key={`row-${index}`} row={row} />;
         })}
       </View>
-      {rows.map((row, index) => {
-        return (
-          <View key={`row-${index}`} style={styles.rowContainer}>
-            {row.map((djs) => {
-              return (
-                <TouchableOpacity
-                  key={djs.get('date')}
-                  style={[styles.dayCellCountainer]}
-                >
-                  <View style={styles.dayCellLabel}>
-                    <Text
-                      style={styles.dayCellText}
-                    >{`${djs.format('D')}`}</Text>
-                  </View>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-        );
-      })}
     </View>
   );
 };
@@ -82,41 +56,5 @@ const styles = StyleSheet.create({
   },
   monthText: {
     textAlign: 'center',
-  },
-  rowContainer: {
-    width: '100%',
-    display: 'flex',
-    flexDirection: 'row',
-    flex: 1,
-  },
-  dayCellCountainer: {
-    minHeight: 80,
-    flex: 1,
-    borderWidth: 0.2,
-    borderColor: 'lightslategrey',
-    backgroundColor: 'white',
-  },
-  dayCellLabel: {
-    paddingVertical: 1,
-    paddingHorizontal: 2,
-  },
-  dayCellText: {
-    textAlign: 'center',
-    fontSize: 12,
-  },
-  weekContainer: {
-    display: 'flex',
-    flexDirection: 'row',
-  },
-  headerCellCountainer: {
-    borderWidth: 0.2,
-    flex: 1,
-    borderColor: 'lightslategrey',
-    paddingVertical: 2,
-    backgroundColor: 'white',
-  },
-  headerCellText: {
-    textAlign: 'center',
-    fontSize: 12,
   },
 });
