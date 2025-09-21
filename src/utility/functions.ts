@@ -1,4 +1,5 @@
 import dayjs from 'dayjs';
+import type { WeekStartsOn } from '../calendar/MonthCalendar';
 
 export function monthlyStartDate(args: { date: Date; weekStartsOn: 0 | 1 }) {
   const { date, weekStartsOn } = args;
@@ -30,4 +31,43 @@ export function monthlyEndDate(args: { date: Date; weekStartsOn: 0 | 1 }) {
       return endOfMonth.add(7 - endOfMonth.day(), 'day').toDate();
     }
   }
+}
+
+export function getWeekIds(args: {
+  start: Date;
+  end: Date;
+  weekStartsOn: WeekStartsOn;
+}) {
+  const { start, end, weekStartsOn } = args;
+  const startDjs = dayjs(start);
+  const endDjs = dayjs(end);
+  const weekIds: string[] = [];
+  let current = startDjs;
+  if (weekStartsOn === 0) {
+    while (current.isSame(endDjs) || current.isBefore(endDjs)) {
+      const weekId = current.startOf('week').format('YYYY-MM-DD');
+      if (!weekIds.includes(weekId)) {
+        weekIds.push(weekId);
+      }
+      current = current.add(1, 'day');
+    }
+  } else {
+    while (current.isSame(endDjs) || current.isBefore(endDjs)) {
+      if (current.day() === 0) {
+        const weekId = current.subtract(6, 'day').format('YYYY-MM-DD');
+        if (!weekIds.includes(weekId)) {
+          weekIds.push(weekId);
+        }
+      } else {
+        const weekId = current
+          .subtract(current.day() - 1, 'day')
+          .format('YYYY-MM-DD');
+        if (!weekIds.includes(weekId)) {
+          weekIds.push(weekId);
+        }
+      }
+      current = current.add(1, 'day');
+    }
+  }
+  return weekIds;
 }

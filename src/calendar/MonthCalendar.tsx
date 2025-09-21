@@ -22,7 +22,7 @@ export const MonthCalendar = (props: {
   onChangeDate?: (date: Date) => void;
   events: CalendarEvent[];
 }) => {
-  const { defaultDate, weekStartsOn = 0, onChangeDate } = props;
+  const { defaultDate, weekStartsOn = 0, onChangeDate, events } = props;
   const [dateState] = useState(defaultDate);
   const [_activeIndex, setActiveIndex] = useState(HALF_PANEL_LENGTH);
   const defaultDateDjs = dayjs(dateState);
@@ -75,7 +75,11 @@ export const MonthCalendar = (props: {
       data={panels}
       renderItem={({ item }) => {
         return (
-          <MonthCalendarViewItem month={item} weekStartsOn={weekStartsOn} />
+          <MonthCalendarViewItem
+            month={item}
+            weekStartsOn={weekStartsOn}
+            events={events}
+          />
         );
       }}
       showsHorizontalScrollIndicator={false}

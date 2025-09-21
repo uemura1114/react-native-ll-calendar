@@ -1,14 +1,16 @@
 import dayjs from 'dayjs';
 import { StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { monthlyStartDate, monthlyEndDate } from '../../utility/functions';
-import type { WeekStartsOn } from '../MonthCalendar';
+import type { CalendarEvent, WeekStartsOn } from '../MonthCalendar';
 import { MonthCalendarRow } from './MonthCalendarRow';
+import { useEvents } from '../logic/useEvents';
 
 export const MonthCalendarViewItem = (props: {
   month: string;
   weekStartsOn: WeekStartsOn;
+  events: CalendarEvent[];
 }) => {
-  const { month, weekStartsOn } = props;
+  const { month, weekStartsOn, events } = props;
   const { width } = useWindowDimensions();
 
   const date = new Date(month);
@@ -26,6 +28,8 @@ export const MonthCalendarViewItem = (props: {
     currentDate = currentDate.add(7, 'day');
   }
 
+  const { eventsGroupByWeekId } = useEvents({ events, weekStartsOn });
+
   return (
     <View style={[styles.container, { width }]}>
       <View style={styles.monthContainer}>
@@ -36,7 +40,19 @@ export const MonthCalendarViewItem = (props: {
       </View>
       <View>
         {rows.map((row, index) => {
-          return <MonthCalendarRow key={`row-${index}`} row={row} />;
+          const firstDayOfWeek = row[0];
+          if (firstDayOfWeek === undefined) {
+            return null;
+          }
+          const weekId = firstDayOfWeek.format('YYYY-MM-DD');
+          const weekEvents = eventsGroupByWeekId[weekId] || [];
+          return (
+            <MonthCalendarRow
+              key={`row-${index}`}
+              row={row}
+              events={weekEvents}
+            />
+          );
         })}
       </View>
     </View>

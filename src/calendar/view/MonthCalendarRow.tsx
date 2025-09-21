@@ -1,12 +1,15 @@
 import type dayjs from 'dayjs';
 import { StyleSheet } from 'react-native';
 import { Text, TouchableOpacity, View } from 'react-native';
+import type { CalendarEvent } from '../MonthCalendar';
 
 export const MonthCalendarRow = (props: {
   row: dayjs.Dayjs[];
   isWeekdayHeader?: boolean;
+  events?: CalendarEvent[];
 }) => {
-  const { row, isWeekdayHeader } = props;
+  const { row, isWeekdayHeader, events = [] } = props;
+  console.log('events', events);
   return (
     <View style={styles.container}>
       {row.map((djs) => {
