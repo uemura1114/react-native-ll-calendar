@@ -1,28 +1,6 @@
 # react-native-ll-calendar
 
-ReactNative Light Calendar Library
-
-## Installation
-
-```sh
-npm install react-native-ll-calendar
-```
-
-## Usage
-
-```js
-import { multiply } from 'react-native-ll-calendar';
-
-// ...
-
-const result = await multiply(3, 7);
-```
-
-## Contributing
-
-- [Development workflow](CONTRIBUTING.md#development-workflow)
-- [Sending a pull request](CONTRIBUTING.md#sending-a-pull-request)
-- [Code of conduct](CODE_OF_CONDUCT.md)
+ReactNative Calendar Library
 
 ## License
 

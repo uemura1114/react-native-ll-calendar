@@ -2,7 +2,7 @@
   "name": "react-native-ll-calendar",
   "version": "0.1.0",
   "private": true,
-  "description": "ReactNative Light Calendar Library",
+  "description": "ReactNative Calendar Library",
   "main": "./lib/module/index.js",
   "types": "./lib/typescript/src/index.d.ts",
   "exports": {
@@ -109,7 +109,7 @@
       "tagName": "v${version}"
     },
     "npm": {
-      "publish": true
+      "publish": false
     },
     "github": {
       "release": true
