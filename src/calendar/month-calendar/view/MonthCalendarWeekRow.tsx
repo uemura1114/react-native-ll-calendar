@@ -2,7 +2,7 @@ import dayjs from 'dayjs';
 import { StyleSheet, useWindowDimensions } from 'react-native';
 import { Text, TouchableOpacity, View } from 'react-native';
 import type { CalendarEvent } from '../../../types/month-calendar';
-import type MonthCalendarEventPosition from '../../../lib/month-calendar-event-position';
+import type MonthCalendarEventPosition from '../../../utils/month-calendar-event-position';
 import { CELL_BORDER_WIDTH, EVENT_GAP } from '../../../constants/size';
 
 export const MonthCalendarWeekRow = (props: {

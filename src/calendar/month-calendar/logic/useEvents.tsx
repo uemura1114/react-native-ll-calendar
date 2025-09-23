@@ -3,7 +3,7 @@ import type {
   CalendarEvent,
   WeekStartsOn,
 } from '../../../types/month-calendar';
-import { getWeekIds } from '../../../lib/functions';
+import { getWeekIds } from '../../../utils/functions';
 
 export const useEvents = (props: {
   events: CalendarEvent[];

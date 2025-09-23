@@ -5,8 +5,8 @@ import type {
   CalendarEvent,
   WeekStartsOn,
 } from '../../../types/month-calendar';
-import MonthCalendarEventPosition from '../../../lib/month-calendar-event-position';
-import { monthlyEndDate, monthlyStartDate } from '../../../lib/functions';
+import MonthCalendarEventPosition from '../../../utils/month-calendar-event-position';
+import { monthlyEndDate, monthlyStartDate } from '../../../utils/functions';
 import { useEvents } from '../logic/useEvents';
 import { CELL_BORDER_WIDTH } from '../../../constants/size';
 
