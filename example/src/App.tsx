@@ -17,11 +17,12 @@ export default function App() {
     return [
       {
         id: '1',
-        title: 'Meeting',
+        title: '😃Meeting',
         start: new Date(currentYear, currentMonth, 5),
         end: new Date(currentYear, currentMonth, 5),
         backgroundColor: '#ff6b6b',
         borderColor: '#e55353',
+        color: '#0e0e0e',
       },
       {
         id: '2',
@@ -30,6 +31,7 @@ export default function App() {
         end: new Date(currentYear, currentMonth, 12),
         backgroundColor: '#4ecdc4',
         borderColor: '#45b7aa',
+        color: '#0e0e0e',
       },
       {
         id: '3',
@@ -38,6 +40,7 @@ export default function App() {
         end: new Date(currentYear, currentMonth, 15),
         backgroundColor: '#45b7d1',
         borderColor: '#3a9bc1',
+        color: '#0e0e0e',
       },
       {
         id: '4',
@@ -46,6 +49,7 @@ export default function App() {
         end: new Date(currentYear, currentMonth, 22),
         backgroundColor: '#96ceb4',
         borderColor: '#7fb069',
+        color: '#0e0e0e',
       },
       {
         id: '5',
@@ -54,6 +58,7 @@ export default function App() {
         end: new Date(currentYear, currentMonth, 25),
         backgroundColor: '#ffeaa7',
         borderColor: '#fdcb6e',
+        color: '#0e0e0e',
       },
       {
         id: '6',
@@ -62,6 +67,7 @@ export default function App() {
         end: new Date(currentYear, currentMonth + 1, 2),
         backgroundColor: '#dda0dd',
         borderColor: '#ba68c8',
+        color: '#0e0e0e',
       },
 
       {
@@ -71,6 +77,7 @@ export default function App() {
         end: new Date(currentYear, currentMonth - 1, 20),
         backgroundColor: '#74b9ff',
         borderColor: '#0984e3',
+        color: '#0e0e0e',
       },
       {
         id: '8',
@@ -79,6 +86,7 @@ export default function App() {
         end: new Date(currentYear, currentMonth - 1, 25),
         backgroundColor: '#fd79a8',
         borderColor: '#e84393',
+        color: '#0e0e0e',
       },
       {
         id: '9',
@@ -87,6 +95,7 @@ export default function App() {
         end: new Date(currentYear, currentMonth, 1),
         backgroundColor: '#fdcb6e',
         borderColor: '#e17055',
+        color: '#0e0e0e',
       },
 
       {
@@ -96,6 +105,7 @@ export default function App() {
         end: new Date(currentYear, currentMonth + 1, 10),
         backgroundColor: '#a29bfe',
         borderColor: '#6c5ce7',
+        color: '#0e0e0e',
       },
       {
         id: '10-2',
@@ -104,6 +114,7 @@ export default function App() {
         end: new Date(currentYear, currentMonth + 1, 9),
         backgroundColor: '#a29bfe',
         borderColor: '#6c5ce7',
+        color: '#0e0e0e',
       },
       {
         id: '10-3',
@@ -112,6 +123,16 @@ export default function App() {
         end: new Date(currentYear, currentMonth + 1, 10),
         backgroundColor: '#a29bfe',
         borderColor: '#6c5ce7',
+        color: '#0e0e0e',
+      },
+      {
+        id: '10-4',
+        title: 'Seminar',
+        start: new Date(currentYear, currentMonth + 1, 10),
+        end: new Date(currentYear, currentMonth + 1, 10),
+        backgroundColor: '#a29bfe',
+        borderColor: '#6c5ce7',
+        color: '#0e0e0e',
       },
       {
         id: '11',
@@ -120,6 +141,7 @@ export default function App() {
         end: new Date(currentYear, currentMonth + 1, 14),
         backgroundColor: '#fd79a8',
         borderColor: '#e84393',
+        color: '#0e0e0e',
       },
       {
         id: '12',
@@ -128,6 +150,7 @@ export default function App() {
         end: new Date(currentYear, currentMonth + 1, 23),
         backgroundColor: '#00b894',
         borderColor: '#00a085',
+        color: '#0e0e0e',
       },
       {
         id: '13',
@@ -136,6 +159,7 @@ export default function App() {
         end: new Date(currentYear, currentMonth + 1, 28),
         backgroundColor: '#fab1a0',
         borderColor: '#e17055',
+        color: '#0e0e0e',
       },
     ];
   }, []);

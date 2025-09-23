@@ -77,6 +77,7 @@ export const MonthCalendar = (props: {
       windowSize={5}
       initialNumToRender={5}
       maxToRenderPerBatch={5}
+      removeClippedSubviews={false}
     />
   );
 };
