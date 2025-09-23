@@ -2,7 +2,7 @@
   "name": "react-native-ll-calendar",
   "version": "0.1.0",
   "private": true,
-  "description": "ReactNative Light Calendar Library",
+  "description": "ReactNative Calendar Library",
   "main": "./lib/module/index.js",
   "types": "./lib/typescript/src/index.d.ts",
   "exports": {
@@ -70,7 +70,6 @@
     "@release-it/conventional-changelog": "^10.0.1",
     "@types/jest": "^29.5.14",
     "@types/react": "^19.1.12",
-    "babel-plugin-module-resolver": "^5.0.2",
     "commitlint": "^19.8.1",
     "del-cli": "^6.0.0",
     "eslint": "^9.35.0",
@@ -97,13 +96,7 @@
     "modulePathIgnorePatterns": [
       "<rootDir>/example/node_modules",
       "<rootDir>/lib/"
-    ],
-    "moduleNameMapper": {
-      "^@/(.*)$": "<rootDir>/src/$1"
-    },
-    "transform": {
-      "^.+\\.(js|ts|tsx)$": ["babel-jest", {"configFile": "./babel.config.js"}]
-    }
+    ]
   },
   "commitlint": {
     "extends": [

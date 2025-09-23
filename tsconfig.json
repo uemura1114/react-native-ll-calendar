@@ -1,19 +1,18 @@
 {
   "compilerOptions": {
     "rootDir": ".",
-    "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"],
       "react-native-ll-calendar": ["./src/index"]
     },
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,
+    "customConditions": ["react-native-strict-api"],
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "jsx": "react-jsx",
     "lib": ["ESNext"],
     "module": "ESNext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "noEmit": true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitReturns": true,
