@@ -97,7 +97,13 @@
     "modulePathIgnorePatterns": [
       "<rootDir>/example/node_modules",
       "<rootDir>/lib/"
-    ]
+    ],
+    "moduleNameMapper": {
+      "^@/(.*)$": "<rootDir>/src/$1"
+    },
+    "transform": {
+      "^.+\\.(js|ts|tsx)$": ["babel-jest", {"configFile": "./babel.config.js"}]
+    }
   },
   "commitlint": {
     "extends": [
