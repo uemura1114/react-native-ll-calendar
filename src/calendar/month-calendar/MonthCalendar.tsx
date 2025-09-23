@@ -11,8 +11,15 @@ export const MonthCalendar = (props: {
   weekStartsOn?: WeekStartsOn;
   onChangeDate?: (date: Date) => void;
   events: CalendarEvent[];
+  onPressEvent?: (event: CalendarEvent) => void;
 }) => {
-  const { defaultDate, weekStartsOn = 0, onChangeDate, events } = props;
+  const {
+    defaultDate,
+    weekStartsOn = 0,
+    onChangeDate,
+    events,
+    onPressEvent,
+  } = props;
   const [dateState] = useState(defaultDate);
   const [_activeIndex, setActiveIndex] = useState(HALF_PANEL_LENGTH);
   const defaultDateDjs = dayjs(dateState);
@@ -69,6 +76,7 @@ export const MonthCalendar = (props: {
             month={item}
             weekStartsOn={weekStartsOn}
             events={events}
+            onPressEvent={onPressEvent}
           />
         );
       }}

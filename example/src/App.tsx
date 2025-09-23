@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
+import { Alert } from 'react-native';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { MonthCalendar, type CalendarEvent } from 'react-native-ll-calendar';
 
@@ -164,6 +165,10 @@ export default function App() {
     ];
   }, []);
 
+  const handleEventPress = useCallback((event: CalendarEvent) => {
+    Alert.alert('Notification', `pressed ${event.title}`);
+  }, []);
+
   return (
     <View style={styles.container}>
       <ScrollView style={styles.scrollView}>
@@ -172,6 +177,7 @@ export default function App() {
           weekStartsOn={0}
           onChangeDate={handleChangeDate}
           events={events}
+          onPressEvent={handleEventPress}
         />
       </ScrollView>
     </View>

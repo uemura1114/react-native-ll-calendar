@@ -10,8 +10,15 @@ export const MonthCalendarWeekRow = (props: {
   isWeekdayHeader?: boolean;
   events?: CalendarEvent[];
   eventPosition?: MonthCalendarEventPosition;
+  onPressEvent?: (event: CalendarEvent) => void;
 }) => {
-  const { dates, isWeekdayHeader, events = [], eventPosition } = props;
+  const {
+    dates,
+    isWeekdayHeader,
+    events = [],
+    eventPosition,
+    onPressEvent,
+  } = props;
   const eventHeight = 26;
   const { width: screenWidth } = useWindowDimensions();
   const dateColumnWidth = screenWidth / 7;
@@ -125,6 +132,9 @@ export const MonthCalendarWeekRow = (props: {
                     isPrevDateEvent ? styles.prevDateEvent : {},
                     isLastRow ? styles.lastRowEvent : {},
                   ]}
+                  onPress={() => {
+                    onPressEvent?.(eventRow);
+                  }}
                 >
                   <Text
                     numberOfLines={1}
