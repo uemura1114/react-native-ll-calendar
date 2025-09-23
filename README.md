@@ -2,6 +2,8 @@
 
 ReactNative Calendar Library
 
+<img src="assets/screen-shot.png" width="320px">
+
 ## License
 
 MIT
