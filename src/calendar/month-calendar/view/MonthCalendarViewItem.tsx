@@ -15,8 +15,9 @@ export const MonthCalendarViewItem = (props: {
   weekStartsOn: WeekStartsOn;
   events: CalendarEvent[];
   onPressEvent?: (event: CalendarEvent) => void;
+  onPressCell?: (date: Date) => void;
 }) => {
-  const { month, weekStartsOn, events, onPressEvent } = props;
+  const { month, weekStartsOn, events, onPressEvent, onPressCell } = props;
   const { width } = useWindowDimensions();
   const eventPosition = new MonthCalendarEventPosition();
 
@@ -60,6 +61,7 @@ export const MonthCalendarViewItem = (props: {
               events={weekEvents}
               eventPosition={eventPosition}
               onPressEvent={onPressEvent}
+              onPressCell={onPressCell}
             />
           );
         })}

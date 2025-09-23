@@ -11,6 +11,7 @@ export const MonthCalendarWeekRow = (props: {
   events?: CalendarEvent[];
   eventPosition?: MonthCalendarEventPosition;
   onPressEvent?: (event: CalendarEvent) => void;
+  onPressCell?: (date: Date) => void;
 }) => {
   const {
     dates,
@@ -18,6 +19,7 @@ export const MonthCalendarWeekRow = (props: {
     events = [],
     eventPosition,
     onPressEvent,
+    onPressCell,
   } = props;
   const eventHeight = 26;
   const { width: screenWidth } = useWindowDimensions();
@@ -78,6 +80,9 @@ export const MonthCalendarWeekRow = (props: {
               isWeekdayHeader ? { minHeight: undefined } : {},
               { zIndex: 7 - dateIndex },
             ]}
+            onPress={() => {
+              onPressCell?.(djs.toDate());
+            }}
           >
             <View style={styles.dayCellLabel}>
               <Text style={styles.dayCellText}>{text}</Text>

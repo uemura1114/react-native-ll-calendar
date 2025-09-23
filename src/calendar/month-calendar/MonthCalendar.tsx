@@ -12,6 +12,7 @@ export const MonthCalendar = (props: {
   onChangeDate?: (date: Date) => void;
   events: CalendarEvent[];
   onPressEvent?: (event: CalendarEvent) => void;
+  onPressCell?: (date: Date) => void;
 }) => {
   const {
     defaultDate,
@@ -19,6 +20,7 @@ export const MonthCalendar = (props: {
     onChangeDate,
     events,
     onPressEvent,
+    onPressCell,
   } = props;
   const [dateState] = useState(defaultDate);
   const [_activeIndex, setActiveIndex] = useState(HALF_PANEL_LENGTH);
@@ -77,6 +79,7 @@ export const MonthCalendar = (props: {
             weekStartsOn={weekStartsOn}
             events={events}
             onPressEvent={onPressEvent}
+            onPressCell={onPressCell}
           />
         );
       }}

@@ -1,3 +1,4 @@
+import dayjs from 'dayjs';
 import { useCallback, useMemo, useState } from 'react';
 import { Alert } from 'react-native';
 import { View, StyleSheet, ScrollView } from 'react-native';
@@ -169,6 +170,11 @@ export default function App() {
     Alert.alert('Notification', `pressed ${event.title}`);
   }, []);
 
+  const handleCellPress = useCallback((d: Date) => {
+    const djs = dayjs(d);
+    Alert.alert('Notification', `pressed ${djs.format('YYYY-MM-DD')}`);
+  }, []);
+
   return (
     <View style={styles.container}>
       <ScrollView style={styles.scrollView}>
@@ -178,6 +184,7 @@ export default function App() {
           onChangeDate={handleChangeDate}
           events={events}
           onPressEvent={handleEventPress}
+          onPressCell={handleCellPress}
         />
       </ScrollView>
     </View>
