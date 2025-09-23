@@ -1,4 +1,6 @@
+import dayjs from 'dayjs';
 import { useCallback, useMemo, useState } from 'react';
+import { Alert } from 'react-native';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { MonthCalendar, type CalendarEvent } from 'react-native-ll-calendar';
 
@@ -164,6 +166,15 @@ export default function App() {
     ];
   }, []);
 
+  const handleEventPress = useCallback((event: CalendarEvent) => {
+    Alert.alert('Notification', `pressed ${event.title}`);
+  }, []);
+
+  const handleCellPress = useCallback((d: Date) => {
+    const djs = dayjs(d);
+    Alert.alert('Notification', `pressed ${djs.format('YYYY-MM-DD')}`);
+  }, []);
+
   return (
     <View style={styles.container}>
       <ScrollView style={styles.scrollView}>
@@ -172,6 +183,8 @@ export default function App() {
           weekStartsOn={0}
           onChangeDate={handleChangeDate}
           events={events}
+          onPressEvent={handleEventPress}
+          onPressCell={handleCellPress}
         />
       </ScrollView>
     </View>
