@@ -1,9 +1,6 @@
 import { useMemo } from 'react';
-import { getWeekIds } from '../../../lib/functions';
-import type {
-  CalendarEvent,
-  WeekStartsOn,
-} from '../../../types/month-calendar';
+import { getWeekIds } from '@/lib/functions';
+import type { CalendarEvent, WeekStartsOn } from '@/types/month-calendar';
 
 export const useEvents = (props: {
   events: CalendarEvent[];
