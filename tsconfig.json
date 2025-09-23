@@ -1,7 +1,9 @@
 {
   "compilerOptions": {
     "rootDir": ".",
+    "baseUrl": ".",
     "paths": {
+      "@/*": ["./src/*"],
       "react-native-ll-calendar": ["./src/index"]
     },
     "allowUnreachableCode": false,

@@ -1,4 +1,4 @@
-import { monthlyStartDate, monthlyEndDate } from '../lib/functions';
+import { monthlyStartDate, monthlyEndDate } from '@/lib/functions';
 
 describe('monthlyStartDate', () => {
   it('should return the start of the week for the month when weekStartsOn is 0 (Sunday)', () => {
