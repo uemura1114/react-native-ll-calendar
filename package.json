@@ -97,6 +97,7 @@
       "<rootDir>/example/node_modules",
       "<rootDir>/lib/"
     ],
+    "moduleFileExtensions": ["ts", "tsx", "js", "jsx", "json"],
     "moduleNameMapper": {
       "^@/(.*)$": "<rootDir>/src/$1"
     }
