@@ -7,4 +7,5 @@ export type CalendarEvent = {
   end: Date;
   backgroundColor: string;
   borderColor: string;
+  color: string;
 };

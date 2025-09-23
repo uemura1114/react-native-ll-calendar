@@ -76,6 +76,7 @@ const styles = StyleSheet.create({
     padding: 2,
     borderWidth: CELL_BORDER_WIDTH,
     borderColor: 'lightslategrey',
+    backgroundColor: 'white',
   },
   monthText: {
     textAlign: 'center',

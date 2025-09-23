@@ -129,7 +129,7 @@ export const MonthCalendarWeekRow = (props: {
                   <Text
                     numberOfLines={1}
                     ellipsizeMode="tail"
-                    style={styles.eventTitle}
+                    style={[styles.eventTitle, { color: eventRow.color }]}
                   >
                     {eventRow.title}
                   </Text>
@@ -149,11 +149,13 @@ const styles = StyleSheet.create({
     display: 'flex',
     flexDirection: 'row',
     flex: 1,
+    backgroundColor: 'white',
   },
   dayCellCountainer: {
     minHeight: 80,
     flex: 1,
-    borderWidth: CELL_BORDER_WIDTH,
+    borderRightWidth: CELL_BORDER_WIDTH,
+    borderBottomWidth: CELL_BORDER_WIDTH,
     borderColor: 'lightslategrey',
     backgroundColor: 'white',
   },
