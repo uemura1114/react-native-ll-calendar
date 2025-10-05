@@ -30,7 +30,7 @@ export default function App() {
         id: '2',
         title: 'Conference',
         start: new Date(currentYear, currentMonth, 10),
-        end: new Date(currentYear, currentMonth, 12),
+        end: new Date(currentYear, currentMonth, 19),
         backgroundColor: '#4ecdc4',
         borderColor: '#45b7aa',
         color: '#0e0e0e',
@@ -180,7 +180,7 @@ export default function App() {
       <ScrollView style={styles.scrollView}>
         <MonthCalendar
           defaultDate={date}
-          weekStartsOn={0}
+          weekStartsOn={1}
           onChangeDate={handleChangeDate}
           events={events}
           onPressEvent={handleEventPress}

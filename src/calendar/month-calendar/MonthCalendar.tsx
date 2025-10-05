@@ -72,7 +72,7 @@ export const MonthCalendar = (props: {
       initialScrollIndex={HALF_PANEL_LENGTH}
       decelerationRate={'fast'}
       data={panels}
-      renderItem={({ item }) => {
+      renderItem={({ item, index }) => {
         return (
           <MonthCalendarViewItem
             month={item}
@@ -80,6 +80,7 @@ export const MonthCalendar = (props: {
             events={events}
             onPressEvent={onPressEvent}
             onPressCell={onPressCell}
+            flatListIndex={index}
           />
         );
       }}
