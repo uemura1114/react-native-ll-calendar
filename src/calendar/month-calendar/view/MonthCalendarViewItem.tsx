@@ -16,8 +16,16 @@ export const MonthCalendarViewItem = (props: {
   events: CalendarEvent[];
   onPressEvent?: (event: CalendarEvent) => void;
   onPressCell?: (date: Date) => void;
+  flatListIndex: number;
 }) => {
-  const { month, weekStartsOn, events, onPressEvent, onPressCell } = props;
+  const {
+    month,
+    weekStartsOn,
+    events,
+    onPressEvent,
+    onPressCell,
+    flatListIndex,
+  } = props;
   const { width } = useWindowDimensions();
   const eventPosition = new MonthCalendarEventPosition();
 
@@ -39,7 +47,7 @@ export const MonthCalendarViewItem = (props: {
   const { eventsGroupByWeekId } = useEvents({ events, weekStartsOn });
 
   return (
-    <View style={[styles.container, { width }]}>
+    <View style={[styles.container, { width, zIndex: flatListIndex }]}>
       <View style={styles.monthContainer}>
         <Text style={styles.monthText}>{dateDjs.format('YYYY/MM')}</Text>
       </View>
