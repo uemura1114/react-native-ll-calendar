@@ -173,6 +173,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: CELL_BORDER_WIDTH,
     borderColor: 'lightslategrey',
     backgroundColor: 'white',
+    paddingBottom: 2,
   },
   dayCellLabel: {
     paddingVertical: 1,
