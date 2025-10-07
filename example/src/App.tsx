@@ -355,6 +355,14 @@ export default function App() {
     Alert.alert('Notification', `pressed ${djs.format('YYYY-MM-DD')}`);
   }, []);
 
+  const [refreshing, setRefreshing] = useState(false);
+  const handleRefresh = useCallback(() => {
+    setRefreshing(true);
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 2000);
+  }, []);
+
   return (
     <View style={styles.container}>
       <MonthCalendar
@@ -364,6 +372,8 @@ export default function App() {
         events={events}
         onPressEvent={handleEventPress}
         onPressCell={handleCellPress}
+        onRefresh={handleRefresh}
+        refreshing={refreshing}
       />
     </View>
   );
