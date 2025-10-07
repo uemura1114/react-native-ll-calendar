@@ -66,7 +66,7 @@ export default function App() {
         id: '6',
         title: 'Vacation',
         start: new Date(currentYear, currentMonth, 28),
-        end: new Date(currentYear, currentMonth + 1, 2),
+        end: new Date(currentYear, currentMonth + 1, 4),
         backgroundColor: '#dda0dd',
         borderColor: '#ba68c8',
         color: '#0e0e0e',
@@ -103,7 +103,7 @@ export default function App() {
       {
         id: '10-1',
         title: 'Seminar',
-        start: new Date(currentYear, currentMonth + 1, 8),
+        start: new Date(currentYear, currentMonth + 1, 3),
         end: new Date(currentYear, currentMonth + 1, 10),
         backgroundColor: '#a29bfe',
         borderColor: '#6c5ce7',
@@ -112,7 +112,7 @@ export default function App() {
       {
         id: '10-2',
         title: 'Seminar',
-        start: new Date(currentYear, currentMonth + 1, 8),
+        start: new Date(currentYear, currentMonth + 1, 4),
         end: new Date(currentYear, currentMonth + 1, 9),
         backgroundColor: '#a29bfe',
         borderColor: '#6c5ce7',

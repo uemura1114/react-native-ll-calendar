@@ -117,7 +117,7 @@ export const MonthCalendarWeekRow = (props: {
               if (eventPosition && weekId) {
                 eventPosition.push({
                   weekId,
-                  startDate: eventRow.start,
+                  startDate: startDjs.toDate(),
                   days: diffDays + 1,
                   rowNum: rowIndex + 1,
                 });
