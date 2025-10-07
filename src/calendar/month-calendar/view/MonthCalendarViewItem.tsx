@@ -1,5 +1,11 @@
 import dayjs from 'dayjs';
-import { StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+  useWindowDimensions,
+} from 'react-native';
 import { MonthCalendarWeekRow } from './MonthCalendarWeekRow';
 import type {
   CalendarEvent,
@@ -47,7 +53,7 @@ export const MonthCalendarViewItem = (props: {
   const { eventsGroupByWeekId } = useEvents({ events, weekStartsOn });
 
   return (
-    <View style={[styles.container, { width, zIndex: flatListIndex }]}>
+    <ScrollView style={[styles.container, { width, zIndex: flatListIndex }]}>
       <View style={styles.monthContainer}>
         <Text style={styles.monthText}>{dateDjs.format('YYYY/MM')}</Text>
       </View>
@@ -74,13 +80,13 @@ export const MonthCalendarViewItem = (props: {
           );
         })}
       </View>
-    </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    borderWidth: CELL_BORDER_WIDTH,
+    height: '100%',
     borderColor: 'lightslategrey',
     alignSelf: 'flex-start',
   },
