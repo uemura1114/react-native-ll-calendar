@@ -13,6 +13,8 @@ export const MonthCalendar = (props: {
   events: CalendarEvent[];
   onPressEvent?: (event: CalendarEvent) => void;
   onPressCell?: (date: Date) => void;
+  onRefresh?: () => void;
+  refreshing?: boolean;
 }) => {
   const {
     defaultDate,
@@ -21,6 +23,8 @@ export const MonthCalendar = (props: {
     events,
     onPressEvent,
     onPressCell,
+    onRefresh,
+    refreshing,
   } = props;
   const [dateState] = useState(defaultDate);
   const [_activeIndex, setActiveIndex] = useState(HALF_PANEL_LENGTH);
@@ -81,6 +85,8 @@ export const MonthCalendar = (props: {
             onPressEvent={onPressEvent}
             onPressCell={onPressCell}
             flatListIndex={index}
+            onRefresh={onRefresh}
+            refreshing={refreshing}
           />
         );
       }}

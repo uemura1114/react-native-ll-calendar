@@ -1,5 +1,11 @@
 import dayjs from 'dayjs';
-import { StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+  useWindowDimensions,
+} from 'react-native';
 import { MonthCalendarWeekRow } from './MonthCalendarWeekRow';
 import type {
   CalendarEvent,
@@ -9,6 +15,7 @@ import MonthCalendarEventPosition from '../../../utils/month-calendar-event-posi
 import { monthlyEndDate, monthlyStartDate } from '../../../utils/functions';
 import { useEvents } from '../logic/useEvents';
 import { CELL_BORDER_WIDTH } from '../../../constants/size';
+import { RefreshControl } from 'react-native';
 
 export const MonthCalendarViewItem = (props: {
   month: string;
@@ -17,6 +24,8 @@ export const MonthCalendarViewItem = (props: {
   onPressEvent?: (event: CalendarEvent) => void;
   onPressCell?: (date: Date) => void;
   flatListIndex: number;
+  onRefresh?: () => void;
+  refreshing?: boolean;
 }) => {
   const {
     month,
@@ -25,6 +34,8 @@ export const MonthCalendarViewItem = (props: {
     onPressEvent,
     onPressCell,
     flatListIndex,
+    onRefresh,
+    refreshing,
   } = props;
   const { width } = useWindowDimensions();
   const eventPosition = new MonthCalendarEventPosition();
@@ -47,7 +58,12 @@ export const MonthCalendarViewItem = (props: {
   const { eventsGroupByWeekId } = useEvents({ events, weekStartsOn });
 
   return (
-    <View style={[styles.container, { width, zIndex: flatListIndex }]}>
+    <ScrollView
+      style={[styles.container, { width, zIndex: flatListIndex }]}
+      refreshControl={
+        <RefreshControl refreshing={!!refreshing} onRefresh={onRefresh} />
+      }
+    >
       <View style={styles.monthContainer}>
         <Text style={styles.monthText}>{dateDjs.format('YYYY/MM')}</Text>
       </View>
@@ -74,13 +90,13 @@ export const MonthCalendarViewItem = (props: {
           );
         })}
       </View>
-    </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    borderWidth: CELL_BORDER_WIDTH,
+    height: '100%',
     borderColor: 'lightslategrey',
     alignSelf: 'flex-start',
   },
