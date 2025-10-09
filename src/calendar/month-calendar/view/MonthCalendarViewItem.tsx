@@ -5,6 +5,7 @@ import {
   Text,
   View,
   useWindowDimensions,
+  type ViewStyle,
 } from 'react-native';
 import { MonthCalendarWeekRow } from './MonthCalendarWeekRow';
 import type {
@@ -26,6 +27,7 @@ export const MonthCalendarViewItem = (props: {
   flatListIndex: number;
   onRefresh?: () => void;
   refreshing?: boolean;
+  dayCellStyle?: (date: Date) => ViewStyle;
 }) => {
   const {
     month,
@@ -36,6 +38,7 @@ export const MonthCalendarViewItem = (props: {
     flatListIndex,
     onRefresh,
     refreshing,
+    dayCellStyle,
   } = props;
   const { width } = useWindowDimensions();
   const eventPosition = new MonthCalendarEventPosition();
@@ -86,6 +89,7 @@ export const MonthCalendarViewItem = (props: {
               eventPosition={eventPosition}
               onPressEvent={onPressEvent}
               onPressCell={onPressCell}
+              dayCellStyle={dayCellStyle}
             />
           );
         })}

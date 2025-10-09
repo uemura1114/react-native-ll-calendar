@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
 import { useCallback, useMemo, useState } from 'react';
-import { Alert } from 'react-native';
+import { Alert, type ViewStyle } from 'react-native';
 import { View, StyleSheet } from 'react-native';
 import { MonthCalendar, type CalendarEvent } from 'react-native-ll-calendar';
 
@@ -381,6 +381,17 @@ export default function App() {
     }, 2000);
   }, []);
 
+  const dayCellStyle: (date: Date) => ViewStyle = useCallback((d) => {
+    if (d.getDate() === 10) {
+      return {
+        borderColor: 'red',
+        backgroundColor: 'lightgray',
+        borderWidth: 2,
+      };
+    }
+    return {};
+  }, []);
+
   return (
     <View style={styles.container}>
       <MonthCalendar
@@ -392,6 +403,7 @@ export default function App() {
         onPressCell={handleCellPress}
         onRefresh={handleRefresh}
         refreshing={refreshing}
+        dayCellStyle={dayCellStyle}
       />
     </View>
   );
