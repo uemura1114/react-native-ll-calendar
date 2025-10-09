@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
 import { StyleSheet, useWindowDimensions } from 'react-native';
-import { Text, TouchableOpacity, View } from 'react-native';
+import { Text, TouchableOpacity, View, type ViewStyle } from 'react-native';
 import type { CalendarEvent } from '../../../types/month-calendar';
 import type MonthCalendarEventPosition from '../../../utils/month-calendar-event-position';
 import { CELL_BORDER_WIDTH, EVENT_GAP } from '../../../constants/size';
@@ -12,6 +12,7 @@ export const MonthCalendarWeekRow = (props: {
   eventPosition?: MonthCalendarEventPosition;
   onPressEvent?: (event: CalendarEvent) => void;
   onPressCell?: (date: Date) => void;
+  dayCellStyle?: (date: Date) => ViewStyle;
 }) => {
   const {
     dates,
@@ -20,6 +21,7 @@ export const MonthCalendarWeekRow = (props: {
     eventPosition,
     onPressEvent,
     onPressCell,
+    dayCellStyle,
   } = props;
   const eventHeight = 26;
   const { width: screenWidth } = useWindowDimensions();
@@ -84,6 +86,7 @@ export const MonthCalendarWeekRow = (props: {
               onPressCell?.(djs.toDate());
             }}
           >
+            <View style={[styles.dayCellInner, dayCellStyle?.(djs.toDate())]} />
             <View style={styles.dayCellLabel}>
               <Text style={styles.dayCellText}>{text}</Text>
             </View>
@@ -175,7 +178,14 @@ const styles = StyleSheet.create({
     borderBottomWidth: CELL_BORDER_WIDTH,
     borderColor: 'lightslategrey',
     backgroundColor: 'white',
-    paddingBottom: 2,
+    position: 'relative',
+  },
+  dayCellInner: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
   },
   dayCellLabel: {
     paddingVertical: 1,

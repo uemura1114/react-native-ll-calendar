@@ -1,4 +1,4 @@
-import { useWindowDimensions, FlatList } from 'react-native';
+import { useWindowDimensions, FlatList, type ViewStyle } from 'react-native';
 import dayjs from 'dayjs';
 import { useState } from 'react';
 import type { CalendarEvent, WeekStartsOn } from '../../types/month-calendar';
@@ -15,6 +15,7 @@ export const MonthCalendar = (props: {
   onPressCell?: (date: Date) => void;
   onRefresh?: () => void;
   refreshing?: boolean;
+  dayCellStyle?: (date: Date) => ViewStyle;
 }) => {
   const {
     defaultDate,
@@ -25,6 +26,7 @@ export const MonthCalendar = (props: {
     onPressCell,
     onRefresh,
     refreshing,
+    dayCellStyle,
   } = props;
   const [dateState] = useState(defaultDate);
   const [_activeIndex, setActiveIndex] = useState(HALF_PANEL_LENGTH);
@@ -87,6 +89,7 @@ export const MonthCalendar = (props: {
             flatListIndex={index}
             onRefresh={onRefresh}
             refreshing={refreshing}
+            dayCellStyle={dayCellStyle}
           />
         );
       }}
