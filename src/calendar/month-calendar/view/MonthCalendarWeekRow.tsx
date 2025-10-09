@@ -100,7 +100,9 @@ export const MonthCalendarWeekRow = (props: {
               const rawStartDjs = dayjs(eventRow.start);
               const startDjs = dateIndex === 0 ? djs : dayjs(eventRow.start);
               const endDjs = dayjs(eventRow.end);
-              const diffDays = endDjs.diff(startDjs, 'day');
+              const diffDays = endDjs
+                .startOf('day')
+                .diff(startDjs.startOf('day'), 'day');
               const isPrevDateEvent =
                 dateIndex === 0 && rawStartDjs.isBefore(djs);
               let width =
