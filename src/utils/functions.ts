@@ -45,8 +45,8 @@ export function getWeekIds(args: {
   weekStartsOn: WeekStartsOn;
 }) {
   const { start, end, weekStartsOn } = args;
-  const startDjs = dayjs(start);
-  const endDjs = dayjs(end);
+  const startDjs = dayjs(start).startOf('day');
+  const endDjs = dayjs(end).startOf('day');
   const weekIds: string[] = [];
   let current = startDjs;
   if (weekStartsOn === 0) {
