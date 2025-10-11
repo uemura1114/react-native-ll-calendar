@@ -10,6 +10,7 @@ import {
 import { MonthCalendarWeekRow } from './MonthCalendarWeekRow';
 import type {
   CalendarEvent,
+  WeekdayNum,
   WeekStartsOn,
 } from '../../../types/month-calendar';
 import MonthCalendarEventPosition from '../../../utils/month-calendar-event-position';
@@ -29,6 +30,7 @@ export const MonthCalendarViewItem = (props: {
   refreshing?: boolean;
   dayCellStyle?: (date: Date) => ViewStyle;
   locale?: ILocale;
+  weekdayCellStyle?: (weekDayNum: WeekdayNum) => ViewStyle;
 }) => {
   const {
     month,
@@ -41,6 +43,7 @@ export const MonthCalendarViewItem = (props: {
     refreshing,
     dayCellStyle,
     locale,
+    weekdayCellStyle,
   } = props;
   const { width } = useWindowDimensions();
   const eventPosition = new MonthCalendarEventPosition();
@@ -77,6 +80,7 @@ export const MonthCalendarViewItem = (props: {
           dates={weeks[0] ?? []}
           isWeekdayHeader={true}
           locale={locale}
+          weekdayCellStyle={weekdayCellStyle}
         />
       </View>
       <View>

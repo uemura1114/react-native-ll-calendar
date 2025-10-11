@@ -4,6 +4,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { Alert, type ViewStyle } from 'react-native';
 import { View, StyleSheet } from 'react-native';
 import { MonthCalendar, type CalendarEvent } from 'react-native-ll-calendar';
+import type { WeekdayNum } from '../../src/types/month-calendar';
 
 export default function App() {
   const [date, setDate] = useState(new Date());
@@ -393,6 +394,18 @@ export default function App() {
     return {};
   }, []);
 
+  const weekdayCellStyle: (weekday: WeekdayNum) => ViewStyle = useCallback(
+    (day) => {
+      if (day === 0 || day === 6) {
+        return {
+          backgroundColor: 'lightgreen',
+        };
+      }
+      return {};
+    },
+    []
+  );
+
   return (
     <View style={styles.container}>
       <MonthCalendar
@@ -406,6 +419,7 @@ export default function App() {
         refreshing={refreshing}
         dayCellStyle={dayCellStyle}
         locale={ja}
+        weekdayCellStyle={weekdayCellStyle}
       />
     </View>
   );

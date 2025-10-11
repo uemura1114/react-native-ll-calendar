@@ -2,7 +2,7 @@ import dayjs from 'dayjs';
 import en from 'dayjs/locale/en';
 import { StyleSheet, useWindowDimensions } from 'react-native';
 import { Text, TouchableOpacity, View, type ViewStyle } from 'react-native';
-import type { CalendarEvent } from '../../../types/month-calendar';
+import type { CalendarEvent, WeekdayNum } from '../../../types/month-calendar';
 import type MonthCalendarEventPosition from '../../../utils/month-calendar-event-position';
 import { CELL_BORDER_WIDTH, EVENT_GAP } from '../../../constants/size';
 
@@ -15,6 +15,7 @@ export const MonthCalendarWeekRow = (props: {
   onPressCell?: (date: Date) => void;
   dayCellStyle?: (date: Date) => ViewStyle;
   locale?: ILocale;
+  weekdayCellStyle?: (weekDayNum: WeekdayNum) => ViewStyle;
 }) => {
   const {
     dates,
@@ -25,6 +26,7 @@ export const MonthCalendarWeekRow = (props: {
     onPressCell,
     dayCellStyle,
     locale = en,
+    weekdayCellStyle,
   } = props;
   const eventHeight = 26;
   const { width: screenWidth } = useWindowDimensions();
@@ -93,7 +95,14 @@ export const MonthCalendarWeekRow = (props: {
               onPressCell?.(djs.toDate());
             }}
           >
-            <View style={[styles.dayCellInner, dayCellStyle?.(djs.toDate())]} />
+            <View
+              style={[
+                styles.dayCellInner,
+                isWeekdayHeader
+                  ? weekdayCellStyle?.(djs.day())
+                  : dayCellStyle?.(djs.toDate()),
+              ]}
+            />
             <View style={styles.dayCellLabel}>
               <Text style={styles.dayCellText}>{text}</Text>
             </View>
