@@ -15,6 +15,7 @@ export const MonthCalendarWeekRow = (props: {
   onPressEvent?: (event: CalendarEvent) => void;
   onPressCell?: (date: Date) => void;
   dayCellContainerStyle?: (date: Date) => ViewStyle;
+  dayCellTextStyle?: (date: Date) => TextStyle;
   locale?: ILocale;
   weekdayCellContainerStyle?: (weekDayNum: WeekdayNum) => ViewStyle;
   weekdayCellTextStyle?: (weekDayNum: WeekdayNum) => TextStyle;
@@ -27,6 +28,7 @@ export const MonthCalendarWeekRow = (props: {
     onPressEvent,
     onPressCell,
     dayCellContainerStyle,
+    dayCellTextStyle,
     locale = en,
     weekdayCellContainerStyle,
     weekdayCellTextStyle,
@@ -110,7 +112,9 @@ export const MonthCalendarWeekRow = (props: {
               <Text
                 style={[
                   styles.dayCellText,
-                  isWeekdayHeader ? weekdayCellTextStyle?.(djs.day()) : {},
+                  isWeekdayHeader
+                    ? weekdayCellTextStyle?.(djs.day())
+                    : dayCellTextStyle?.(djs.toDate()),
                 ]}
               >
                 {text}

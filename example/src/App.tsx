@@ -395,6 +395,21 @@ export default function App() {
     return {};
   }, []);
 
+  const dayCellTextStyle: (date: Date) => TextStyle = useCallback((d) => {
+    if (d.getDay() === 0) {
+      return {
+        color: 'red',
+        fontWeight: 'bold',
+      };
+    } else if (d.getDay() === 6) {
+      return {
+        color: 'blue',
+        fontWeight: 'bold',
+      };
+    }
+    return {};
+  }, []);
+
   const weekdayCellContainerStyle: (weekday: WeekdayNum) => ViewStyle =
     useCallback((day) => {
       if (day === 0 || day === 6) {
@@ -435,6 +450,7 @@ export default function App() {
         onRefresh={handleRefresh}
         refreshing={refreshing}
         dayCellContainerStyle={dayCellContainerStyle}
+        dayCellTextStyle={dayCellTextStyle}
         locale={ja}
         weekdayCellContainerStyle={weekdayCellContainerStyle}
         weekdayCellTextStyle={weekdayCellTextStyle}

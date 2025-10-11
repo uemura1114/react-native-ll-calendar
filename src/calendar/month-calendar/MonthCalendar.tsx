@@ -25,6 +25,7 @@ export const MonthCalendar = (props: {
   onRefresh?: () => void;
   refreshing?: boolean;
   dayCellContainerStyle?: (date: Date) => ViewStyle;
+  dayCellTextStyle?: (date: Date) => TextStyle;
   locale?: ILocale;
   weekdayCellContainerStyle?: (weekDayNum: WeekdayNum) => ViewStyle;
   weekdayCellTextStyle?: (weekDayNum: WeekdayNum) => TextStyle;
@@ -39,6 +40,7 @@ export const MonthCalendar = (props: {
     onRefresh,
     refreshing,
     dayCellContainerStyle,
+    dayCellTextStyle,
     locale,
     weekdayCellContainerStyle,
     weekdayCellTextStyle,
@@ -105,6 +107,7 @@ export const MonthCalendar = (props: {
             onRefresh={onRefresh}
             refreshing={refreshing}
             dayCellContainerStyle={dayCellContainerStyle}
+            dayCellTextStyle={dayCellTextStyle}
             locale={locale}
             weekdayCellContainerStyle={weekdayCellContainerStyle}
             weekdayCellTextStyle={weekdayCellTextStyle}
