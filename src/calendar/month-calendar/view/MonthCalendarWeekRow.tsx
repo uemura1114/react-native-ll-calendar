@@ -2,9 +2,10 @@ import dayjs from 'dayjs';
 import en from 'dayjs/locale/en';
 import { StyleSheet, useWindowDimensions } from 'react-native';
 import { Text, TouchableOpacity, View, type ViewStyle } from 'react-native';
-import type { CalendarEvent } from '../../../types/month-calendar';
+import type { CalendarEvent, WeekdayNum } from '../../../types/month-calendar';
 import type MonthCalendarEventPosition from '../../../utils/month-calendar-event-position';
 import { CELL_BORDER_WIDTH, EVENT_GAP } from '../../../constants/size';
+import type { TextStyle } from 'react-native';
 
 export const MonthCalendarWeekRow = (props: {
   dates: dayjs.Dayjs[];
@@ -13,8 +14,11 @@ export const MonthCalendarWeekRow = (props: {
   eventPosition?: MonthCalendarEventPosition;
   onPressEvent?: (event: CalendarEvent) => void;
   onPressCell?: (date: Date) => void;
-  dayCellStyle?: (date: Date) => ViewStyle;
+  dayCellContainerStyle?: (date: Date) => ViewStyle;
+  dayCellTextStyle?: (date: Date) => TextStyle;
   locale?: ILocale;
+  weekdayCellContainerStyle?: (weekDayNum: WeekdayNum) => ViewStyle;
+  weekdayCellTextStyle?: (weekDayNum: WeekdayNum) => TextStyle;
 }) => {
   const {
     dates,
@@ -23,8 +27,11 @@ export const MonthCalendarWeekRow = (props: {
     eventPosition,
     onPressEvent,
     onPressCell,
-    dayCellStyle,
+    dayCellContainerStyle,
+    dayCellTextStyle,
     locale = en,
+    weekdayCellContainerStyle,
+    weekdayCellTextStyle,
   } = props;
   const eventHeight = 26;
   const { width: screenWidth } = useWindowDimensions();
@@ -93,9 +100,25 @@ export const MonthCalendarWeekRow = (props: {
               onPressCell?.(djs.toDate());
             }}
           >
-            <View style={[styles.dayCellInner, dayCellStyle?.(djs.toDate())]} />
+            <View
+              style={[
+                styles.dayCellInner,
+                isWeekdayHeader
+                  ? weekdayCellContainerStyle?.(djs.day())
+                  : dayCellContainerStyle?.(djs.toDate()),
+              ]}
+            />
             <View style={styles.dayCellLabel}>
-              <Text style={styles.dayCellText}>{text}</Text>
+              <Text
+                style={[
+                  styles.dayCellText,
+                  isWeekdayHeader
+                    ? weekdayCellTextStyle?.(djs.day())
+                    : dayCellTextStyle?.(djs.toDate()),
+                ]}
+              >
+                {text}
+              </Text>
             </View>
             {rows.map((eventRow, rowIndex) => {
               if (typeof eventRow === 'number') {
