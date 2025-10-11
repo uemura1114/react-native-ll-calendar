@@ -31,6 +31,7 @@ export const MonthCalendar = (props: {
   weekdayCellTextStyle?: (weekDayNum: WeekdayNum) => TextStyle;
   todayCellTextStyle?: TextStyle;
   hiddenMonth?: boolean;
+  monthFormat?: string;
 }) => {
   const {
     defaultDate,
@@ -48,6 +49,7 @@ export const MonthCalendar = (props: {
     weekdayCellTextStyle,
     todayCellTextStyle,
     hiddenMonth,
+    monthFormat,
   } = props;
   const [dateState] = useState(defaultDate);
   const [_activeIndex, setActiveIndex] = useState(HALF_PANEL_LENGTH);
@@ -117,6 +119,7 @@ export const MonthCalendar = (props: {
             weekdayCellTextStyle={weekdayCellTextStyle}
             todayCellTextStyle={todayCellTextStyle}
             hiddenMonth={hiddenMonth}
+            monthFormat={monthFormat}
           />
         );
       }}

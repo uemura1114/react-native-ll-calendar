@@ -38,6 +38,7 @@ export const MonthCalendarViewItem = (props: {
   weekdayCellTextStyle?: (weekDayNum: WeekdayNum) => TextStyle;
   todayCellTextStyle?: TextStyle;
   hiddenMonth?: boolean;
+  monthFormat?: string;
 }) => {
   const {
     month,
@@ -55,6 +56,7 @@ export const MonthCalendarViewItem = (props: {
     weekdayCellTextStyle,
     todayCellTextStyle,
     hiddenMonth,
+    monthFormat = 'YYYY/MM',
   } = props;
   const { width } = useWindowDimensions();
   const eventPosition = new MonthCalendarEventPosition();
@@ -106,7 +108,7 @@ export const MonthCalendarViewItem = (props: {
         <View style={styles.blankMonthContainer} />
       ) : (
         <View style={styles.monthContainer} onLayout={onLayoutMonthRow}>
-          <Text style={styles.monthText}>{dateDjs.format('YYYY/MM')}</Text>
+          <Text style={styles.monthText}>{dateDjs.format(monthFormat)}</Text>
         </View>
       )}
       <View onLayout={onLayoutWeekdayRow}>
