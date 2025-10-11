@@ -44,6 +44,13 @@ const events: CalendarEvent[] = [
 
 function App() {
   const [date, setDate] = useState(new Date());
+  const [refreshing, setRefreshing] = useState(false);
+
+  const handleRefresh = () => {
+    setRefreshing(true);
+    // Fetch new events or data
+    setTimeout(() => setRefreshing(false), 1000);
+  };
 
   return (
     <MonthCalendar
@@ -53,6 +60,14 @@ function App() {
       events={events}
       onPressEvent={(event) => console.log('Event pressed:', event.title)}
       onPressCell={(date) => console.log('Cell pressed:', date)}
+      onLongPressCell={(date) => console.log('Cell long pressed:', date)}
+      delayLongPress={500}
+      onRefresh={handleRefresh}
+      refreshing={refreshing}
+      todayCellTextStyle={{ fontWeight: 'bold', color: '#007AFF' }}
+      dayCellTextStyle={(date) => ({
+        color: date.getDay() === 0 ? '#FF3B30' : '#000000',
+      })}
     />
   );
 }
@@ -70,6 +85,18 @@ function App() {
 | `events` | `CalendarEvent[]` | Yes | - | Array of calendar events |
 | `onPressEvent` | `(event: CalendarEvent) => void` | No | - | Callback when event is pressed |
 | `onPressCell` | `(date: Date) => void` | No | - | Callback when date cell is pressed |
+| `onLongPressCell` | `(date: Date) => void` | No | - | Callback when date cell is long pressed |
+| `delayLongPress` | `number` | No | - | Delay in ms before long press is triggered |
+| `onRefresh` | `() => void` | No | - | Callback for pull-to-refresh |
+| `refreshing` | `boolean` | No | - | Whether the calendar is refreshing |
+| `dayCellContainerStyle` | `(date: Date) => ViewStyle` | No | - | Style function for day cell container |
+| `dayCellTextStyle` | `(date: Date) => TextStyle` | No | - | Style function for day cell text |
+| `todayCellTextStyle` | `TextStyle` | No | - | Style for today's cell text |
+| `locale` | `ILocale` | No | - | Locale configuration for date formatting |
+| `weekdayCellContainerStyle` | `(weekDayNum: WeekdayNum) => ViewStyle` | No | - | Style function for weekday cell container |
+| `weekdayCellTextStyle` | `(weekDayNum: WeekdayNum) => TextStyle` | No | - | Style function for weekday cell text |
+| `hiddenMonth` | `boolean` | No | `false` | Hide month header display |
+| `monthFormat` | `string` | No | - | Custom format string for month display |
 
 ### CalendarEvent
 
@@ -88,8 +115,13 @@ function App() {
 - Horizontally scrollable month view
 - Multi-day event support
 - Customizable event colors
-- Event and date cell press handlers
+- Event and date cell press handlers (tap and long press)
 - Configurable week start day (Sunday or Monday)
+- Customizable styling for day cells, weekday cells, and today's cell
+- Pull-to-refresh support
+- Locale support for internationalization
+- Optional month header visibility control
+- Custom month format display
 - Spans 10 years before and after the default date
 
 ## License
