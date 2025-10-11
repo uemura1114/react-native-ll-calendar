@@ -1,4 +1,5 @@
 import dayjs from 'dayjs';
+import en from 'dayjs/locale/en';
 import { StyleSheet, useWindowDimensions } from 'react-native';
 import { Text, TouchableOpacity, View, type ViewStyle } from 'react-native';
 import type { CalendarEvent } from '../../../types/month-calendar';
@@ -13,6 +14,7 @@ export const MonthCalendarWeekRow = (props: {
   onPressEvent?: (event: CalendarEvent) => void;
   onPressCell?: (date: Date) => void;
   dayCellStyle?: (date: Date) => ViewStyle;
+  locale?: ILocale;
 }) => {
   const {
     dates,
@@ -22,6 +24,7 @@ export const MonthCalendarWeekRow = (props: {
     onPressEvent,
     onPressCell,
     dayCellStyle,
+    locale = en,
   } = props;
   const eventHeight = 26;
   const { width: screenWidth } = useWindowDimensions();
@@ -34,7 +37,9 @@ export const MonthCalendarWeekRow = (props: {
   return (
     <View style={styles.container}>
       {dates.map((djs, dateIndex) => {
-        const text = isWeekdayHeader ? djs.format('ddd') : djs.format('D');
+        const text = isWeekdayHeader
+          ? djs.locale(locale).format('ddd')
+          : djs.format('D');
         const filteredEvents = events
           .filter((event) => {
             const startDjs = dayjs(event.start);

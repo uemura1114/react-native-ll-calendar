@@ -28,6 +28,7 @@ export const MonthCalendarViewItem = (props: {
   onRefresh?: () => void;
   refreshing?: boolean;
   dayCellStyle?: (date: Date) => ViewStyle;
+  locale?: ILocale;
 }) => {
   const {
     month,
@@ -39,6 +40,7 @@ export const MonthCalendarViewItem = (props: {
     onRefresh,
     refreshing,
     dayCellStyle,
+    locale,
   } = props;
   const { width } = useWindowDimensions();
   const eventPosition = new MonthCalendarEventPosition();
@@ -71,7 +73,11 @@ export const MonthCalendarViewItem = (props: {
         <Text style={styles.monthText}>{dateDjs.format('YYYY/MM')}</Text>
       </View>
       <View>
-        <MonthCalendarWeekRow dates={weeks[0] ?? []} isWeekdayHeader={true} />
+        <MonthCalendarWeekRow
+          dates={weeks[0] ?? []}
+          isWeekdayHeader={true}
+          locale={locale}
+        />
       </View>
       <View>
         {weeks.map((week, index) => {

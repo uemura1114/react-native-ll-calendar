@@ -16,6 +16,7 @@ export const MonthCalendar = (props: {
   onRefresh?: () => void;
   refreshing?: boolean;
   dayCellStyle?: (date: Date) => ViewStyle;
+  locale?: ILocale;
 }) => {
   const {
     defaultDate,
@@ -27,6 +28,7 @@ export const MonthCalendar = (props: {
     onRefresh,
     refreshing,
     dayCellStyle,
+    locale,
   } = props;
   const [dateState] = useState(defaultDate);
   const [_activeIndex, setActiveIndex] = useState(HALF_PANEL_LENGTH);
@@ -90,6 +92,7 @@ export const MonthCalendar = (props: {
             onRefresh={onRefresh}
             refreshing={refreshing}
             dayCellStyle={dayCellStyle}
+            locale={locale}
           />
         );
       }}
