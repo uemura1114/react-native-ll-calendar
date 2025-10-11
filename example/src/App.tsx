@@ -9,6 +9,7 @@ import type { TextStyle } from 'react-native';
 
 export default function App() {
   const [date, setDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
   const handleChangeDate = useCallback((d: Date) => {
     setDate(d);
@@ -384,16 +385,17 @@ export default function App() {
     }, 2000);
   }, []);
 
-  const dayCellContainerStyle: (date: Date) => ViewStyle = useCallback((d) => {
-    if (d.getDate() === 10) {
-      return {
-        borderColor: 'red',
-        backgroundColor: 'lightgray',
-        borderWidth: 2,
-      };
-    }
-    return {};
-  }, []);
+  const dayCellContainerStyle: (date: Date) => ViewStyle = useCallback(
+    (d) => {
+      if (dayjs(d).isSame(dayjs(selectedDate), 'day')) {
+        return {
+          backgroundColor: 'lightgray',
+        };
+      }
+      return {};
+    },
+    [selectedDate]
+  );
 
   const dayCellTextStyle: (date: Date) => TextStyle = useCallback((d) => {
     if (d.getDay() === 0) {
@@ -443,6 +445,10 @@ export default function App() {
     borderRadius: 12,
   };
 
+  const handleLongPressCell = useCallback((d: Date) => {
+    setSelectedDate(d);
+  }, []);
+
   return (
     <View style={styles.container}>
       <MonthCalendar
@@ -452,6 +458,8 @@ export default function App() {
         events={events}
         onPressEvent={handleEventPress}
         onPressCell={handleCellPress}
+        onLongPressCell={handleLongPressCell}
+        delayLongPress={500}
         onRefresh={handleRefresh}
         refreshing={refreshing}
         dayCellContainerStyle={dayCellContainerStyle}

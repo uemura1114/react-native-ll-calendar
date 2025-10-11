@@ -22,6 +22,8 @@ export const MonthCalendar = (props: {
   events: CalendarEvent[];
   onPressEvent?: (event: CalendarEvent) => void;
   onPressCell?: (date: Date) => void;
+  onLongPressCell?: (date: Date) => void;
+  delayLongPress?: number;
   onRefresh?: () => void;
   refreshing?: boolean;
   dayCellContainerStyle?: (date: Date) => ViewStyle;
@@ -40,6 +42,8 @@ export const MonthCalendar = (props: {
     events,
     onPressEvent,
     onPressCell,
+    onLongPressCell,
+    delayLongPress,
     onRefresh,
     refreshing,
     dayCellContainerStyle,
@@ -109,6 +113,8 @@ export const MonthCalendar = (props: {
             events={events}
             onPressEvent={onPressEvent}
             onPressCell={onPressCell}
+            onLongPressCell={onLongPressCell}
+            delayLongPress={delayLongPress}
             flatListIndex={index}
             onRefresh={onRefresh}
             refreshing={refreshing}

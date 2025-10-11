@@ -14,6 +14,8 @@ export const MonthCalendarWeekRow = (props: {
   eventPosition?: MonthCalendarEventPosition;
   onPressEvent?: (event: CalendarEvent) => void;
   onPressCell?: (date: Date) => void;
+  onLongPressCell?: (date: Date) => void;
+  delayLongPress?: number;
   dayCellContainerStyle?: (date: Date) => ViewStyle;
   dayCellTextStyle?: (date: Date) => TextStyle;
   locale?: ILocale;
@@ -29,6 +31,8 @@ export const MonthCalendarWeekRow = (props: {
     eventPosition,
     onPressEvent,
     onPressCell,
+    onLongPressCell,
+    delayLongPress = 500,
     dayCellContainerStyle,
     dayCellTextStyle,
     locale = en,
@@ -103,6 +107,10 @@ export const MonthCalendarWeekRow = (props: {
             onPress={() => {
               onPressCell?.(djs.toDate());
             }}
+            onLongPress={() => {
+              onLongPressCell?.(djs.toDate());
+            }}
+            delayLongPress={delayLongPress}
           >
             <View
               style={[
