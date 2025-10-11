@@ -19,6 +19,7 @@ export const MonthCalendarWeekRow = (props: {
   locale?: ILocale;
   weekdayCellContainerStyle?: (weekDayNum: WeekdayNum) => ViewStyle;
   weekdayCellTextStyle?: (weekDayNum: WeekdayNum) => TextStyle;
+  weekRowMinHeight?: number;
 }) => {
   const {
     dates,
@@ -32,6 +33,7 @@ export const MonthCalendarWeekRow = (props: {
     locale = en,
     weekdayCellContainerStyle,
     weekdayCellTextStyle,
+    weekRowMinHeight,
   } = props;
   const eventHeight = 26;
   const { width: screenWidth } = useWindowDimensions();
@@ -93,7 +95,7 @@ export const MonthCalendarWeekRow = (props: {
             key={isWeekdayHeader ? djs.get('d') : djs.get('date')}
             style={[
               styles.dayCellCountainer,
-              isWeekdayHeader ? { minHeight: undefined } : {},
+              { minHeight: isWeekdayHeader ? undefined : weekRowMinHeight },
               { zIndex: 7 - dateIndex },
             ]}
             onPress={() => {
@@ -202,7 +204,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
   },
   dayCellCountainer: {
-    minHeight: 80,
     flex: 1,
     borderRightWidth: CELL_BORDER_WIDTH,
     borderBottomWidth: CELL_BORDER_WIDTH,
