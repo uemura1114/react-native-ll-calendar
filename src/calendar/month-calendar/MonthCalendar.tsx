@@ -1,4 +1,9 @@
-import { useWindowDimensions, FlatList, type ViewStyle } from 'react-native';
+import {
+  useWindowDimensions,
+  FlatList,
+  type ViewStyle,
+  type TextStyle,
+} from 'react-native';
 import dayjs from 'dayjs';
 import { useState } from 'react';
 import type {
@@ -22,6 +27,7 @@ export const MonthCalendar = (props: {
   dayCellStyle?: (date: Date) => ViewStyle;
   locale?: ILocale;
   weekdayCellStyle?: (weekDayNum: WeekdayNum) => ViewStyle;
+  weekdayTextStyle?: (weekDayNum: WeekdayNum) => TextStyle;
 }) => {
   const {
     defaultDate,
@@ -35,6 +41,7 @@ export const MonthCalendar = (props: {
     dayCellStyle,
     locale,
     weekdayCellStyle,
+    weekdayTextStyle,
   } = props;
   const [dateState] = useState(defaultDate);
   const [_activeIndex, setActiveIndex] = useState(HALF_PANEL_LENGTH);
@@ -100,6 +107,7 @@ export const MonthCalendar = (props: {
             dayCellStyle={dayCellStyle}
             locale={locale}
             weekdayCellStyle={weekdayCellStyle}
+            weekdayTextStyle={weekdayTextStyle}
           />
         );
       }}

@@ -5,6 +5,7 @@ import { Text, TouchableOpacity, View, type ViewStyle } from 'react-native';
 import type { CalendarEvent, WeekdayNum } from '../../../types/month-calendar';
 import type MonthCalendarEventPosition from '../../../utils/month-calendar-event-position';
 import { CELL_BORDER_WIDTH, EVENT_GAP } from '../../../constants/size';
+import type { TextStyle } from 'react-native';
 
 export const MonthCalendarWeekRow = (props: {
   dates: dayjs.Dayjs[];
@@ -16,6 +17,7 @@ export const MonthCalendarWeekRow = (props: {
   dayCellStyle?: (date: Date) => ViewStyle;
   locale?: ILocale;
   weekdayCellStyle?: (weekDayNum: WeekdayNum) => ViewStyle;
+  weekdayTextStyle?: (weekDayNum: WeekdayNum) => TextStyle;
 }) => {
   const {
     dates,
@@ -27,6 +29,7 @@ export const MonthCalendarWeekRow = (props: {
     dayCellStyle,
     locale = en,
     weekdayCellStyle,
+    weekdayTextStyle,
   } = props;
   const eventHeight = 26;
   const { width: screenWidth } = useWindowDimensions();
@@ -104,7 +107,14 @@ export const MonthCalendarWeekRow = (props: {
               ]}
             />
             <View style={styles.dayCellLabel}>
-              <Text style={styles.dayCellText}>{text}</Text>
+              <Text
+                style={[
+                  styles.dayCellText,
+                  isWeekdayHeader ? weekdayTextStyle?.(djs.day()) : {},
+                ]}
+              >
+                {text}
+              </Text>
             </View>
             {rows.map((eventRow, rowIndex) => {
               if (typeof eventRow === 'number') {

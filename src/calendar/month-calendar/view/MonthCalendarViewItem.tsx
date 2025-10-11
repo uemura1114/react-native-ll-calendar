@@ -5,6 +5,7 @@ import {
   Text,
   View,
   useWindowDimensions,
+  type TextStyle,
   type ViewStyle,
 } from 'react-native';
 import { MonthCalendarWeekRow } from './MonthCalendarWeekRow';
@@ -31,6 +32,7 @@ export const MonthCalendarViewItem = (props: {
   dayCellStyle?: (date: Date) => ViewStyle;
   locale?: ILocale;
   weekdayCellStyle?: (weekDayNum: WeekdayNum) => ViewStyle;
+  weekdayTextStyle?: (weekDayNum: WeekdayNum) => TextStyle;
 }) => {
   const {
     month,
@@ -44,6 +46,7 @@ export const MonthCalendarViewItem = (props: {
     dayCellStyle,
     locale,
     weekdayCellStyle,
+    weekdayTextStyle,
   } = props;
   const { width } = useWindowDimensions();
   const eventPosition = new MonthCalendarEventPosition();
@@ -81,6 +84,7 @@ export const MonthCalendarViewItem = (props: {
           isWeekdayHeader={true}
           locale={locale}
           weekdayCellStyle={weekdayCellStyle}
+          weekdayTextStyle={weekdayTextStyle}
         />
       </View>
       <View>
