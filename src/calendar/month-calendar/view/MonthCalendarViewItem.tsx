@@ -142,7 +142,6 @@ const styles = StyleSheet.create({
     height: '100%',
     borderColor: 'lightslategrey',
     alignSelf: 'flex-start',
-    backgroundColor: 'red',
   },
   monthContainer: {
     padding: 2,
