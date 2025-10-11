@@ -1,4 +1,5 @@
 import dayjs from 'dayjs';
+import ja from 'dayjs/locale/ja';
 import { useCallback, useMemo, useState } from 'react';
 import { Alert, type ViewStyle } from 'react-native';
 import { View, StyleSheet } from 'react-native';
@@ -404,6 +405,7 @@ export default function App() {
         onRefresh={handleRefresh}
         refreshing={refreshing}
         dayCellStyle={dayCellStyle}
+        locale={ja}
       />
     </View>
   );

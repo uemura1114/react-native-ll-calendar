@@ -1,4 +1,5 @@
 import dayjs from 'dayjs';
+import en from 'dayjs/locale/en';
 import { StyleSheet, useWindowDimensions } from 'react-native';
 import { Text, TouchableOpacity, View, type ViewStyle } from 'react-native';
 import type { CalendarEvent } from '../../../types/month-calendar';
@@ -13,6 +14,7 @@ export const MonthCalendarWeekRow = (props: {
   onPressEvent?: (event: CalendarEvent) => void;
   onPressCell?: (date: Date) => void;
   dayCellStyle?: (date: Date) => ViewStyle;
+  locale?: ILocale;
 }) => {
   const {
     dates,
@@ -22,6 +24,7 @@ export const MonthCalendarWeekRow = (props: {
     onPressEvent,
     onPressCell,
     dayCellStyle,
+    locale = en,
   } = props;
   const eventHeight = 26;
   const { width: screenWidth } = useWindowDimensions();
@@ -34,25 +37,29 @@ export const MonthCalendarWeekRow = (props: {
   return (
     <View style={styles.container}>
       {dates.map((djs, dateIndex) => {
-        const text = isWeekdayHeader ? djs.format('ddd') : djs.format('D');
-        const filteredEvents = events
-          .filter((event) => {
-            const startDjs = dayjs(event.start);
-            return (
-              startDjs.format('YYYY-MM-DD') === djs.format('YYYY-MM-DD') ||
-              (dateIndex === 0 && startDjs.isBefore(djs))
-            );
-          })
-          .sort((a, b) => {
-            const aStartDjs = dateIndex === 0 ? djs : dayjs(a.start);
-            const bStartDjs = dateIndex === 0 ? djs : dayjs(b.start);
-            const aEndDjs = dayjs(a.end);
-            const bEndDjs = dayjs(b.end);
-            const aDiffDays = aEndDjs.diff(aStartDjs, 'day');
-            const bDiffDays = bEndDjs.diff(bStartDjs, 'day');
+        const text = isWeekdayHeader
+          ? djs.locale(locale).format('ddd')
+          : djs.format('D');
+        const filteredEvents = isWeekdayHeader
+          ? []
+          : events
+              .filter((event) => {
+                const startDjs = dayjs(event.start);
+                return (
+                  startDjs.format('YYYY-MM-DD') === djs.format('YYYY-MM-DD') ||
+                  (dateIndex === 0 && startDjs.isBefore(djs))
+                );
+              })
+              .sort((a, b) => {
+                const aStartDjs = dateIndex === 0 ? djs : dayjs(a.start);
+                const bStartDjs = dateIndex === 0 ? djs : dayjs(b.start);
+                const aEndDjs = dayjs(a.end);
+                const bEndDjs = dayjs(b.end);
+                const aDiffDays = aEndDjs.diff(aStartDjs, 'day');
+                const bDiffDays = bEndDjs.diff(bStartDjs, 'day');
 
-            return bDiffDays - aDiffDays;
-          });
+                return bDiffDays - aDiffDays;
+              });
 
         const rows: (CalendarEvent | number)[] = [];
         if (weekId && eventPosition) {
