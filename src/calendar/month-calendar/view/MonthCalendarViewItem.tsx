@@ -5,6 +5,7 @@ import {
   Text,
   View,
   useWindowDimensions,
+  type LayoutChangeEvent,
   type TextStyle,
   type ViewStyle,
 } from 'react-native';
@@ -19,6 +20,7 @@ import { monthlyEndDate, monthlyStartDate } from '../../../utils/functions';
 import { useEvents } from '../logic/useEvents';
 import { CELL_BORDER_WIDTH } from '../../../constants/size';
 import { RefreshControl } from 'react-native';
+import { useCallback, useMemo, useState } from 'react';
 
 export const MonthCalendarViewItem = (props: {
   month: string;
@@ -52,7 +54,6 @@ export const MonthCalendarViewItem = (props: {
   } = props;
   const { width } = useWindowDimensions();
   const eventPosition = new MonthCalendarEventPosition();
-
   const date = new Date(month);
   const dateDjs = dayjs(date);
   const startDate = monthlyStartDate({ date, weekStartsOn });
@@ -70,17 +71,37 @@ export const MonthCalendarViewItem = (props: {
 
   const { eventsGroupByWeekId } = useEvents({ events, weekStartsOn });
 
+  const [bodyHeight, setBodyHeight] = useState(0);
+  const onLayoutBody = useCallback((e: LayoutChangeEvent) => {
+    setBodyHeight(e.nativeEvent.layout.height);
+  }, []);
+
+  const [monthRowHeight, setMonthRowHeight] = useState(0);
+  const onLayoutMonthRow = useCallback((e: LayoutChangeEvent) => {
+    setMonthRowHeight(e.nativeEvent.layout.height);
+  }, []);
+
+  const [weekdayRowHeight, setWeekdayRowHeight] = useState(0);
+  const onLayoutWeekdayRow = useCallback((e: LayoutChangeEvent) => {
+    setWeekdayRowHeight(e.nativeEvent.layout.height);
+  }, []);
+
+  const weekRowMinHeight = useMemo(() => {
+    return (bodyHeight - monthRowHeight - weekdayRowHeight) / weeks.length;
+  }, [bodyHeight, monthRowHeight, weekdayRowHeight, weeks.length]);
+
   return (
     <ScrollView
       style={[styles.container, { width, zIndex: flatListIndex }]}
       refreshControl={
         <RefreshControl refreshing={!!refreshing} onRefresh={onRefresh} />
       }
+      onLayout={onLayoutBody}
     >
-      <View style={styles.monthContainer}>
+      <View style={styles.monthContainer} onLayout={onLayoutMonthRow}>
         <Text style={styles.monthText}>{dateDjs.format('YYYY/MM')}</Text>
       </View>
-      <View>
+      <View onLayout={onLayoutWeekdayRow}>
         <MonthCalendarWeekRow
           dates={weeks[0] ?? []}
           isWeekdayHeader={true}
@@ -107,6 +128,7 @@ export const MonthCalendarViewItem = (props: {
               onPressCell={onPressCell}
               dayCellContainerStyle={dayCellContainerStyle}
               dayCellTextStyle={dayCellTextStyle}
+              weekRowMinHeight={weekRowMinHeight}
             />
           );
         })}
@@ -120,6 +142,7 @@ const styles = StyleSheet.create({
     height: '100%',
     borderColor: 'lightslategrey',
     alignSelf: 'flex-start',
+    backgroundColor: 'red',
   },
   monthContainer: {
     padding: 2,
