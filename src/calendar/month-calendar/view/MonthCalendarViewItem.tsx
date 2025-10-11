@@ -36,6 +36,7 @@ export const MonthCalendarViewItem = (props: {
   locale?: ILocale;
   weekdayCellContainerStyle?: (weekDayNum: WeekdayNum) => ViewStyle;
   weekdayCellTextStyle?: (weekDayNum: WeekdayNum) => TextStyle;
+  todayCellTextStyle?: TextStyle;
 }) => {
   const {
     month,
@@ -51,6 +52,7 @@ export const MonthCalendarViewItem = (props: {
     locale,
     weekdayCellContainerStyle,
     weekdayCellTextStyle,
+    todayCellTextStyle,
   } = props;
   const { width } = useWindowDimensions();
   const eventPosition = new MonthCalendarEventPosition();
@@ -129,6 +131,7 @@ export const MonthCalendarViewItem = (props: {
               dayCellContainerStyle={dayCellContainerStyle}
               dayCellTextStyle={dayCellTextStyle}
               weekRowMinHeight={weekRowMinHeight}
+              todayCellTextStyle={todayCellTextStyle}
             />
           );
         })}
