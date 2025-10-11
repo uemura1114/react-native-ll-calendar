@@ -460,6 +460,7 @@ export default function App() {
         weekdayCellContainerStyle={weekdayCellContainerStyle}
         weekdayCellTextStyle={weekdayCellTextStyle}
         todayCellTextStyle={todayCellTextStyle}
+        hiddenMonth={true}
       />
     </View>
   );

@@ -37,6 +37,7 @@ export const MonthCalendarViewItem = (props: {
   weekdayCellContainerStyle?: (weekDayNum: WeekdayNum) => ViewStyle;
   weekdayCellTextStyle?: (weekDayNum: WeekdayNum) => TextStyle;
   todayCellTextStyle?: TextStyle;
+  hiddenMonth?: boolean;
 }) => {
   const {
     month,
@@ -53,6 +54,7 @@ export const MonthCalendarViewItem = (props: {
     weekdayCellContainerStyle,
     weekdayCellTextStyle,
     todayCellTextStyle,
+    hiddenMonth,
   } = props;
   const { width } = useWindowDimensions();
   const eventPosition = new MonthCalendarEventPosition();
@@ -100,9 +102,13 @@ export const MonthCalendarViewItem = (props: {
       }
       onLayout={onLayoutBody}
     >
-      <View style={styles.monthContainer} onLayout={onLayoutMonthRow}>
-        <Text style={styles.monthText}>{dateDjs.format('YYYY/MM')}</Text>
-      </View>
+      {hiddenMonth ? (
+        <View style={styles.blankMonthContainer} />
+      ) : (
+        <View style={styles.monthContainer} onLayout={onLayoutMonthRow}>
+          <Text style={styles.monthText}>{dateDjs.format('YYYY/MM')}</Text>
+        </View>
+      )}
       <View onLayout={onLayoutWeekdayRow}>
         <MonthCalendarWeekRow
           dates={weeks[0] ?? []}
@@ -145,6 +151,10 @@ const styles = StyleSheet.create({
     height: '100%',
     borderColor: 'lightslategrey',
     alignSelf: 'flex-start',
+  },
+  blankMonthContainer: {
+    borderWidth: CELL_BORDER_WIDTH,
+    borderColor: 'lightslategrey',
   },
   monthContainer: {
     padding: 2,

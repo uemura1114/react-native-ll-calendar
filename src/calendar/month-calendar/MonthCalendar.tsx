@@ -30,6 +30,7 @@ export const MonthCalendar = (props: {
   weekdayCellContainerStyle?: (weekDayNum: WeekdayNum) => ViewStyle;
   weekdayCellTextStyle?: (weekDayNum: WeekdayNum) => TextStyle;
   todayCellTextStyle?: TextStyle;
+  hiddenMonth?: boolean;
 }) => {
   const {
     defaultDate,
@@ -46,6 +47,7 @@ export const MonthCalendar = (props: {
     weekdayCellContainerStyle,
     weekdayCellTextStyle,
     todayCellTextStyle,
+    hiddenMonth,
   } = props;
   const [dateState] = useState(defaultDate);
   const [_activeIndex, setActiveIndex] = useState(HALF_PANEL_LENGTH);
@@ -114,6 +116,7 @@ export const MonthCalendar = (props: {
             weekdayCellContainerStyle={weekdayCellContainerStyle}
             weekdayCellTextStyle={weekdayCellTextStyle}
             todayCellTextStyle={todayCellTextStyle}
+            hiddenMonth={hiddenMonth}
           />
         );
       }}
