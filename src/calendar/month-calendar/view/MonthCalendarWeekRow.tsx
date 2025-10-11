@@ -40,24 +40,26 @@ export const MonthCalendarWeekRow = (props: {
         const text = isWeekdayHeader
           ? djs.locale(locale).format('ddd')
           : djs.format('D');
-        const filteredEvents = events
-          .filter((event) => {
-            const startDjs = dayjs(event.start);
-            return (
-              startDjs.format('YYYY-MM-DD') === djs.format('YYYY-MM-DD') ||
-              (dateIndex === 0 && startDjs.isBefore(djs))
-            );
-          })
-          .sort((a, b) => {
-            const aStartDjs = dateIndex === 0 ? djs : dayjs(a.start);
-            const bStartDjs = dateIndex === 0 ? djs : dayjs(b.start);
-            const aEndDjs = dayjs(a.end);
-            const bEndDjs = dayjs(b.end);
-            const aDiffDays = aEndDjs.diff(aStartDjs, 'day');
-            const bDiffDays = bEndDjs.diff(bStartDjs, 'day');
+        const filteredEvents = isWeekdayHeader
+          ? []
+          : events
+              .filter((event) => {
+                const startDjs = dayjs(event.start);
+                return (
+                  startDjs.format('YYYY-MM-DD') === djs.format('YYYY-MM-DD') ||
+                  (dateIndex === 0 && startDjs.isBefore(djs))
+                );
+              })
+              .sort((a, b) => {
+                const aStartDjs = dateIndex === 0 ? djs : dayjs(a.start);
+                const bStartDjs = dateIndex === 0 ? djs : dayjs(b.start);
+                const aEndDjs = dayjs(a.end);
+                const bEndDjs = dayjs(b.end);
+                const aDiffDays = aEndDjs.diff(aStartDjs, 'day');
+                const bDiffDays = bEndDjs.diff(bStartDjs, 'day');
 
-            return bDiffDays - aDiffDays;
-          });
+                return bDiffDays - aDiffDays;
+              });
 
         const rows: (CalendarEvent | number)[] = [];
         if (weekId && eventPosition) {
