@@ -20,6 +20,7 @@ export const MonthCalendarWeekRow = (props: {
   weekdayCellContainerStyle?: (weekDayNum: WeekdayNum) => ViewStyle;
   weekdayCellTextStyle?: (weekDayNum: WeekdayNum) => TextStyle;
   weekRowMinHeight?: number;
+  todayCellTextStyle?: TextStyle;
 }) => {
   const {
     dates,
@@ -34,6 +35,7 @@ export const MonthCalendarWeekRow = (props: {
     weekdayCellContainerStyle,
     weekdayCellTextStyle,
     weekRowMinHeight,
+    todayCellTextStyle,
   } = props;
   const eventHeight = 26;
   const { width: screenWidth } = useWindowDimensions();
@@ -117,6 +119,9 @@ export const MonthCalendarWeekRow = (props: {
                   isWeekdayHeader
                     ? weekdayCellTextStyle?.(djs.day())
                     : dayCellTextStyle?.(djs.toDate()),
+                  !isWeekdayHeader && dayjs(djs).isSame(dayjs(), 'day')
+                    ? todayCellTextStyle
+                    : {},
                 ]}
               >
                 {text}

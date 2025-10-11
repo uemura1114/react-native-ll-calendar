@@ -438,6 +438,11 @@ export default function App() {
     []
   );
 
+  const todayCellTextStyle: TextStyle = {
+    backgroundColor: 'lightblue',
+    borderRadius: 12,
+  };
+
   return (
     <View style={styles.container}>
       <MonthCalendar
@@ -454,6 +459,7 @@ export default function App() {
         locale={ja}
         weekdayCellContainerStyle={weekdayCellContainerStyle}
         weekdayCellTextStyle={weekdayCellTextStyle}
+        todayCellTextStyle={todayCellTextStyle}
       />
     </View>
   );
