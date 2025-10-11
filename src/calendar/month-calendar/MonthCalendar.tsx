@@ -24,10 +24,10 @@ export const MonthCalendar = (props: {
   onPressCell?: (date: Date) => void;
   onRefresh?: () => void;
   refreshing?: boolean;
-  dayCellStyle?: (date: Date) => ViewStyle;
+  dayCellContainerStyle?: (date: Date) => ViewStyle;
   locale?: ILocale;
-  weekdayCellStyle?: (weekDayNum: WeekdayNum) => ViewStyle;
-  weekdayTextStyle?: (weekDayNum: WeekdayNum) => TextStyle;
+  weekdayCellContainerStyle?: (weekDayNum: WeekdayNum) => ViewStyle;
+  weekdayCellTextStyle?: (weekDayNum: WeekdayNum) => TextStyle;
 }) => {
   const {
     defaultDate,
@@ -38,10 +38,10 @@ export const MonthCalendar = (props: {
     onPressCell,
     onRefresh,
     refreshing,
-    dayCellStyle,
+    dayCellContainerStyle,
     locale,
-    weekdayCellStyle,
-    weekdayTextStyle,
+    weekdayCellContainerStyle,
+    weekdayCellTextStyle,
   } = props;
   const [dateState] = useState(defaultDate);
   const [_activeIndex, setActiveIndex] = useState(HALF_PANEL_LENGTH);
@@ -104,10 +104,10 @@ export const MonthCalendar = (props: {
             flatListIndex={index}
             onRefresh={onRefresh}
             refreshing={refreshing}
-            dayCellStyle={dayCellStyle}
+            dayCellContainerStyle={dayCellContainerStyle}
             locale={locale}
-            weekdayCellStyle={weekdayCellStyle}
-            weekdayTextStyle={weekdayTextStyle}
+            weekdayCellContainerStyle={weekdayCellContainerStyle}
+            weekdayCellTextStyle={weekdayCellTextStyle}
           />
         );
       }}

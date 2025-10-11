@@ -14,10 +14,10 @@ export const MonthCalendarWeekRow = (props: {
   eventPosition?: MonthCalendarEventPosition;
   onPressEvent?: (event: CalendarEvent) => void;
   onPressCell?: (date: Date) => void;
-  dayCellStyle?: (date: Date) => ViewStyle;
+  dayCellContainerStyle?: (date: Date) => ViewStyle;
   locale?: ILocale;
-  weekdayCellStyle?: (weekDayNum: WeekdayNum) => ViewStyle;
-  weekdayTextStyle?: (weekDayNum: WeekdayNum) => TextStyle;
+  weekdayCellContainerStyle?: (weekDayNum: WeekdayNum) => ViewStyle;
+  weekdayCellTextStyle?: (weekDayNum: WeekdayNum) => TextStyle;
 }) => {
   const {
     dates,
@@ -26,10 +26,10 @@ export const MonthCalendarWeekRow = (props: {
     eventPosition,
     onPressEvent,
     onPressCell,
-    dayCellStyle,
+    dayCellContainerStyle,
     locale = en,
-    weekdayCellStyle,
-    weekdayTextStyle,
+    weekdayCellContainerStyle,
+    weekdayCellTextStyle,
   } = props;
   const eventHeight = 26;
   const { width: screenWidth } = useWindowDimensions();
@@ -102,15 +102,15 @@ export const MonthCalendarWeekRow = (props: {
               style={[
                 styles.dayCellInner,
                 isWeekdayHeader
-                  ? weekdayCellStyle?.(djs.day())
-                  : dayCellStyle?.(djs.toDate()),
+                  ? weekdayCellContainerStyle?.(djs.day())
+                  : dayCellContainerStyle?.(djs.toDate()),
               ]}
             />
             <View style={styles.dayCellLabel}>
               <Text
                 style={[
                   styles.dayCellText,
-                  isWeekdayHeader ? weekdayTextStyle?.(djs.day()) : {},
+                  isWeekdayHeader ? weekdayCellTextStyle?.(djs.day()) : {},
                 ]}
               >
                 {text}

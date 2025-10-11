@@ -384,7 +384,7 @@ export default function App() {
     }, 2000);
   }, []);
 
-  const dayCellStyle: (date: Date) => ViewStyle = useCallback((d) => {
+  const dayCellContainerStyle: (date: Date) => ViewStyle = useCallback((d) => {
     if (d.getDate() === 10) {
       return {
         borderColor: 'red',
@@ -395,19 +395,17 @@ export default function App() {
     return {};
   }, []);
 
-  const weekdayCellStyle: (weekday: WeekdayNum) => ViewStyle = useCallback(
-    (day) => {
+  const weekdayCellContainerStyle: (weekday: WeekdayNum) => ViewStyle =
+    useCallback((day) => {
       if (day === 0 || day === 6) {
         return {
           backgroundColor: 'lightgreen',
         };
       }
       return {};
-    },
-    []
-  );
+    }, []);
 
-  const weekdayTextStyle: (weekday: WeekdayNum) => TextStyle = useCallback(
+  const weekdayCellTextStyle: (weekday: WeekdayNum) => TextStyle = useCallback(
     (day) => {
       if (day === 0) {
         return {
@@ -436,10 +434,10 @@ export default function App() {
         onPressCell={handleCellPress}
         onRefresh={handleRefresh}
         refreshing={refreshing}
-        dayCellStyle={dayCellStyle}
+        dayCellContainerStyle={dayCellContainerStyle}
         locale={ja}
-        weekdayCellStyle={weekdayCellStyle}
-        weekdayTextStyle={weekdayTextStyle}
+        weekdayCellContainerStyle={weekdayCellContainerStyle}
+        weekdayCellTextStyle={weekdayCellTextStyle}
       />
     </View>
   );

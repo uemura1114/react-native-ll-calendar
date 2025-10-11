@@ -29,10 +29,10 @@ export const MonthCalendarViewItem = (props: {
   flatListIndex: number;
   onRefresh?: () => void;
   refreshing?: boolean;
-  dayCellStyle?: (date: Date) => ViewStyle;
+  dayCellContainerStyle?: (date: Date) => ViewStyle;
   locale?: ILocale;
-  weekdayCellStyle?: (weekDayNum: WeekdayNum) => ViewStyle;
-  weekdayTextStyle?: (weekDayNum: WeekdayNum) => TextStyle;
+  weekdayCellContainerStyle?: (weekDayNum: WeekdayNum) => ViewStyle;
+  weekdayCellTextStyle?: (weekDayNum: WeekdayNum) => TextStyle;
 }) => {
   const {
     month,
@@ -43,10 +43,10 @@ export const MonthCalendarViewItem = (props: {
     flatListIndex,
     onRefresh,
     refreshing,
-    dayCellStyle,
+    dayCellContainerStyle,
     locale,
-    weekdayCellStyle,
-    weekdayTextStyle,
+    weekdayCellContainerStyle,
+    weekdayCellTextStyle,
   } = props;
   const { width } = useWindowDimensions();
   const eventPosition = new MonthCalendarEventPosition();
@@ -83,8 +83,8 @@ export const MonthCalendarViewItem = (props: {
           dates={weeks[0] ?? []}
           isWeekdayHeader={true}
           locale={locale}
-          weekdayCellStyle={weekdayCellStyle}
-          weekdayTextStyle={weekdayTextStyle}
+          weekdayCellContainerStyle={weekdayCellContainerStyle}
+          weekdayCellTextStyle={weekdayCellTextStyle}
         />
       </View>
       <View>
@@ -103,7 +103,7 @@ export const MonthCalendarViewItem = (props: {
               eventPosition={eventPosition}
               onPressEvent={onPressEvent}
               onPressCell={onPressCell}
-              dayCellStyle={dayCellStyle}
+              dayCellContainerStyle={dayCellContainerStyle}
             />
           );
         })}
