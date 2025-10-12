@@ -13,6 +13,7 @@ export const MonthCalendarEvent = (props: {
   isLastEvent: boolean;
   onPressEvent?: (event: CalendarEvent) => void;
   setIsEventDragging?: (bool: boolean) => void;
+  draggingEvent?: CalendarEvent | null;
   setDraggingEvent?: (event: CalendarEvent | null) => void;
   findDateFromPosition?: (x: number, y: number) => Date | null;
 }) => {
@@ -24,6 +25,7 @@ export const MonthCalendarEvent = (props: {
     isLastEvent,
     onPressEvent,
     setIsEventDragging,
+    draggingEvent,
     setDraggingEvent,
     findDateFromPosition,
   } = props;
@@ -39,7 +41,7 @@ export const MonthCalendarEvent = (props: {
       onPanResponderGrant: (evt, _gestureState) => {
         touchStartTime.current = Date.now();
         setIsEventDragging?.(true);
-        setDraggingEvent?.({ ...event, id: 'dragging' });
+        setDraggingEvent?.(event);
         dragStartDate.current =
           findDateFromPosition?.(
             evt.nativeEvent.pageX,
@@ -61,7 +63,6 @@ export const MonthCalendarEvent = (props: {
           const newEnd = dayjs(event.end).add(diff, 'days').toDate();
           setDraggingEvent?.({
             ...event,
-            id: 'dragging',
             start: newStart,
             end: newEnd,
           });
@@ -98,6 +99,7 @@ export const MonthCalendarEvent = (props: {
         },
         isPrevDateEvent ? styles.prevDateEvent : {},
         isLastEvent ? styles.lastRowEvent : {},
+        event.id === draggingEvent?.id ? styles.draggingEvent : {},
       ]}
       {...panResponder.panHandlers}
     >
@@ -130,6 +132,9 @@ const styles = StyleSheet.create({
   },
   lastRowEvent: {
     marginBottom: EVENT_GAP,
+  },
+  draggingEvent: {
+    opacity: 0.5,
   },
   eventTitle: {
     fontSize: 10,

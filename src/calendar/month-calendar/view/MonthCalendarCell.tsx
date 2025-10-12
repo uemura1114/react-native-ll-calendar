@@ -49,6 +49,7 @@ export const MonthCalendarCell = (props: {
   >;
   findDateFromPosition?: (x: number, y: number) => Date | null;
   draggingEvent?: CalendarEvent | null;
+  isRenderDraggingEventRow?: boolean;
 }) => {
   const {
     month,
@@ -74,15 +75,18 @@ export const MonthCalendarCell = (props: {
     cellLayoutsRef,
     findDateFromPosition,
     draggingEvent,
+    isRenderDraggingEventRow = false,
   } = props;
 
   const cellRef = useRef<any>(null);
 
-  const isRenderDraggingEvent =
-    (draggingEvent &&
+  const isRenderDraggingEventCell =
+    (isRenderDraggingEventRow &&
+      draggingEvent &&
       dayjs(draggingEvent.start).format('YYYY-MM-DD') ===
         djs.format('YYYY-MM-DD')) ||
-    (draggingEvent &&
+    (isRenderDraggingEventRow &&
+      draggingEvent &&
       dateIndex === 0 &&
       dayjs(draggingEvent.start).isBefore(djs));
 
@@ -183,12 +187,13 @@ export const MonthCalendarCell = (props: {
               isLastEvent={isLast}
               onPressEvent={onPressEvent}
               setIsEventDragging={setIsEventDragging}
+              draggingEvent={draggingEvent}
               setDraggingEvent={setDraggingEvent}
               findDateFromPosition={findDateFromPosition}
             />
           );
         })}
-        {isRenderDraggingEvent && (
+        {isRenderDraggingEventCell && (
           <MonthCalendarDraggingEvent
             date={djs.toDate()}
             event={draggingEvent}

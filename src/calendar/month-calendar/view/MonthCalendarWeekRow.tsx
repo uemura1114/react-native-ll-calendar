@@ -92,7 +92,7 @@ export const MonthCalendarWeekRow = (props: {
     });
   }, [draggingEvent, weekStartsOn]);
 
-  const isRenderDraggingEvent =
+  const isRenderDraggingEventRow =
     !!draggingEvent && !!weekId && draggingEventWeekIds.includes(weekId);
 
   return (
@@ -189,7 +189,8 @@ export const MonthCalendarWeekRow = (props: {
             setDraggingEvent={setDraggingEvent}
             cellLayoutsRef={cellLayoutsRef}
             findDateFromPosition={findDateFromPosition}
-            draggingEvent={isRenderDraggingEvent ? draggingEvent : null}
+            draggingEvent={draggingEvent}
+            isRenderDraggingEventRow={isRenderDraggingEventRow}
           />
         );
       })}
