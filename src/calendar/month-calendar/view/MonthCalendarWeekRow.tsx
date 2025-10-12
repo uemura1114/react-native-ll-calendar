@@ -24,6 +24,9 @@ export const MonthCalendarWeekRow = (props: {
   weekdayCellTextStyle?: (weekDayNum: WeekdayNum) => TextStyle;
   weekRowMinHeight?: number;
   todayCellTextStyle?: TextStyle;
+  setIsEventDragging?: (bool: boolean) => void;
+  draggingEvent?: CalendarEvent | null;
+  setDraggingEvent?: (event: CalendarEvent | null) => void;
 }) => {
   const {
     dates,
@@ -41,6 +44,9 @@ export const MonthCalendarWeekRow = (props: {
     weekdayCellTextStyle,
     weekRowMinHeight,
     todayCellTextStyle,
+    setIsEventDragging,
+    draggingEvent,
+    setDraggingEvent,
   } = props;
   const eventHeight = 26;
   const { width: screenWidth } = useWindowDimensions();
@@ -49,6 +55,8 @@ export const MonthCalendarWeekRow = (props: {
   if (weekId && eventPosition) {
     eventPosition.resetResource(weekId);
   }
+
+  console.log('draggingEvent', draggingEvent);
 
   return (
     <View style={styles.container}>
@@ -136,56 +144,60 @@ export const MonthCalendarWeekRow = (props: {
                 {text}
               </Text>
             </View>
-            {rows.map((eventRow, rowIndex) => {
-              if (typeof eventRow === 'number') {
+            <View style={styles.eventsWrapper}>
+              {rows.map((eventRow, rowIndex) => {
+                if (typeof eventRow === 'number') {
+                  return (
+                    <View
+                      key={eventRow}
+                      style={{ height: eventHeight, marginBottom: EVENT_GAP }}
+                    />
+                  );
+                }
+
+                const rawStartDjs = dayjs(eventRow.start);
+                const startDjs = dateIndex === 0 ? djs : dayjs(eventRow.start);
+                const endDjs = dayjs(eventRow.end);
+                const diffDays = endDjs
+                  .startOf('day')
+                  .diff(startDjs.startOf('day'), 'day');
+                const isPrevDateEvent =
+                  dateIndex === 0 && rawStartDjs.isBefore(djs);
+                let width =
+                  (diffDays + 1) * dateColumnWidth -
+                  EVENT_GAP * 2 -
+                  CELL_BORDER_WIDTH * 2;
+
+                if (isPrevDateEvent) {
+                  width += EVENT_GAP + 1;
+                }
+
+                const isLast = rowIndex === rows.length - 1;
+
+                if (eventPosition && weekId) {
+                  eventPosition.push({
+                    weekId,
+                    startDate: startDjs.toDate(),
+                    days: diffDays + 1,
+                    rowNum: rowIndex + 1,
+                  });
+                }
+
                 return (
-                  <View
-                    key={eventRow}
-                    style={{ height: eventHeight, marginBottom: EVENT_GAP }}
+                  <MonthCalendarEvent
+                    key={eventRow.id}
+                    event={eventRow}
+                    width={width}
+                    height={eventHeight}
+                    isPrevDateEvent={isPrevDateEvent}
+                    isLastEvent={isLast}
+                    onPressEvent={onPressEvent}
+                    setIsEventDragging={setIsEventDragging}
+                    setDraggingEvent={setDraggingEvent}
                   />
                 );
-              }
-
-              const rawStartDjs = dayjs(eventRow.start);
-              const startDjs = dateIndex === 0 ? djs : dayjs(eventRow.start);
-              const endDjs = dayjs(eventRow.end);
-              const diffDays = endDjs
-                .startOf('day')
-                .diff(startDjs.startOf('day'), 'day');
-              const isPrevDateEvent =
-                dateIndex === 0 && rawStartDjs.isBefore(djs);
-              let width =
-                (diffDays + 1) * dateColumnWidth -
-                EVENT_GAP * 2 -
-                CELL_BORDER_WIDTH * 2;
-
-              if (isPrevDateEvent) {
-                width += EVENT_GAP + 1;
-              }
-
-              const isLast = rowIndex === rows.length - 1;
-
-              if (eventPosition && weekId) {
-                eventPosition.push({
-                  weekId,
-                  startDate: startDjs.toDate(),
-                  days: diffDays + 1,
-                  rowNum: rowIndex + 1,
-                });
-              }
-
-              return (
-                <MonthCalendarEvent
-                  key={eventRow.id}
-                  event={eventRow}
-                  width={width}
-                  height={eventHeight}
-                  isPrevDateEvent={isPrevDateEvent}
-                  isLastEvent={isLast}
-                  onPressEvent={onPressEvent}
-                />
-              );
-            })}
+              })}
+            </View>
           </TouchableOpacity>
         );
       })}
@@ -215,6 +227,9 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
+  },
+  eventsWrapper: {
+    position: 'relative',
   },
   dayCellLabel: {
     paddingVertical: 1,

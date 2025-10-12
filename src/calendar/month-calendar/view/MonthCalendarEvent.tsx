@@ -1,6 +1,8 @@
-import { StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { PanResponder, StyleSheet, Text } from 'react-native';
 import type { CalendarEvent } from '../../../types/month-calendar';
 import { EVENT_GAP } from '../../../constants/size';
+import { useRef } from 'react';
+import { View } from 'react-native';
 
 export const MonthCalendarEvent = (props: {
   event: CalendarEvent;
@@ -9,11 +11,56 @@ export const MonthCalendarEvent = (props: {
   isPrevDateEvent: boolean;
   isLastEvent: boolean;
   onPressEvent?: (event: CalendarEvent) => void;
+  setIsEventDragging?: (bool: boolean) => void;
+  setDraggingEvent?: (event: CalendarEvent | null) => void;
 }) => {
-  const { event, width, height, isPrevDateEvent, isLastEvent, onPressEvent } =
-    props;
+  const {
+    event,
+    width,
+    height,
+    isPrevDateEvent,
+    isLastEvent,
+    onPressEvent,
+    setIsEventDragging,
+    setDraggingEvent,
+  } = props;
+
+  const touchStartTime = useRef(0);
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+
+      onPanResponderGrant: (evt, _gestureState) => {
+        touchStartTime.current = Date.now();
+        setIsEventDragging?.(true);
+        setDraggingEvent?.(event);
+        console.log(evt.nativeEvent.locationX, evt.nativeEvent.locationY);
+      },
+
+      onPanResponderMove: (_evt, gestureState) => {
+        console.log(gestureState.dx, gestureState.dy);
+      },
+
+      onPanResponderRelease: (evt, gestureState) => {
+        setIsEventDragging?.(false);
+        setDraggingEvent?.(null);
+        console.log(evt.nativeEvent.locationX, evt.nativeEvent.locationY);
+
+        const touchDuration = Date.now() - touchStartTime.current;
+        const moveDistance = Math.sqrt(
+          gestureState.dx ** 2 + gestureState.dy ** 2
+        );
+
+        if (touchDuration < 200 && moveDistance < 10) {
+          onPressEvent?.(event);
+        }
+      },
+    })
+  ).current;
+
   return (
-    <TouchableOpacity
+    <View
       style={[
         styles.event,
         {
@@ -25,9 +72,7 @@ export const MonthCalendarEvent = (props: {
         isPrevDateEvent ? styles.prevDateEvent : {},
         isLastEvent ? styles.lastRowEvent : {},
       ]}
-      onPress={() => {
-        onPressEvent?.(event);
-      }}
+      {...panResponder.panHandlers}
     >
       <Text
         numberOfLines={1}
@@ -36,7 +81,7 @@ export const MonthCalendarEvent = (props: {
       >
         {event.title}
       </Text>
-    </TouchableOpacity>
+    </View>
   );
 };
 

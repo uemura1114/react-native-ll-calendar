@@ -57,6 +57,9 @@ export const MonthCalendar = (props: {
   } = props;
   const [dateState] = useState(defaultDate);
   const [_activeIndex, setActiveIndex] = useState(HALF_PANEL_LENGTH);
+  const [draggingEvent, setDraggingEvent] = useState<CalendarEvent | null>(
+    null
+  );
   const defaultDateDjs = dayjs(dateState);
   const startOfDefaultDateDjs = defaultDateDjs.startOf('month');
   const prevPanels: string[] = Array.from(
@@ -126,11 +129,13 @@ export const MonthCalendar = (props: {
             todayCellTextStyle={todayCellTextStyle}
             hiddenMonth={hiddenMonth}
             monthFormat={monthFormat}
+            draggingEvent={draggingEvent}
+            setDraggingEvent={setDraggingEvent}
           />
         );
       }}
       showsHorizontalScrollIndicator={false}
-      scrollEnabled={true}
+      scrollEnabled={draggingEvent === null}
       windowSize={5}
       initialNumToRender={5}
       maxToRenderPerBatch={5}

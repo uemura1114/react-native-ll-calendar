@@ -41,6 +41,8 @@ export const MonthCalendarViewItem = (props: {
   todayCellTextStyle?: TextStyle;
   hiddenMonth?: boolean;
   monthFormat?: string;
+  draggingEvent: CalendarEvent | null;
+  setDraggingEvent: (event: CalendarEvent | null) => void;
 }) => {
   const {
     month,
@@ -61,6 +63,8 @@ export const MonthCalendarViewItem = (props: {
     todayCellTextStyle,
     hiddenMonth,
     monthFormat = 'YYYY/MM',
+    draggingEvent,
+    setDraggingEvent,
   } = props;
   const { width } = useWindowDimensions();
   const eventPosition = new MonthCalendarEventPosition();
@@ -102,6 +106,7 @@ export const MonthCalendarViewItem = (props: {
 
   return (
     <ScrollView
+      scrollEnabled={draggingEvent === null}
       style={[styles.container, { width, zIndex: flatListIndex }]}
       refreshControl={
         <RefreshControl refreshing={!!refreshing} onRefresh={onRefresh} />
@@ -146,6 +151,8 @@ export const MonthCalendarViewItem = (props: {
               dayCellTextStyle={dayCellTextStyle}
               weekRowMinHeight={weekRowMinHeight}
               todayCellTextStyle={todayCellTextStyle}
+              draggingEvent={draggingEvent}
+              setDraggingEvent={setDraggingEvent}
             />
           );
         })}
