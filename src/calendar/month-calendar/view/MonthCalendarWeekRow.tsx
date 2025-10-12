@@ -145,7 +145,7 @@ export const MonthCalendarWeekRow = (props: {
         return (
           <MonthCalendarCell
             month={month}
-            key={djs.format('YYYY-MM-DD')}
+            key={`${month}-${djs.format('YYYY-MM-DD')}`}
             isWeekdayHeader={isWeekdayHeader}
             djs={djs}
             weekRowMinHeight={weekRowMinHeight}

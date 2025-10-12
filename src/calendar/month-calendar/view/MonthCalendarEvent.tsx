@@ -3,6 +3,7 @@ import type { CalendarEvent } from '../../../types/month-calendar';
 import { EVENT_GAP } from '../../../constants/size';
 import { useRef } from 'react';
 import { View } from 'react-native';
+import dayjs from 'dayjs';
 
 export const MonthCalendarEvent = (props: {
   event: CalendarEvent;
@@ -28,6 +29,8 @@ export const MonthCalendarEvent = (props: {
   } = props;
 
   const touchStartTime = useRef(0);
+  const dragStartDate = useRef<Date | null>(null);
+  const currentOverDate = useRef<Date | null>(null);
 
   const panResponder = useRef(
     PanResponder.create({
@@ -36,15 +39,34 @@ export const MonthCalendarEvent = (props: {
       onPanResponderGrant: (evt, _gestureState) => {
         touchStartTime.current = Date.now();
         setIsEventDragging?.(true);
-        setDraggingEvent?.(event);
-        console.log(
-          'start date',
-          findDateFromPosition?.(evt.nativeEvent.pageX, evt.nativeEvent.pageY)
-        );
+        setDraggingEvent?.({ ...event, id: 'dragging' });
+        dragStartDate.current =
+          findDateFromPosition?.(
+            evt.nativeEvent.pageX,
+            evt.nativeEvent.pageY
+          ) ?? null;
       },
 
-      onPanResponderMove: (_evt, gestureState) => {
-        console.log(gestureState.dx, gestureState.dy);
+      onPanResponderMove: (evt) => {
+        const overDate = findDateFromPosition?.(
+          evt.nativeEvent.pageX,
+          evt.nativeEvent.pageY
+        );
+        if (overDate && overDate !== currentOverDate.current) {
+          const diff = dayjs(overDate).diff(
+            dayjs(dragStartDate.current),
+            'day'
+          );
+          const newStart = dayjs(event.start).add(diff, 'days').toDate();
+          const newEnd = dayjs(event.end).add(diff, 'days').toDate();
+          setDraggingEvent?.({
+            ...event,
+            id: 'dragging',
+            start: newStart,
+            end: newEnd,
+          });
+        }
+        currentOverDate.current = overDate ?? null;
       },
 
       onPanResponderRelease: (evt, gestureState) => {

@@ -101,7 +101,10 @@ export const MonthCalendarViewItem = (props: {
     currentDate = currentDate.add(7, 'day');
   }
 
-  const { eventsGroupByWeekId } = useEvents({ events, weekStartsOn });
+  const { eventsGroupByWeekId } = useEvents({
+    events,
+    weekStartsOn,
+  });
 
   const [bodyHeight, setBodyHeight] = useState(0);
   const onLayoutBody = useCallback((e: LayoutChangeEvent) => {
