@@ -6,6 +6,7 @@ import type { CalendarEvent, WeekdayNum } from '../../../types/month-calendar';
 import type MonthCalendarEventPosition from '../../../utils/month-calendar-event-position';
 import { CELL_BORDER_WIDTH, EVENT_GAP } from '../../../constants/size';
 import type { TextStyle } from 'react-native';
+import { MonthCalendarEvent } from './MonthCalendarEvent';
 
 export const MonthCalendarWeekRow = (props: {
   dates: dayjs.Dayjs[];
@@ -162,7 +163,7 @@ export const MonthCalendarWeekRow = (props: {
                 width += EVENT_GAP + 1;
               }
 
-              const isLastRow = rowIndex === rows.length - 1;
+              const isLast = rowIndex === rows.length - 1;
 
               if (eventPosition && weekId) {
                 eventPosition.push({
@@ -174,31 +175,15 @@ export const MonthCalendarWeekRow = (props: {
               }
 
               return (
-                <TouchableOpacity
+                <MonthCalendarEvent
                   key={eventRow.id}
-                  style={[
-                    styles.event,
-                    {
-                      backgroundColor: eventRow.backgroundColor,
-                      borderColor: eventRow.borderColor,
-                      width: width,
-                      height: eventHeight,
-                    },
-                    isPrevDateEvent ? styles.prevDateEvent : {},
-                    isLastRow ? styles.lastRowEvent : {},
-                  ]}
-                  onPress={() => {
-                    onPressEvent?.(eventRow);
-                  }}
-                >
-                  <Text
-                    numberOfLines={1}
-                    ellipsizeMode="tail"
-                    style={[styles.eventTitle, { color: eventRow.color }]}
-                  >
-                    {eventRow.title}
-                  </Text>
-                </TouchableOpacity>
+                  event={eventRow}
+                  width={width}
+                  height={eventHeight}
+                  isPrevDateEvent={isPrevDateEvent}
+                  isLastEvent={isLast}
+                  onPressEvent={onPressEvent}
+                />
               );
             })}
           </TouchableOpacity>
@@ -238,26 +223,5 @@ const styles = StyleSheet.create({
   dayCellText: {
     textAlign: 'center',
     fontSize: 12,
-  },
-  event: {
-    borderWidth: 0.5,
-    borderRadius: 4,
-    paddingHorizontal: 4,
-    flexDirection: 'row',
-    alignItems: 'center',
-    boxShadow: '0 0 2px 0 rgba(0, 0, 0, 0.1)',
-    marginTop: EVENT_GAP,
-    marginLeft: EVENT_GAP,
-  },
-  prevDateEvent: {
-    marginLeft: -1,
-    borderTopStartRadius: 0,
-    borderBottomStartRadius: 0,
-  },
-  lastRowEvent: {
-    marginBottom: EVENT_GAP,
-  },
-  eventTitle: {
-    fontSize: 10,
   },
 });
