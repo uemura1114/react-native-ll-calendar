@@ -181,6 +181,7 @@ export const MonthCalendarViewItem = (props: {
               setDraggingEvent={setDraggingEvent}
               cellLayoutsRef={cellLayoutsRef}
               findDateFromPosition={findDateFromPosition}
+              weekStartsOn={weekStartsOn}
             />
           );
         })}

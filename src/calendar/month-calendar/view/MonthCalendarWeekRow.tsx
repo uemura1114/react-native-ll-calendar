@@ -2,11 +2,17 @@ import dayjs from 'dayjs';
 import en from 'dayjs/locale/en';
 import { StyleSheet, useWindowDimensions } from 'react-native';
 import { View, type ViewStyle } from 'react-native';
-import type { CalendarEvent, WeekdayNum } from '../../../types/month-calendar';
+import type {
+  CalendarEvent,
+  WeekdayNum,
+  WeekStartsOn,
+} from '../../../types/month-calendar';
 import type MonthCalendarEventPosition from '../../../utils/month-calendar-event-position';
 import { CELL_BORDER_WIDTH } from '../../../constants/size';
 import type { TextStyle } from 'react-native';
 import { MonthCalendarCell } from './MonthCalendarCell';
+import { getWeekIds } from '../../../utils/functions';
+import { useMemo } from 'react';
 
 export const MonthCalendarWeekRow = (props: {
   month: string;
@@ -41,6 +47,7 @@ export const MonthCalendarWeekRow = (props: {
     >
   >;
   findDateFromPosition?: (x: number, y: number) => Date | null;
+  weekStartsOn?: WeekStartsOn;
 }) => {
   const {
     month,
@@ -60,10 +67,11 @@ export const MonthCalendarWeekRow = (props: {
     weekRowMinHeight,
     todayCellTextStyle,
     setIsEventDragging,
-    // draggingEvent,
+    draggingEvent,
     setDraggingEvent,
     cellLayoutsRef,
     findDateFromPosition,
+    weekStartsOn,
   } = props;
   const eventHeight = 26;
   const { width: screenWidth } = useWindowDimensions();
@@ -72,6 +80,20 @@ export const MonthCalendarWeekRow = (props: {
   if (weekId && eventPosition) {
     eventPosition.resetResource(weekId);
   }
+
+  const draggingEventWeekIds: string[] = useMemo(() => {
+    if (weekStartsOn === undefined || !draggingEvent) {
+      return [];
+    }
+    return getWeekIds({
+      start: draggingEvent.start,
+      end: draggingEvent.end,
+      weekStartsOn,
+    });
+  }, [draggingEvent, weekStartsOn]);
+
+  const isRenderDraggingEvent =
+    !!draggingEvent && !!weekId && draggingEventWeekIds.includes(weekId);
 
   return (
     <View style={styles.container}>
@@ -167,6 +189,7 @@ export const MonthCalendarWeekRow = (props: {
             setDraggingEvent={setDraggingEvent}
             cellLayoutsRef={cellLayoutsRef}
             findDateFromPosition={findDateFromPosition}
+            draggingEvent={isRenderDraggingEvent ? draggingEvent : null}
           />
         );
       })}

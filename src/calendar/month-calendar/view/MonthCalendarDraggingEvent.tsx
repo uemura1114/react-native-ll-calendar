@@ -5,16 +5,24 @@ import { View } from 'react-native';
 import dayjs from 'dayjs';
 
 export const MonthCalendarDraggingEvent = (props: {
+  date: Date;
   event: CalendarEvent;
   height: number;
   dateColumnWidth: number;
+  dateIndex: number;
 }) => {
-  const { event, height, dateColumnWidth } = props;
-  const startDjs = dayjs(event.start);
+  const { date, event, height, dateColumnWidth, dateIndex } = props;
+  const startDjs = dateIndex === 0 ? dayjs(date) : dayjs(event.start);
   const endDjs = dayjs(event.end);
   const diffDays = endDjs.startOf('day').diff(startDjs.startOf('day'), 'day');
+  const isPrevDateEvent =
+    dateIndex === 0 && dayjs(event.start).isBefore(dayjs(date));
   let width =
     (diffDays + 1) * dateColumnWidth - EVENT_GAP * 2 - CELL_BORDER_WIDTH * 2;
+
+  if (isPrevDateEvent) {
+    width += EVENT_GAP + 1;
+  }
 
   return (
     <View
@@ -26,6 +34,7 @@ export const MonthCalendarDraggingEvent = (props: {
           width: width,
           height: height,
         },
+        isPrevDateEvent ? styles.prevDateEvent : {},
       ]}
     >
       <Text
@@ -49,6 +58,11 @@ const styles = StyleSheet.create({
     boxShadow: '0 0 2px 0 rgba(0, 0, 0, 0.1)',
     marginTop: EVENT_GAP,
     marginLeft: EVENT_GAP,
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 999,
   },
   prevDateEvent: {
     marginLeft: -1,

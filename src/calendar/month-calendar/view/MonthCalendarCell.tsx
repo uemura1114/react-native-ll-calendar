@@ -12,6 +12,7 @@ import dayjs from 'dayjs';
 import { CELL_BORDER_WIDTH, EVENT_GAP } from '../../../constants/size';
 import { MonthCalendarEvent } from './MonthCalendarEvent';
 import { useRef } from 'react';
+import { MonthCalendarDraggingEvent } from './MonthCalendarDraggingEvent';
 
 export const MonthCalendarCell = (props: {
   month: string;
@@ -47,6 +48,7 @@ export const MonthCalendarCell = (props: {
     >
   >;
   findDateFromPosition?: (x: number, y: number) => Date | null;
+  draggingEvent?: CalendarEvent | null;
 }) => {
   const {
     month,
@@ -71,9 +73,18 @@ export const MonthCalendarCell = (props: {
     setDraggingEvent,
     cellLayoutsRef,
     findDateFromPosition,
+    draggingEvent,
   } = props;
 
   const cellRef = useRef<any>(null);
+
+  const isRenderDraggingEvent =
+    (draggingEvent &&
+      dayjs(draggingEvent.start).format('YYYY-MM-DD') ===
+        djs.format('YYYY-MM-DD')) ||
+    (draggingEvent &&
+      dateIndex === 0 &&
+      dayjs(draggingEvent.start).isBefore(djs));
 
   return (
     <TouchableOpacity
@@ -177,6 +188,15 @@ export const MonthCalendarCell = (props: {
             />
           );
         })}
+        {isRenderDraggingEvent && (
+          <MonthCalendarDraggingEvent
+            date={djs.toDate()}
+            event={draggingEvent}
+            height={eventHeight}
+            dateColumnWidth={dateColumnWidth}
+            dateIndex={dateIndex}
+          />
+        )}
       </View>
     </TouchableOpacity>
   );
