@@ -105,6 +105,28 @@ export const MonthCalendarWeekRow = (props: {
             }
           }
         }
+
+        rows.forEach((row, rowIndex) => {
+          if (typeof row === 'number') {
+            return;
+          }
+
+          if (eventPosition && weekId) {
+            const startDjs = dateIndex === 0 ? djs : dayjs(row.start);
+            const endDjs = dayjs(row.end);
+            const diffDays = endDjs
+              .startOf('day')
+              .diff(startDjs.startOf('day'), 'day');
+
+            eventPosition.push({
+              weekId,
+              startDate: startDjs.toDate(),
+              days: diffDays + 1,
+              rowNum: rowIndex + 1,
+            });
+          }
+        });
+
         return (
           <MonthCalendarCell
             key={djs.format('YYYY-MM-DD')}
@@ -124,8 +146,6 @@ export const MonthCalendarWeekRow = (props: {
             events={rows}
             eventHeight={eventHeight}
             dateColumnWidth={dateColumnWidth}
-            eventPosition={eventPosition}
-            weekId={weekId}
             onPressEvent={onPressEvent}
             setIsEventDragging={setIsEventDragging}
             setDraggingEvent={setDraggingEvent}

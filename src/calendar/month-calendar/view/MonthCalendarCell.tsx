@@ -10,7 +10,6 @@ import { TouchableOpacity } from 'react-native';
 import type { CalendarEvent, WeekdayNum } from '../../../types/month-calendar';
 import dayjs from 'dayjs';
 import { CELL_BORDER_WIDTH, EVENT_GAP } from '../../../constants/size';
-import type MonthCalendarEventPosition from '../../../utils/month-calendar-event-position';
 import { MonthCalendarEvent } from './MonthCalendarEvent';
 
 export const MonthCalendarCell = (props: {
@@ -30,8 +29,6 @@ export const MonthCalendarCell = (props: {
   events: (CalendarEvent | number)[];
   eventHeight: number;
   dateColumnWidth: number;
-  eventPosition?: MonthCalendarEventPosition;
-  weekId?: string;
   onPressEvent?: (event: CalendarEvent) => void;
   setIsEventDragging?: (bool: boolean) => void;
   setDraggingEvent?: (event: CalendarEvent | null) => void;
@@ -53,8 +50,6 @@ export const MonthCalendarCell = (props: {
     events,
     eventHeight,
     dateColumnWidth,
-    eventPosition,
-    weekId,
     onPressEvent,
     setIsEventDragging,
     setDraggingEvent,
@@ -126,15 +121,6 @@ export const MonthCalendarCell = (props: {
           }
 
           const isLast = rowIndex === events.length - 1;
-
-          if (eventPosition && weekId) {
-            eventPosition.push({
-              weekId,
-              startDate: startDjs.toDate(),
-              days: diffDays + 1,
-              rowNum: rowIndex + 1,
-            });
-          }
 
           return (
             <MonthCalendarEvent
