@@ -9,6 +9,7 @@ import type { TextStyle } from 'react-native';
 import { MonthCalendarCell } from './MonthCalendarCell';
 
 export const MonthCalendarWeekRow = (props: {
+  month: string;
   dates: dayjs.Dayjs[];
   isWeekdayHeader?: boolean;
   events?: CalendarEvent[];
@@ -27,8 +28,22 @@ export const MonthCalendarWeekRow = (props: {
   setIsEventDragging?: (bool: boolean) => void;
   draggingEvent?: CalendarEvent | null;
   setDraggingEvent?: (event: CalendarEvent | null) => void;
+  cellLayoutsRef?: React.RefObject<
+    Map<
+      string,
+      {
+        pageX: number;
+        pageY: number;
+        width: number;
+        height: number;
+        date: Date;
+      }
+    >
+  >;
+  findDateFromPosition?: (x: number, y: number) => Date | null;
 }) => {
   const {
+    month,
     dates,
     isWeekdayHeader = false,
     events = [],
@@ -45,8 +60,10 @@ export const MonthCalendarWeekRow = (props: {
     weekRowMinHeight,
     todayCellTextStyle,
     setIsEventDragging,
-    draggingEvent,
+    // draggingEvent,
     setDraggingEvent,
+    cellLayoutsRef,
+    findDateFromPosition,
   } = props;
   const eventHeight = 26;
   const { width: screenWidth } = useWindowDimensions();
@@ -55,8 +72,6 @@ export const MonthCalendarWeekRow = (props: {
   if (weekId && eventPosition) {
     eventPosition.resetResource(weekId);
   }
-
-  console.log('draggingEvent', draggingEvent);
 
   return (
     <View style={styles.container}>
@@ -129,6 +144,7 @@ export const MonthCalendarWeekRow = (props: {
 
         return (
           <MonthCalendarCell
+            month={month}
             key={djs.format('YYYY-MM-DD')}
             isWeekdayHeader={isWeekdayHeader}
             djs={djs}
@@ -149,6 +165,8 @@ export const MonthCalendarWeekRow = (props: {
             onPressEvent={onPressEvent}
             setIsEventDragging={setIsEventDragging}
             setDraggingEvent={setDraggingEvent}
+            cellLayoutsRef={cellLayoutsRef}
+            findDateFromPosition={findDateFromPosition}
           />
         );
       })}

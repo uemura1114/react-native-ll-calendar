@@ -5,7 +5,7 @@ import {
   type TextStyle,
 } from 'react-native';
 import dayjs from 'dayjs';
-import { useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import type {
   CalendarEvent,
   WeekdayNum,
@@ -56,7 +56,8 @@ export const MonthCalendar = (props: {
     monthFormat,
   } = props;
   const [dateState] = useState(defaultDate);
-  const [_activeIndex, setActiveIndex] = useState(HALF_PANEL_LENGTH);
+  const activeIndex = useRef(HALF_PANEL_LENGTH);
+
   const [draggingEvent, setDraggingEvent] = useState<CalendarEvent | null>(
     null
   );
@@ -76,13 +77,51 @@ export const MonthCalendar = (props: {
       return startOfDefaultDateDjs.add(i + 1, 'month').format('YYYY-MM');
     }
   );
-  const panels: string[] = [
-    ...prevPanels,
-    startOfDefaultDateDjs.format('YYYY-MM'),
-    ...nextPanels,
-  ];
+  const panels: string[] = useMemo(() => {
+    return [
+      ...prevPanels,
+      startOfDefaultDateDjs.format('YYYY-MM'),
+      ...nextPanels,
+    ];
+  }, [nextPanels, prevPanels, startOfDefaultDateDjs]);
 
   const { width } = useWindowDimensions();
+
+  const scrollOffsetX = useRef(0);
+  const scrollOffsetYs = useRef<Map<string, number>>(new Map());
+  const cellLayoutsRef = useRef<
+    Map<
+      string,
+      {
+        pageX: number;
+        pageY: number;
+        width: number;
+        height: number;
+        date: Date;
+      }
+    >
+  >(new Map());
+
+  const findDateFromPosition = useCallback(
+    (x: number, y: number): Date | null => {
+      const activePanel = panels[activeIndex.current];
+      const scrollOffsetY = activePanel
+        ? (scrollOffsetYs.current.get(activePanel) ?? 0)
+        : 0;
+      for (const [_, layout] of cellLayoutsRef.current.entries()) {
+        if (
+          x >= layout.pageX - scrollOffsetX.current &&
+          x <= layout.pageX - scrollOffsetX.current + layout.width &&
+          y >= layout.pageY - scrollOffsetY &&
+          y <= layout.pageY + layout.height - scrollOffsetY
+        ) {
+          return layout.date;
+        }
+      }
+      return null;
+    },
+    [panels]
+  );
 
   return (
     <FlatList
@@ -103,7 +142,7 @@ export const MonthCalendar = (props: {
           const newDate = new Date(month);
           onChangeDate?.(newDate);
         }
-        setActiveIndex(newIndex);
+        activeIndex.current = newIndex;
       }}
       initialScrollIndex={HALF_PANEL_LENGTH}
       decelerationRate={'fast'}
@@ -131,6 +170,9 @@ export const MonthCalendar = (props: {
             monthFormat={monthFormat}
             draggingEvent={draggingEvent}
             setDraggingEvent={setDraggingEvent}
+            cellLayoutsRef={cellLayoutsRef}
+            findDateFromPosition={findDateFromPosition}
+            scrollOffsetYs={scrollOffsetYs}
           />
         );
       }}
@@ -140,6 +182,9 @@ export const MonthCalendar = (props: {
       initialNumToRender={5}
       maxToRenderPerBatch={5}
       removeClippedSubviews={false}
+      onScroll={(e) => {
+        scrollOffsetX.current = e.nativeEvent.contentOffset.x;
+      }}
     />
   );
 };

@@ -43,6 +43,20 @@ export const MonthCalendarViewItem = (props: {
   monthFormat?: string;
   draggingEvent: CalendarEvent | null;
   setDraggingEvent: (event: CalendarEvent | null) => void;
+  cellLayoutsRef: React.RefObject<
+    Map<
+      string,
+      {
+        pageX: number;
+        pageY: number;
+        width: number;
+        height: number;
+        date: Date;
+      }
+    >
+  >;
+  findDateFromPosition: (x: number, y: number) => Date | null;
+  scrollOffsetYs: React.RefObject<Map<string, number>>;
 }) => {
   const {
     month,
@@ -65,7 +79,11 @@ export const MonthCalendarViewItem = (props: {
     monthFormat = 'YYYY/MM',
     draggingEvent,
     setDraggingEvent,
+    cellLayoutsRef,
+    findDateFromPosition,
+    scrollOffsetYs,
   } = props;
+
   const { width } = useWindowDimensions();
   const eventPosition = new MonthCalendarEventPosition();
   const date = new Date(month);
@@ -112,6 +130,9 @@ export const MonthCalendarViewItem = (props: {
         <RefreshControl refreshing={!!refreshing} onRefresh={onRefresh} />
       }
       onLayout={onLayoutBody}
+      onScroll={(e) => {
+        scrollOffsetYs.current.set(month, e.nativeEvent.contentOffset.y);
+      }}
     >
       {hiddenMonth ? (
         <View style={styles.blankMonthContainer} />
@@ -122,6 +143,7 @@ export const MonthCalendarViewItem = (props: {
       )}
       <View onLayout={onLayoutWeekdayRow}>
         <MonthCalendarWeekRow
+          month={month}
           dates={weeks[0] ?? []}
           isWeekdayHeader={true}
           locale={locale}
@@ -140,6 +162,7 @@ export const MonthCalendarViewItem = (props: {
           return (
             <MonthCalendarWeekRow
               key={`row-${index}`}
+              month={month}
               dates={week}
               events={weekEvents}
               eventPosition={eventPosition}
@@ -153,6 +176,8 @@ export const MonthCalendarViewItem = (props: {
               todayCellTextStyle={todayCellTextStyle}
               draggingEvent={draggingEvent}
               setDraggingEvent={setDraggingEvent}
+              cellLayoutsRef={cellLayoutsRef}
+              findDateFromPosition={findDateFromPosition}
             />
           );
         })}

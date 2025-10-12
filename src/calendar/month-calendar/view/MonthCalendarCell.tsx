@@ -11,8 +11,10 @@ import type { CalendarEvent, WeekdayNum } from '../../../types/month-calendar';
 import dayjs from 'dayjs';
 import { CELL_BORDER_WIDTH, EVENT_GAP } from '../../../constants/size';
 import { MonthCalendarEvent } from './MonthCalendarEvent';
+import { useRef } from 'react';
 
 export const MonthCalendarCell = (props: {
+  month: string;
   isWeekdayHeader: boolean;
   djs: Dayjs;
   weekRowMinHeight?: number;
@@ -32,8 +34,22 @@ export const MonthCalendarCell = (props: {
   onPressEvent?: (event: CalendarEvent) => void;
   setIsEventDragging?: (bool: boolean) => void;
   setDraggingEvent?: (event: CalendarEvent | null) => void;
+  cellLayoutsRef?: React.RefObject<
+    Map<
+      string,
+      {
+        pageX: number;
+        pageY: number;
+        width: number;
+        height: number;
+        date: Date;
+      }
+    >
+  >;
+  findDateFromPosition?: (x: number, y: number) => Date | null;
 }) => {
   const {
+    month,
     isWeekdayHeader,
     djs,
     weekRowMinHeight,
@@ -53,9 +69,33 @@ export const MonthCalendarCell = (props: {
     onPressEvent,
     setIsEventDragging,
     setDraggingEvent,
+    cellLayoutsRef,
+    findDateFromPosition,
   } = props;
+
+  const cellRef = useRef<any>(null);
+
   return (
     <TouchableOpacity
+      ref={(ref) => {
+        cellRef.current = ref;
+      }}
+      onLayout={() => {
+        const ref = cellRef.current;
+        const dateKey = `${month}-${djs.format('YYYY-MM-DD')}`;
+
+        ref?.measureInWindow(
+          (pageX: any, pageY: any, width: any, height: any) => {
+            cellLayoutsRef?.current.set(dateKey, {
+              pageX,
+              pageY,
+              width,
+              height,
+              date: djs.toDate(),
+            });
+          }
+        );
+      }}
       key={isWeekdayHeader ? djs.get('d') : djs.get('date')}
       style={[
         styles.dayCellCountainer,
@@ -133,6 +173,7 @@ export const MonthCalendarCell = (props: {
               onPressEvent={onPressEvent}
               setIsEventDragging={setIsEventDragging}
               setDraggingEvent={setDraggingEvent}
+              findDateFromPosition={findDateFromPosition}
             />
           );
         })}

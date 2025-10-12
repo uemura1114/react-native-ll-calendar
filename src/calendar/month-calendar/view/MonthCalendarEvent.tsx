@@ -13,6 +13,7 @@ export const MonthCalendarEvent = (props: {
   onPressEvent?: (event: CalendarEvent) => void;
   setIsEventDragging?: (bool: boolean) => void;
   setDraggingEvent?: (event: CalendarEvent | null) => void;
+  findDateFromPosition?: (x: number, y: number) => Date | null;
 }) => {
   const {
     event,
@@ -23,6 +24,7 @@ export const MonthCalendarEvent = (props: {
     onPressEvent,
     setIsEventDragging,
     setDraggingEvent,
+    findDateFromPosition,
   } = props;
 
   const touchStartTime = useRef(0);
@@ -35,7 +37,10 @@ export const MonthCalendarEvent = (props: {
         touchStartTime.current = Date.now();
         setIsEventDragging?.(true);
         setDraggingEvent?.(event);
-        console.log(evt.nativeEvent.locationX, evt.nativeEvent.locationY);
+        console.log(
+          'start date',
+          findDateFromPosition?.(evt.nativeEvent.pageX, evt.nativeEvent.pageY)
+        );
       },
 
       onPanResponderMove: (_evt, gestureState) => {
