@@ -1,12 +1,12 @@
 import dayjs from 'dayjs';
 import en from 'dayjs/locale/en';
 import { StyleSheet, useWindowDimensions } from 'react-native';
-import { Text, TouchableOpacity, View, type ViewStyle } from 'react-native';
+import { View, type ViewStyle } from 'react-native';
 import type { CalendarEvent, WeekdayNum } from '../../../types/month-calendar';
 import type MonthCalendarEventPosition from '../../../utils/month-calendar-event-position';
-import { CELL_BORDER_WIDTH, EVENT_GAP } from '../../../constants/size';
+import { CELL_BORDER_WIDTH } from '../../../constants/size';
 import type { TextStyle } from 'react-native';
-import { MonthCalendarEvent } from './MonthCalendarEvent';
+import { MonthCalendarCell } from './MonthCalendarCell';
 
 export const MonthCalendarWeekRow = (props: {
   dates: dayjs.Dayjs[];
@@ -30,7 +30,7 @@ export const MonthCalendarWeekRow = (props: {
 }) => {
   const {
     dates,
-    isWeekdayHeader,
+    isWeekdayHeader = false,
     events = [],
     eventPosition,
     onPressEvent,
@@ -106,99 +106,30 @@ export const MonthCalendarWeekRow = (props: {
           }
         }
         return (
-          <TouchableOpacity
-            key={isWeekdayHeader ? djs.get('d') : djs.get('date')}
-            style={[
-              styles.dayCellCountainer,
-              { minHeight: isWeekdayHeader ? undefined : weekRowMinHeight },
-              { zIndex: 7 - dateIndex },
-            ]}
-            onPress={() => {
-              onPressCell?.(djs.toDate());
-            }}
-            onLongPress={() => {
-              onLongPressCell?.(djs.toDate());
-            }}
+          <MonthCalendarCell
+            key={djs.format('YYYY-MM-DD')}
+            isWeekdayHeader={isWeekdayHeader}
+            djs={djs}
+            weekRowMinHeight={weekRowMinHeight}
+            dateIndex={dateIndex}
+            onPressCell={onPressCell}
+            onLongPressCell={onLongPressCell}
             delayLongPress={delayLongPress}
-          >
-            <View
-              style={[
-                styles.dayCellInner,
-                isWeekdayHeader
-                  ? weekdayCellContainerStyle?.(djs.day())
-                  : dayCellContainerStyle?.(djs.toDate()),
-              ]}
-            />
-            <View style={styles.dayCellLabel}>
-              <Text
-                style={[
-                  styles.dayCellText,
-                  isWeekdayHeader
-                    ? weekdayCellTextStyle?.(djs.day())
-                    : dayCellTextStyle?.(djs.toDate()),
-                  !isWeekdayHeader && dayjs(djs).isSame(dayjs(), 'day')
-                    ? todayCellTextStyle
-                    : {},
-                ]}
-              >
-                {text}
-              </Text>
-            </View>
-            <View style={styles.eventsWrapper}>
-              {rows.map((eventRow, rowIndex) => {
-                if (typeof eventRow === 'number') {
-                  return (
-                    <View
-                      key={eventRow}
-                      style={{ height: eventHeight, marginBottom: EVENT_GAP }}
-                    />
-                  );
-                }
-
-                const rawStartDjs = dayjs(eventRow.start);
-                const startDjs = dateIndex === 0 ? djs : dayjs(eventRow.start);
-                const endDjs = dayjs(eventRow.end);
-                const diffDays = endDjs
-                  .startOf('day')
-                  .diff(startDjs.startOf('day'), 'day');
-                const isPrevDateEvent =
-                  dateIndex === 0 && rawStartDjs.isBefore(djs);
-                let width =
-                  (diffDays + 1) * dateColumnWidth -
-                  EVENT_GAP * 2 -
-                  CELL_BORDER_WIDTH * 2;
-
-                if (isPrevDateEvent) {
-                  width += EVENT_GAP + 1;
-                }
-
-                const isLast = rowIndex === rows.length - 1;
-
-                if (eventPosition && weekId) {
-                  eventPosition.push({
-                    weekId,
-                    startDate: startDjs.toDate(),
-                    days: diffDays + 1,
-                    rowNum: rowIndex + 1,
-                  });
-                }
-
-                return (
-                  <MonthCalendarEvent
-                    key={eventRow.id}
-                    event={eventRow}
-                    width={width}
-                    height={eventHeight}
-                    isPrevDateEvent={isPrevDateEvent}
-                    isLastEvent={isLast}
-                    onPressEvent={onPressEvent}
-                    setIsEventDragging={setIsEventDragging}
-                    setDraggingEvent={setDraggingEvent}
-                  />
-                );
-              })}
-            </View>
-          </TouchableOpacity>
+            dayCellContainerStyle={dayCellContainerStyle}
+            dayCellTextStyle={dayCellTextStyle}
+            weekdayCellContainerStyle={weekdayCellContainerStyle}
+            weekdayCellTextStyle={weekdayCellTextStyle}
+            todayCellTextStyle={todayCellTextStyle}
+            cellText={text}
+            events={rows}
+            eventHeight={eventHeight}
+            dateColumnWidth={dateColumnWidth}
+            eventPosition={eventPosition}
+            weekId={weekId}
+            onPressEvent={onPressEvent}
+            setIsEventDragging={setIsEventDragging}
+            setDraggingEvent={setDraggingEvent}
+          />
         );
       })}
     </View>
