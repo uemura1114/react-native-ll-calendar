@@ -6615,6 +6615,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"expo-haptics@npm:~15.0.7":
+  version: 15.0.7
+  resolution: "expo-haptics@npm:15.0.7"
+  peerDependencies:
+    expo: "*"
+  checksum: 559cef2251b8e39401f99fc56a869372bf09d0111e97c82b59b4c8ef9f9a68bd95e88fd1e5b6a9ed586b7b694fbdca765fc2c1afd1138aa7eb6d7a394dff3b74
+  languageName: node
+  linkType: hard
+
 "expo-keep-awake@npm:~15.0.7":
   version: 15.0.7
   resolution: "expo-keep-awake@npm:15.0.7"
@@ -11256,6 +11265,7 @@ __metadata:
   dependencies:
     "@expo/metro-runtime": ~6.1.2
     expo: ^54.0.13
+    expo-haptics: ~15.0.7
     expo-status-bar: ~3.0.8
     react: 19.1.0
     react-dom: 19.1.0

@@ -16,11 +16,16 @@ import type {
   WeekStartsOn,
 } from '../../../types/month-calendar';
 import MonthCalendarEventPosition from '../../../utils/month-calendar-event-position';
-import { monthlyEndDate, monthlyStartDate } from '../../../utils/functions';
+import {
+  getWeekIds,
+  monthlyEndDate,
+  monthlyStartDate,
+} from '../../../utils/functions';
 import { useEvents } from '../logic/useEvents';
 import { CELL_BORDER_WIDTH } from '../../../constants/size';
 import { RefreshControl } from 'react-native';
 import { useCallback, useMemo, useState } from 'react';
+import { MonthCalendarDraggingEvent } from './MonthCalendarDraggingEvent';
 
 export const MonthCalendarViewItem = (props: {
   month: string;
@@ -41,6 +46,36 @@ export const MonthCalendarViewItem = (props: {
   todayCellTextStyle?: TextStyle;
   hiddenMonth?: boolean;
   monthFormat?: string;
+  draggingEvent: CalendarEvent | null;
+  setDraggingEvent: (event: CalendarEvent | null) => void;
+  cellLayoutsRef: React.RefObject<
+    Map<
+      string,
+      {
+        pageX: number;
+        pageY: number;
+        width: number;
+        height: number;
+        date: Date;
+      }
+    >
+  >;
+  findDateFromPosition: (x: number, y: number) => Date | null;
+  scrollOffsetYsRef: React.RefObject<Map<string, number>>;
+  findPositionFromDate: (
+    date: Date,
+    month: string
+  ) => {
+    x: number;
+    y: number;
+  } | null;
+  weekdayTextHeightsRef: React.RefObject<Map<string, number>>;
+  calendarContainerRef: React.RefObject<any>;
+  onEventDragStart?: (event: CalendarEvent) => void;
+  onEventDrop?: (args: { event: CalendarEvent; newStartDate: Date }) => void;
+  layoutKey: number;
+  updateLayoutKey: () => void;
+  onEventDragOver?: (date: Date) => void;
 }) => {
   const {
     month,
@@ -61,7 +96,21 @@ export const MonthCalendarViewItem = (props: {
     todayCellTextStyle,
     hiddenMonth,
     monthFormat = 'YYYY/MM',
+    draggingEvent,
+    setDraggingEvent,
+    cellLayoutsRef,
+    findDateFromPosition,
+    scrollOffsetYsRef,
+    findPositionFromDate,
+    weekdayTextHeightsRef,
+    calendarContainerRef,
+    onEventDragStart,
+    onEventDrop,
+    layoutKey,
+    updateLayoutKey,
+    onEventDragOver,
   } = props;
+
   const { width } = useWindowDimensions();
   const eventPosition = new MonthCalendarEventPosition();
   const date = new Date(month);
@@ -79,7 +128,10 @@ export const MonthCalendarViewItem = (props: {
     currentDate = currentDate.add(7, 'day');
   }
 
-  const { eventsGroupByWeekId } = useEvents({ events, weekStartsOn });
+  const { eventsGroupByWeekId } = useEvents({
+    events,
+    weekStartsOn,
+  });
 
   const [bodyHeight, setBodyHeight] = useState(0);
   const onLayoutBody = useCallback((e: LayoutChangeEvent) => {
@@ -100,13 +152,35 @@ export const MonthCalendarViewItem = (props: {
     return (bodyHeight - monthRowHeight - weekdayRowHeight) / weeks.length;
   }, [bodyHeight, monthRowHeight, weekdayRowHeight, weeks.length]);
 
+  const draggingEventWeekIds: string[] = useMemo(() => {
+    if (weekStartsOn === undefined || !draggingEvent) {
+      return [];
+    }
+    return getWeekIds({
+      start: draggingEvent.start,
+      end: draggingEvent.end,
+      weekStartsOn,
+    });
+  }, [draggingEvent, weekStartsOn]);
+
+  const eventHeight = 26;
+  const dateColumnWidth = width / 7;
+
   return (
     <ScrollView
+      scrollEnabled={draggingEvent === null}
       style={[styles.container, { width, zIndex: flatListIndex }]}
       refreshControl={
-        <RefreshControl refreshing={!!refreshing} onRefresh={onRefresh} />
+        <RefreshControl
+          refreshing={!!refreshing}
+          onRefresh={onRefresh}
+          enabled={draggingEvent === null}
+        />
       }
       onLayout={onLayoutBody}
+      onScroll={(e) => {
+        scrollOffsetYsRef.current.set(month, e.nativeEvent.contentOffset.y);
+      }}
     >
       {hiddenMonth ? (
         <View style={styles.blankMonthContainer} />
@@ -117,6 +191,7 @@ export const MonthCalendarViewItem = (props: {
       )}
       <View onLayout={onLayoutWeekdayRow}>
         <MonthCalendarWeekRow
+          month={month}
           dates={weeks[0] ?? []}
           isWeekdayHeader={true}
           locale={locale}
@@ -135,6 +210,7 @@ export const MonthCalendarViewItem = (props: {
           return (
             <MonthCalendarWeekRow
               key={`row-${index}`}
+              month={month}
               dates={week}
               events={weekEvents}
               eventPosition={eventPosition}
@@ -146,10 +222,62 @@ export const MonthCalendarViewItem = (props: {
               dayCellTextStyle={dayCellTextStyle}
               weekRowMinHeight={weekRowMinHeight}
               todayCellTextStyle={todayCellTextStyle}
+              draggingEvent={draggingEvent}
+              setDraggingEvent={setDraggingEvent}
+              cellLayoutsRef={cellLayoutsRef}
+              findDateFromPosition={findDateFromPosition}
+              eventHeight={eventHeight}
+              dateColumnWidth={dateColumnWidth}
+              weekdayTextHeightsRef={weekdayTextHeightsRef}
+              calendarContainerRef={calendarContainerRef}
+              onEventDragStart={onEventDragStart}
+              onEventDrop={onEventDrop}
+              layoutKey={layoutKey}
+              updateLayoutKey={updateLayoutKey}
+              onEventDragOver={onEventDragOver}
             />
           );
         })}
       </View>
+      {weeks.flatMap((week) => {
+        const weekId = week[0]?.format('YYYY-MM-DD');
+        const isRenderDraggingEventRow =
+          !!draggingEvent && !!weekId && draggingEventWeekIds.includes(weekId);
+
+        if (!isRenderDraggingEventRow) {
+          return null;
+        }
+
+        return week.map((d, index) => {
+          const djs = dayjs(d);
+          const isRenderDraggingEventCell =
+            (isRenderDraggingEventRow &&
+              draggingEvent &&
+              dayjs(draggingEvent.start).format('YYYY-MM-DD') ===
+                djs.format('YYYY-MM-DD')) ||
+            (isRenderDraggingEventRow &&
+              draggingEvent &&
+              index === 0 &&
+              dayjs(draggingEvent.start).isBefore(djs));
+
+          if (!isRenderDraggingEventCell) {
+            return null;
+          }
+
+          return (
+            <MonthCalendarDraggingEvent
+              key={`${month}-${djs.format('YYYY-MM-DD')}-${draggingEvent.id}`}
+              month={month}
+              date={d.toDate()}
+              event={draggingEvent}
+              height={eventHeight}
+              dateColumnWidth={dateColumnWidth}
+              dateIndex={index}
+              findPositionFromDate={findPositionFromDate}
+            />
+          );
+        });
+      })}
     </ScrollView>
   );
 };
