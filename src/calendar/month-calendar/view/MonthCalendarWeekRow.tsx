@@ -47,6 +47,8 @@ export const MonthCalendarWeekRow = (props: {
   calendarContainerRef?: React.RefObject<any>;
   onEventDragStart?: (event: CalendarEvent) => void;
   onEventDrop?: (args: { event: CalendarEvent; newStartDate: Date }) => void;
+  layoutKey?: number;
+  updateLayoutKey?: () => void;
 }) => {
   const {
     month,
@@ -76,6 +78,8 @@ export const MonthCalendarWeekRow = (props: {
     calendarContainerRef,
     onEventDragStart,
     onEventDrop,
+    layoutKey,
+    updateLayoutKey,
   } = props;
 
   const weekId = dates[0]?.format('YYYY-MM-DD');
@@ -182,6 +186,8 @@ export const MonthCalendarWeekRow = (props: {
             calendarContainerRef={calendarContainerRef}
             onEventDragStart={onEventDragStart}
             onEventDrop={onEventDrop}
+            layoutKey={layoutKey}
+            updateLayoutKey={updateLayoutKey}
           />
         );
       })}

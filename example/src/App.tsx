@@ -105,8 +105,7 @@ export default function App() {
     setSelectedDate(d);
   }, []);
 
-  const handleEventDragStart = useCallback((event: CalendarEvent) => {
-    console.log('handleEventDragStart', event);
+  const handleEventDragStart = useCallback((_event: CalendarEvent) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
   }, []);
 

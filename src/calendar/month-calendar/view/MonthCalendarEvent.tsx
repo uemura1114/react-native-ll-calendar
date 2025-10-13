@@ -19,6 +19,7 @@ export const MonthCalendarEvent = (props: {
   calendarContainerRef?: React.RefObject<any>;
   onEventDragStart?: (event: CalendarEvent) => void;
   onEventDrop?: (args: { event: CalendarEvent; newStartDate: Date }) => void;
+  updateLayoutKey?: () => void;
 }) => {
   const {
     event,
@@ -34,6 +35,7 @@ export const MonthCalendarEvent = (props: {
     calendarContainerRef,
     onEventDragStart,
     onEventDrop,
+    updateLayoutKey,
   } = props;
 
   const touchStartTime = useRef(0);
@@ -137,6 +139,7 @@ export const MonthCalendarEvent = (props: {
                 event: draggingEventRef.current,
                 newStartDate,
               });
+              updateLayoutKey?.();
             }
           }
         );

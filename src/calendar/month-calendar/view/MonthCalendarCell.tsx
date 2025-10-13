@@ -53,6 +53,8 @@ export const MonthCalendarCell = (props: {
   calendarContainerRef?: React.RefObject<any>;
   onEventDragStart?: (event: CalendarEvent) => void;
   onEventDrop?: (args: { event: CalendarEvent; newStartDate: Date }) => void;
+  layoutKey?: number;
+  updateLayoutKey?: () => void;
 }) => {
   const {
     month,
@@ -82,14 +84,22 @@ export const MonthCalendarCell = (props: {
     calendarContainerRef,
     onEventDragStart,
     onEventDrop,
+    layoutKey,
+    updateLayoutKey,
   } = props;
 
   const cellRef = useRef<any>(null);
 
   return (
     <TouchableOpacity
+      key={
+        isWeekdayHeader
+          ? djs.get('d')
+          : `${month}-${djs.format('YYYY-MM-DD')}-${layoutKey}`
+      }
       ref={cellRef}
       onLayout={() => {
+        console.log('fire onLayout', djs.format('YYYY-MM-DD'));
         if (calendarContainerRef?.current) {
           const dateKey = `${month}-${djs.format('YYYY-MM-DD')}`;
           const ref = cellRef.current;
@@ -107,7 +117,6 @@ export const MonthCalendarCell = (props: {
           );
         }
       }}
-      key={isWeekdayHeader ? djs.get('d') : djs.get('date')}
       style={[
         styles.dayCellCountainer,
         { minHeight: isWeekdayHeader ? undefined : weekRowMinHeight },
@@ -201,6 +210,7 @@ export const MonthCalendarCell = (props: {
               calendarContainerRef={calendarContainerRef}
               onEventDragStart={onEventDragStart}
               onEventDrop={onEventDrop}
+              updateLayoutKey={updateLayoutKey}
             />
           );
         })}

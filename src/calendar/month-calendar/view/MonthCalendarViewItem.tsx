@@ -73,6 +73,8 @@ export const MonthCalendarViewItem = (props: {
   calendarContainerRef: React.RefObject<any>;
   onEventDragStart?: (event: CalendarEvent) => void;
   onEventDrop?: (args: { event: CalendarEvent; newStartDate: Date }) => void;
+  layoutKey: number;
+  updateLayoutKey: () => void;
 }) => {
   const {
     month,
@@ -103,6 +105,8 @@ export const MonthCalendarViewItem = (props: {
     calendarContainerRef,
     onEventDragStart,
     onEventDrop,
+    layoutKey,
+    updateLayoutKey,
   } = props;
 
   const { width } = useWindowDimensions();
@@ -226,6 +230,8 @@ export const MonthCalendarViewItem = (props: {
               calendarContainerRef={calendarContainerRef}
               onEventDragStart={onEventDragStart}
               onEventDrop={onEventDrop}
+              layoutKey={layoutKey}
+              updateLayoutKey={updateLayoutKey}
             />
           );
         })}

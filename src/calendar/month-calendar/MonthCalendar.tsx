@@ -68,6 +68,7 @@ export const MonthCalendar = (props: {
   const [draggingEvent, setDraggingEvent] = useState<CalendarEvent | null>(
     null
   );
+  const [layoutKey, setLayoutKey] = useState(0);
   const defaultDateDjs = dayjs(dateState);
   const startOfDefaultDateDjs = defaultDateDjs.startOf('month');
   const prevPanels: string[] = Array.from(
@@ -158,6 +159,10 @@ export const MonthCalendar = (props: {
     []
   );
 
+  const updateLayoutKey = useCallback(() => {
+    setLayoutKey(layoutKey + 1);
+  }, [layoutKey]);
+
   return (
     <View
       style={styles.container}
@@ -224,6 +229,8 @@ export const MonthCalendar = (props: {
               calendarContainerRef={calendarContainerRef}
               onEventDragStart={onEventDragStart}
               onEventDrop={onEventDrop}
+              layoutKey={layoutKey}
+              updateLayoutKey={updateLayoutKey}
             />
           );
         }}
