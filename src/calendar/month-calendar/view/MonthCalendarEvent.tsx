@@ -20,6 +20,7 @@ export const MonthCalendarEvent = (props: {
   onEventDragStart?: (event: CalendarEvent) => void;
   onEventDrop?: (args: { event: CalendarEvent; newStartDate: Date }) => void;
   updateLayoutKey?: () => void;
+  onEventDragOver?: (date: Date) => void;
 }) => {
   const {
     event,
@@ -36,6 +37,7 @@ export const MonthCalendarEvent = (props: {
     onEventDragStart,
     onEventDrop,
     updateLayoutKey,
+    onEventDragOver,
   } = props;
 
   const touchStartTime = useRef(0);
@@ -108,6 +110,7 @@ export const MonthCalendarEvent = (props: {
                 start: newStart,
                 end: newEnd,
               });
+              onEventDragOver?.(overDate);
             }
             currentOverDate.current = overDate ?? null;
           }

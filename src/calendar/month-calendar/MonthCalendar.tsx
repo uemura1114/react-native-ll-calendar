@@ -39,6 +39,7 @@ export const MonthCalendar = (props: {
   monthFormat?: string;
   onEventDragStart?: (event: CalendarEvent) => void;
   onEventDrop?: (args: { event: CalendarEvent; newStartDate: Date }) => void;
+  onEventDragOver?: (date: Date) => void;
 }) => {
   const {
     defaultDate,
@@ -61,6 +62,7 @@ export const MonthCalendar = (props: {
     monthFormat,
     onEventDragStart,
     onEventDrop,
+    onEventDragOver,
   } = props;
   const [dateState] = useState(defaultDate);
   const activeIndex = useRef(HALF_PANEL_LENGTH);
@@ -231,6 +233,7 @@ export const MonthCalendar = (props: {
               onEventDrop={onEventDrop}
               layoutKey={layoutKey}
               updateLayoutKey={updateLayoutKey}
+              onEventDragOver={onEventDragOver}
             />
           );
         }}

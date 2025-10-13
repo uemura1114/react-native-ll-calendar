@@ -49,6 +49,7 @@ export const MonthCalendarWeekRow = (props: {
   onEventDrop?: (args: { event: CalendarEvent; newStartDate: Date }) => void;
   layoutKey?: number;
   updateLayoutKey?: () => void;
+  onEventDragOver?: (date: Date) => void;
 }) => {
   const {
     month,
@@ -80,6 +81,7 @@ export const MonthCalendarWeekRow = (props: {
     onEventDrop,
     layoutKey,
     updateLayoutKey,
+    onEventDragOver,
   } = props;
 
   const weekId = dates[0]?.format('YYYY-MM-DD');
@@ -188,6 +190,7 @@ export const MonthCalendarWeekRow = (props: {
             onEventDrop={onEventDrop}
             layoutKey={layoutKey}
             updateLayoutKey={updateLayoutKey}
+            onEventDragOver={onEventDragOver}
           />
         );
       })}

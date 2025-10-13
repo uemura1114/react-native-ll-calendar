@@ -55,6 +55,7 @@ export const MonthCalendarCell = (props: {
   onEventDrop?: (args: { event: CalendarEvent; newStartDate: Date }) => void;
   layoutKey?: number;
   updateLayoutKey?: () => void;
+  onEventDragOver?: (date: Date) => void;
 }) => {
   const {
     month,
@@ -86,6 +87,7 @@ export const MonthCalendarCell = (props: {
     onEventDrop,
     layoutKey,
     updateLayoutKey,
+    onEventDragOver,
   } = props;
 
   const cellRef = useRef<any>(null);
@@ -211,6 +213,7 @@ export const MonthCalendarCell = (props: {
               onEventDragStart={onEventDragStart}
               onEventDrop={onEventDrop}
               updateLayoutKey={updateLayoutKey}
+              onEventDragOver={onEventDragOver}
             />
           );
         })}

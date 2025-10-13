@@ -125,6 +125,10 @@ export default function App() {
     []
   );
 
+  const handleEventDragOver = useCallback((_date: Date) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+  }, []);
+
   return (
     <View style={styles.container}>
       <MonthCalendar
@@ -148,6 +152,7 @@ export default function App() {
         monthFormat={'YYYY/MM'}
         onEventDragStart={handleEventDragStart}
         onEventDrop={handleEventDrop}
+        onEventDragOver={handleEventDragOver}
       />
     </View>
   );
