@@ -14,6 +14,7 @@ import type {
   WeekStartsOn,
 } from '../../types/month-calendar';
 import { MonthCalendarViewItem } from './view/MonthCalendarViewItem';
+import { Platform } from 'react-native';
 
 const HALF_PANEL_LENGTH = 120; // 10 years
 
@@ -118,8 +119,15 @@ export const MonthCalendar = (props: {
         if (
           x >= layout.pageX - scrollOffsetXRef.current &&
           x <= layout.pageX - scrollOffsetXRef.current + layout.width &&
-          y >= layout.pageY - scrollOffsetY &&
-          y <= layout.pageY + layout.height - scrollOffsetY
+          y >=
+            layout.pageY -
+              scrollOffsetY +
+              (Platform.OS === 'android' ? calendarContainerYRef.current : 0) &&
+          y <=
+            layout.pageY +
+              layout.height -
+              scrollOffsetY +
+              (Platform.OS === 'android' ? calendarContainerYRef.current : 0)
         ) {
           return layout.date;
         }
