@@ -17,6 +17,8 @@ export const MonthCalendarEvent = (props: {
   setDraggingEvent?: (event: CalendarEvent | null) => void;
   findDateFromPosition?: (x: number, y: number) => Date | null;
   calendarContainerRef?: React.RefObject<any>;
+  onEventDragStart?: (event: CalendarEvent) => void;
+  onEventDrop?: (args: { event: CalendarEvent; newStartDate: Date }) => void;
 }) => {
   const {
     event,
@@ -30,12 +32,15 @@ export const MonthCalendarEvent = (props: {
     setDraggingEvent,
     findDateFromPosition,
     calendarContainerRef,
+    onEventDragStart,
+    onEventDrop,
   } = props;
 
   const touchStartTime = useRef(0);
   const dragStartDate = useRef<Date | null>(null);
   const currentOverDate = useRef<Date | null>(null);
   const isDragging = useRef(false);
+  const draggingEventRef = useRef<CalendarEvent | null>(null);
   const dragStartTimer = useRef<NodeJS.Timeout | null>(null);
 
   const panResponder = useRef(
@@ -57,7 +62,9 @@ export const MonthCalendarEvent = (props: {
                 findDateFromPosition?.(relativeX, relativeY) ?? null;
               currentOverDate.current = dragStartDate.current;
               isDragging.current = true;
+              draggingEventRef.current = event;
 
+              onEventDragStart?.(event);
               setDraggingEvent?.(event);
               setIsEventDragging?.(true);
             }, 500);
@@ -111,9 +118,31 @@ export const MonthCalendarEvent = (props: {
           dragStartTimer.current = null;
         }
 
+        calendarContainerRef?.current?.measureInWindow(
+          (containerX: number, containerY: number) => {
+            const overX = evt.nativeEvent.pageX;
+            const overY = evt.nativeEvent.pageY;
+
+            const relativeX = overX - containerX;
+            const relativeY = overY - containerY;
+
+            const overDate = findDateFromPosition?.(relativeX, relativeY);
+            const diff = dayjs(overDate).diff(
+              dayjs(dragStartDate.current),
+              'day'
+            );
+            const newStartDate = dayjs(event.start).add(diff, 'days').toDate();
+            if (overDate && draggingEventRef.current) {
+              onEventDrop?.({
+                event: draggingEventRef.current,
+                newStartDate,
+              });
+            }
+          }
+        );
+
         setIsEventDragging?.(false);
         setDraggingEvent?.(null);
-        console.log(evt.nativeEvent.locationX, evt.nativeEvent.locationY);
 
         const touchDuration = Date.now() - touchStartTime.current;
         const moveDistance = Math.sqrt(
@@ -127,6 +156,7 @@ export const MonthCalendarEvent = (props: {
         isDragging.current = false;
         dragStartDate.current = null;
         currentOverDate.current = null;
+        draggingEventRef.current = null;
       },
     })
   ).current;

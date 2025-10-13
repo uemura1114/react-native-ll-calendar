@@ -37,6 +37,8 @@ export const MonthCalendar = (props: {
   todayCellTextStyle?: TextStyle;
   hiddenMonth?: boolean;
   monthFormat?: string;
+  onEventDragStart?: (event: CalendarEvent) => void;
+  onEventDrop?: (args: { event: CalendarEvent; newStartDate: Date }) => void;
 }) => {
   const {
     defaultDate,
@@ -57,6 +59,8 @@ export const MonthCalendar = (props: {
     todayCellTextStyle,
     hiddenMonth,
     monthFormat,
+    onEventDragStart,
+    onEventDrop,
   } = props;
   const [dateState] = useState(defaultDate);
   const activeIndex = useRef(HALF_PANEL_LENGTH);
@@ -218,6 +222,8 @@ export const MonthCalendar = (props: {
               findPositionFromDate={findPositionFromDate}
               weekdayTextHeightsRef={weekdayTextHeightsRef}
               calendarContainerRef={calendarContainerRef}
+              onEventDragStart={onEventDragStart}
+              onEventDrop={onEventDrop}
             />
           );
         }}

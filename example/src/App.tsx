@@ -449,6 +449,19 @@ export default function App() {
     setSelectedDate(d);
   }, []);
 
+  const handleEventDragStart = useCallback((event: CalendarEvent) => {
+    console.log('handleEventDragStart', event);
+  }, []);
+
+  const handleEventDrop = useCallback(
+    (args: { event: CalendarEvent; newStartDate: Date }) => {
+      const { event, newStartDate } = args;
+      console.log('event', event);
+      console.log('newStartDate', newStartDate);
+    },
+    []
+  );
+
   return (
     <View style={styles.container}>
       <MonthCalendar
@@ -470,6 +483,8 @@ export default function App() {
         todayCellTextStyle={todayCellTextStyle}
         hiddenMonth={false}
         monthFormat={'YYYY/MM'}
+        onEventDragStart={handleEventDragStart}
+        onEventDrop={handleEventDrop}
       />
     </View>
   );

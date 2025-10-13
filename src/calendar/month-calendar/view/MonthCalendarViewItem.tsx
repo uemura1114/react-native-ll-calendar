@@ -71,6 +71,8 @@ export const MonthCalendarViewItem = (props: {
   } | null;
   weekdayTextHeightsRef: React.RefObject<Map<string, number>>;
   calendarContainerRef: React.RefObject<any>;
+  onEventDragStart?: (event: CalendarEvent) => void;
+  onEventDrop?: (args: { event: CalendarEvent; newStartDate: Date }) => void;
 }) => {
   const {
     month,
@@ -99,6 +101,8 @@ export const MonthCalendarViewItem = (props: {
     findPositionFromDate,
     weekdayTextHeightsRef,
     calendarContainerRef,
+    onEventDragStart,
+    onEventDrop,
   } = props;
 
   const { width } = useWindowDimensions();
@@ -220,6 +224,8 @@ export const MonthCalendarViewItem = (props: {
               dateColumnWidth={dateColumnWidth}
               weekdayTextHeightsRef={weekdayTextHeightsRef}
               calendarContainerRef={calendarContainerRef}
+              onEventDragStart={onEventDragStart}
+              onEventDrop={onEventDrop}
             />
           );
         })}

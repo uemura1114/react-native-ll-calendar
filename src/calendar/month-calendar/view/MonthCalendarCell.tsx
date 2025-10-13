@@ -51,6 +51,8 @@ export const MonthCalendarCell = (props: {
   isRenderDraggingEventRow?: boolean;
   weekdayTextHeightsRef?: React.RefObject<Map<string, number>>;
   calendarContainerRef?: React.RefObject<any>;
+  onEventDragStart?: (event: CalendarEvent) => void;
+  onEventDrop?: (args: { event: CalendarEvent; newStartDate: Date }) => void;
 }) => {
   const {
     month,
@@ -78,6 +80,8 @@ export const MonthCalendarCell = (props: {
     findDateFromPosition,
     weekdayTextHeightsRef,
     calendarContainerRef,
+    onEventDragStart,
+    onEventDrop,
   } = props;
 
   const cellRef = useRef<any>(null);
@@ -195,6 +199,8 @@ export const MonthCalendarCell = (props: {
               setDraggingEvent={setDraggingEvent}
               findDateFromPosition={findDateFromPosition}
               calendarContainerRef={calendarContainerRef}
+              onEventDragStart={onEventDragStart}
+              onEventDrop={onEventDrop}
             />
           );
         })}

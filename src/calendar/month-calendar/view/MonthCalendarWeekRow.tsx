@@ -45,6 +45,8 @@ export const MonthCalendarWeekRow = (props: {
   dateColumnWidth?: number;
   weekdayTextHeightsRef?: React.RefObject<Map<string, number>>;
   calendarContainerRef?: React.RefObject<any>;
+  onEventDragStart?: (event: CalendarEvent) => void;
+  onEventDrop?: (args: { event: CalendarEvent; newStartDate: Date }) => void;
 }) => {
   const {
     month,
@@ -72,6 +74,8 @@ export const MonthCalendarWeekRow = (props: {
     dateColumnWidth = 0,
     weekdayTextHeightsRef,
     calendarContainerRef,
+    onEventDragStart,
+    onEventDrop,
   } = props;
 
   const weekId = dates[0]?.format('YYYY-MM-DD');
@@ -176,6 +180,8 @@ export const MonthCalendarWeekRow = (props: {
             findDateFromPosition={findDateFromPosition}
             weekdayTextHeightsRef={weekdayTextHeightsRef}
             calendarContainerRef={calendarContainerRef}
+            onEventDragStart={onEventDragStart}
+            onEventDrop={onEventDrop}
           />
         );
       })}
