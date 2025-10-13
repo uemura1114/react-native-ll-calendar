@@ -65,7 +65,15 @@ export const MonthCalendarEvent = (props: {
         );
       },
 
-      onPanResponderMove: (evt) => {
+      onPanResponderMove: (evt, gestureState) => {
+        const dx = gestureState.dx;
+        const dy = gestureState.dy;
+        const move = Math.sqrt(dx ** 2 + dy ** 2);
+        if (dragStartTimer.current && move > 1) {
+          clearTimeout(dragStartTimer.current);
+          dragStartTimer.current = null;
+        }
+
         if (!isDragging.current) {
           return;
         }

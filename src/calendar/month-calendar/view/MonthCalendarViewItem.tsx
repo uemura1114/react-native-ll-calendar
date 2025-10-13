@@ -161,7 +161,11 @@ export const MonthCalendarViewItem = (props: {
       scrollEnabled={draggingEvent === null}
       style={[styles.container, { width, zIndex: flatListIndex }]}
       refreshControl={
-        <RefreshControl refreshing={!!refreshing} onRefresh={onRefresh} />
+        <RefreshControl
+          refreshing={!!refreshing}
+          onRefresh={onRefresh}
+          enabled={draggingEvent === null}
+        />
       }
       onLayout={onLayoutBody}
       onScroll={(e) => {
