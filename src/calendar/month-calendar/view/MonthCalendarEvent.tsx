@@ -35,6 +35,8 @@ export const MonthCalendarEvent = (props: {
   const touchStartTime = useRef(0);
   const dragStartDate = useRef<Date | null>(null);
   const currentOverDate = useRef<Date | null>(null);
+  const isDragging = useRef(false);
+  const dragStartTimer = useRef<NodeJS.Timeout | null>(null);
 
   const panResponder = useRef(
     PanResponder.create({
@@ -42,8 +44,6 @@ export const MonthCalendarEvent = (props: {
 
       onPanResponderGrant: (evt, _gestureState) => {
         touchStartTime.current = Date.now();
-        setIsEventDragging?.(true);
-        setDraggingEvent?.(event);
 
         calendarContainerRef?.current?.measureInWindow(
           (containerX: number, containerY: number) => {
@@ -52,14 +52,24 @@ export const MonthCalendarEvent = (props: {
 
             const relativeX = tapX - containerX;
             const relativeY = tapY - containerY;
+            dragStartTimer.current = setTimeout(() => {
+              dragStartDate.current =
+                findDateFromPosition?.(relativeX, relativeY) ?? null;
+              currentOverDate.current = dragStartDate.current;
+              isDragging.current = true;
 
-            dragStartDate.current =
-              findDateFromPosition?.(relativeX, relativeY) ?? null;
+              setDraggingEvent?.(event);
+              setIsEventDragging?.(true);
+            }, 500);
           }
         );
       },
 
       onPanResponderMove: (evt) => {
+        if (!isDragging.current) {
+          return;
+        }
+
         calendarContainerRef?.current?.measureInWindow(
           (containerX: number, containerY: number) => {
             const overX = evt.nativeEvent.pageX;
@@ -88,6 +98,11 @@ export const MonthCalendarEvent = (props: {
       },
 
       onPanResponderRelease: (evt, gestureState) => {
+        if (dragStartTimer.current) {
+          clearTimeout(dragStartTimer.current);
+          dragStartTimer.current = null;
+        }
+
         setIsEventDragging?.(false);
         setDraggingEvent?.(null);
         console.log(evt.nativeEvent.locationX, evt.nativeEvent.locationY);
@@ -100,6 +115,10 @@ export const MonthCalendarEvent = (props: {
         if (touchDuration < 200 && moveDistance < 10) {
           onPressEvent?.(event);
         }
+        touchStartTime.current = 0;
+        isDragging.current = false;
+        dragStartDate.current = null;
+        currentOverDate.current = null;
       },
     })
   ).current;
