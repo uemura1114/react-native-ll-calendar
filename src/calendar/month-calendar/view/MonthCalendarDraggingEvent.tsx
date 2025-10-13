@@ -4,6 +4,8 @@ import { CELL_BORDER_WIDTH, EVENT_GAP } from '../../../constants/size';
 import { View } from 'react-native';
 import dayjs from 'dayjs';
 
+const EXPANSION_SIZE = 2;
+
 export const MonthCalendarDraggingEvent = (props: {
   month: string;
   date: Date;
@@ -55,8 +57,8 @@ export const MonthCalendarDraggingEvent = (props: {
         {
           backgroundColor: event.backgroundColor,
           borderColor: event.borderColor,
-          width: width,
-          height: height,
+          width: width + EXPANSION_SIZE * 2,
+          height: height + EXPANSION_SIZE * 2,
         },
         isPrevDateEvent ? styles.prevDateEvent : {},
       ]}
@@ -79,11 +81,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
     flexDirection: 'row',
     alignItems: 'center',
-    boxShadow: '0 0 2px 0 rgba(0, 0, 0, 0.1)',
-    marginTop: EVENT_GAP,
-    marginLeft: EVENT_GAP,
+    marginTop: EVENT_GAP - EXPANSION_SIZE,
+    marginLeft: EVENT_GAP - EXPANSION_SIZE,
     position: 'absolute',
     zIndex: 999,
+    // for iOS shadow
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    // for Android shadow
+    elevation: 8,
   },
   prevDateEvent: {
     marginLeft: -1,
