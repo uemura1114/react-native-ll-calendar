@@ -16,11 +16,16 @@ import type {
   WeekStartsOn,
 } from '../../../types/month-calendar';
 import MonthCalendarEventPosition from '../../../utils/month-calendar-event-position';
-import { monthlyEndDate, monthlyStartDate } from '../../../utils/functions';
+import {
+  getWeekIds,
+  monthlyEndDate,
+  monthlyStartDate,
+} from '../../../utils/functions';
 import { useEvents } from '../logic/useEvents';
 import { CELL_BORDER_WIDTH } from '../../../constants/size';
 import { RefreshControl } from 'react-native';
 import { useCallback, useMemo, useState } from 'react';
+import { MonthCalendarDraggingEvent } from './MonthCalendarDraggingEvent';
 
 export const MonthCalendarViewItem = (props: {
   month: string;
@@ -56,7 +61,16 @@ export const MonthCalendarViewItem = (props: {
     >
   >;
   findDateFromPosition: (x: number, y: number) => Date | null;
-  scrollOffsetYs: React.RefObject<Map<string, number>>;
+  scrollOffsetYsRef: React.RefObject<Map<string, number>>;
+  findPositionFromDate: (
+    date: Date,
+    month: string
+  ) => {
+    x: number;
+    y: number;
+  } | null;
+  weekdayTextHeightsRef: React.RefObject<Map<string, number>>;
+  calendarContainerRef: React.RefObject<any>;
 }) => {
   const {
     month,
@@ -81,7 +95,10 @@ export const MonthCalendarViewItem = (props: {
     setDraggingEvent,
     cellLayoutsRef,
     findDateFromPosition,
-    scrollOffsetYs,
+    scrollOffsetYsRef,
+    findPositionFromDate,
+    weekdayTextHeightsRef,
+    calendarContainerRef,
   } = props;
 
   const { width } = useWindowDimensions();
@@ -125,6 +142,20 @@ export const MonthCalendarViewItem = (props: {
     return (bodyHeight - monthRowHeight - weekdayRowHeight) / weeks.length;
   }, [bodyHeight, monthRowHeight, weekdayRowHeight, weeks.length]);
 
+  const draggingEventWeekIds: string[] = useMemo(() => {
+    if (weekStartsOn === undefined || !draggingEvent) {
+      return [];
+    }
+    return getWeekIds({
+      start: draggingEvent.start,
+      end: draggingEvent.end,
+      weekStartsOn,
+    });
+  }, [draggingEvent, weekStartsOn]);
+
+  const eventHeight = 26;
+  const dateColumnWidth = width / 7;
+
   return (
     <ScrollView
       scrollEnabled={draggingEvent === null}
@@ -134,7 +165,7 @@ export const MonthCalendarViewItem = (props: {
       }
       onLayout={onLayoutBody}
       onScroll={(e) => {
-        scrollOffsetYs.current.set(month, e.nativeEvent.contentOffset.y);
+        scrollOffsetYsRef.current.set(month, e.nativeEvent.contentOffset.y);
       }}
     >
       {hiddenMonth ? (
@@ -181,11 +212,53 @@ export const MonthCalendarViewItem = (props: {
               setDraggingEvent={setDraggingEvent}
               cellLayoutsRef={cellLayoutsRef}
               findDateFromPosition={findDateFromPosition}
-              weekStartsOn={weekStartsOn}
+              eventHeight={eventHeight}
+              dateColumnWidth={dateColumnWidth}
+              weekdayTextHeightsRef={weekdayTextHeightsRef}
+              calendarContainerRef={calendarContainerRef}
             />
           );
         })}
       </View>
+      {weeks.flatMap((week) => {
+        const weekId = week[0]?.format('YYYY-MM-DD');
+        const isRenderDraggingEventRow =
+          !!draggingEvent && !!weekId && draggingEventWeekIds.includes(weekId);
+
+        if (!isRenderDraggingEventRow) {
+          return null;
+        }
+
+        return week.map((d, index) => {
+          const djs = dayjs(d);
+          const isRenderDraggingEventCell =
+            (isRenderDraggingEventRow &&
+              draggingEvent &&
+              dayjs(draggingEvent.start).format('YYYY-MM-DD') ===
+                djs.format('YYYY-MM-DD')) ||
+            (isRenderDraggingEventRow &&
+              draggingEvent &&
+              index === 0 &&
+              dayjs(draggingEvent.start).isBefore(djs));
+
+          if (!isRenderDraggingEventCell) {
+            return null;
+          }
+
+          return (
+            <MonthCalendarDraggingEvent
+              key={`${month}-${djs.format('YYYY-MM-DD')}-${draggingEvent.id}`}
+              month={month}
+              date={d.toDate()}
+              event={draggingEvent}
+              height={eventHeight}
+              dateColumnWidth={dateColumnWidth}
+              dateIndex={index}
+              findPositionFromDate={findPositionFromDate}
+            />
+          );
+        });
+      })}
     </ScrollView>
   );
 };

@@ -16,6 +16,7 @@ export const MonthCalendarEvent = (props: {
   draggingEvent?: CalendarEvent | null;
   setDraggingEvent?: (event: CalendarEvent | null) => void;
   findDateFromPosition?: (x: number, y: number) => Date | null;
+  calendarContainerRef?: React.RefObject<any>;
 }) => {
   const {
     event,
@@ -28,6 +29,7 @@ export const MonthCalendarEvent = (props: {
     draggingEvent,
     setDraggingEvent,
     findDateFromPosition,
+    calendarContainerRef,
   } = props;
 
   const touchStartTime = useRef(0);
@@ -42,32 +44,47 @@ export const MonthCalendarEvent = (props: {
         touchStartTime.current = Date.now();
         setIsEventDragging?.(true);
         setDraggingEvent?.(event);
-        dragStartDate.current =
-          findDateFromPosition?.(
-            evt.nativeEvent.pageX,
-            evt.nativeEvent.pageY
-          ) ?? null;
+
+        calendarContainerRef?.current?.measureInWindow(
+          (containerX: number, containerY: number) => {
+            const tapX = evt.nativeEvent.pageX;
+            const tapY = evt.nativeEvent.pageY;
+
+            const relativeX = tapX - containerX;
+            const relativeY = tapY - containerY;
+
+            dragStartDate.current =
+              findDateFromPosition?.(relativeX, relativeY) ?? null;
+          }
+        );
       },
 
       onPanResponderMove: (evt) => {
-        const overDate = findDateFromPosition?.(
-          evt.nativeEvent.pageX,
-          evt.nativeEvent.pageY
+        calendarContainerRef?.current?.measureInWindow(
+          (containerX: number, containerY: number) => {
+            const overX = evt.nativeEvent.pageX;
+            const overY = evt.nativeEvent.pageY;
+
+            const relativeX = overX - containerX;
+            const relativeY = overY - containerY;
+
+            const overDate = findDateFromPosition?.(relativeX, relativeY);
+            if (overDate && overDate !== currentOverDate.current) {
+              const diff = dayjs(overDate).diff(
+                dayjs(dragStartDate.current),
+                'day'
+              );
+              const newStart = dayjs(event.start).add(diff, 'days').toDate();
+              const newEnd = dayjs(event.end).add(diff, 'days').toDate();
+              setDraggingEvent?.({
+                ...event,
+                start: newStart,
+                end: newEnd,
+              });
+            }
+            currentOverDate.current = overDate ?? null;
+          }
         );
-        if (overDate && overDate !== currentOverDate.current) {
-          const diff = dayjs(overDate).diff(
-            dayjs(dragStartDate.current),
-            'day'
-          );
-          const newStart = dayjs(event.start).add(diff, 'days').toDate();
-          const newEnd = dayjs(event.end).add(diff, 'days').toDate();
-          setDraggingEvent?.({
-            ...event,
-            start: newStart,
-            end: newEnd,
-          });
-        }
-        currentOverDate.current = overDate ?? null;
       },
 
       onPanResponderRelease: (evt, gestureState) => {

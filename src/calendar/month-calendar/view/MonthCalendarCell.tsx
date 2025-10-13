@@ -12,7 +12,6 @@ import dayjs from 'dayjs';
 import { CELL_BORDER_WIDTH, EVENT_GAP } from '../../../constants/size';
 import { MonthCalendarEvent } from './MonthCalendarEvent';
 import { useRef } from 'react';
-import { MonthCalendarDraggingEvent } from './MonthCalendarDraggingEvent';
 
 export const MonthCalendarCell = (props: {
   month: string;
@@ -50,6 +49,8 @@ export const MonthCalendarCell = (props: {
   findDateFromPosition?: (x: number, y: number) => Date | null;
   draggingEvent?: CalendarEvent | null;
   isRenderDraggingEventRow?: boolean;
+  weekdayTextHeightsRef?: React.RefObject<Map<string, number>>;
+  calendarContainerRef?: React.RefObject<any>;
 }) => {
   const {
     month,
@@ -71,45 +72,36 @@ export const MonthCalendarCell = (props: {
     dateColumnWidth,
     onPressEvent,
     setIsEventDragging,
+    draggingEvent,
     setDraggingEvent,
     cellLayoutsRef,
     findDateFromPosition,
-    draggingEvent,
-    isRenderDraggingEventRow = false,
+    weekdayTextHeightsRef,
+    calendarContainerRef,
   } = props;
 
   const cellRef = useRef<any>(null);
 
-  const isRenderDraggingEventCell =
-    (isRenderDraggingEventRow &&
-      draggingEvent &&
-      dayjs(draggingEvent.start).format('YYYY-MM-DD') ===
-        djs.format('YYYY-MM-DD')) ||
-    (isRenderDraggingEventRow &&
-      draggingEvent &&
-      dateIndex === 0 &&
-      dayjs(draggingEvent.start).isBefore(djs));
-
   return (
     <TouchableOpacity
-      ref={(ref) => {
-        cellRef.current = ref;
-      }}
+      ref={cellRef}
       onLayout={() => {
-        const ref = cellRef.current;
-        const dateKey = `${month}-${djs.format('YYYY-MM-DD')}`;
-
-        ref?.measureInWindow(
-          (pageX: any, pageY: any, width: any, height: any) => {
-            cellLayoutsRef?.current.set(dateKey, {
-              pageX,
-              pageY,
-              width,
-              height,
-              date: djs.toDate(),
-            });
-          }
-        );
+        if (calendarContainerRef?.current) {
+          const dateKey = `${month}-${djs.format('YYYY-MM-DD')}`;
+          const ref = cellRef.current;
+          ref?.measureLayout(
+            calendarContainerRef.current,
+            (pageX: any, pageY: any, width: any, height: any) => {
+              cellLayoutsRef?.current.set(dateKey, {
+                pageX,
+                pageY,
+                width,
+                height,
+                date: djs.toDate(),
+              });
+            }
+          );
+        }
       }}
       key={isWeekdayHeader ? djs.get('d') : djs.get('date')}
       style={[
@@ -133,7 +125,19 @@ export const MonthCalendarCell = (props: {
             : dayCellContainerStyle?.(djs.toDate()),
         ]}
       />
-      <View style={styles.dayCellLabel}>
+      <View
+        style={styles.dayCellLabel}
+        onLayout={(e) => {
+          if (isWeekdayHeader) {
+            return;
+          }
+
+          weekdayTextHeightsRef?.current.set(
+            `${month}-${djs.format('YYYY-MM-DD')}`,
+            e.nativeEvent.layout.height
+          );
+        }}
+      >
         <Text
           style={[
             styles.dayCellText,
@@ -190,18 +194,10 @@ export const MonthCalendarCell = (props: {
               draggingEvent={draggingEvent}
               setDraggingEvent={setDraggingEvent}
               findDateFromPosition={findDateFromPosition}
+              calendarContainerRef={calendarContainerRef}
             />
           );
         })}
-        {isRenderDraggingEventCell && (
-          <MonthCalendarDraggingEvent
-            date={djs.toDate()}
-            event={draggingEvent}
-            height={eventHeight}
-            dateColumnWidth={dateColumnWidth}
-            dateIndex={dateIndex}
-          />
-        )}
       </View>
     </TouchableOpacity>
   );

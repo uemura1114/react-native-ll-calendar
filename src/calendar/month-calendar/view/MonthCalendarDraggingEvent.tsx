@@ -5,13 +5,30 @@ import { View } from 'react-native';
 import dayjs from 'dayjs';
 
 export const MonthCalendarDraggingEvent = (props: {
+  month: string;
   date: Date;
   event: CalendarEvent;
   height: number;
   dateColumnWidth: number;
   dateIndex: number;
+  findPositionFromDate: (
+    date: Date,
+    month: string
+  ) => {
+    x: number;
+    y: number;
+  } | null;
 }) => {
-  const { date, event, height, dateColumnWidth, dateIndex } = props;
+  const {
+    month,
+    date,
+    event,
+    height,
+    dateColumnWidth,
+    dateIndex,
+    findPositionFromDate,
+  } = props;
+
   const startDjs = dateIndex === 0 ? dayjs(date) : dayjs(event.start);
   const endDjs = dayjs(event.end);
   const diffDays = endDjs.startOf('day').diff(startDjs.startOf('day'), 'day');
@@ -24,10 +41,17 @@ export const MonthCalendarDraggingEvent = (props: {
     width += EVENT_GAP + 1;
   }
 
+  const position = findPositionFromDate(date, month);
+
+  if (position === null) {
+    return null;
+  }
+
   return (
     <View
       style={[
         styles.event,
+        { top: position.y, left: position.x },
         {
           backgroundColor: event.backgroundColor,
           borderColor: event.borderColor,
@@ -59,9 +83,6 @@ const styles = StyleSheet.create({
     marginTop: EVENT_GAP,
     marginLeft: EVENT_GAP,
     position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
     zIndex: 999,
   },
   prevDateEvent: {

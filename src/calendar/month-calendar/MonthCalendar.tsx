@@ -3,6 +3,8 @@ import {
   FlatList,
   type ViewStyle,
   type TextStyle,
+  View,
+  StyleSheet,
 } from 'react-native';
 import dayjs from 'dayjs';
 import { useCallback, useMemo, useRef, useState } from 'react';
@@ -87,8 +89,8 @@ export const MonthCalendar = (props: {
 
   const { width } = useWindowDimensions();
 
-  const scrollOffsetX = useRef(0);
-  const scrollOffsetYs = useRef<Map<string, number>>(new Map());
+  const scrollOffsetXRef = useRef(0);
+  const scrollOffsetYsRef = useRef<Map<string, number>>(new Map());
   const cellLayoutsRef = useRef<
     Map<
       string,
@@ -102,16 +104,20 @@ export const MonthCalendar = (props: {
     >
   >(new Map());
 
+  const calendarContainerRef = useRef<any>(null);
+  const calendarContainerYRef = useRef(0);
+  const weekdayTextHeightsRef = useRef<Map<string, number>>(new Map());
+
   const findDateFromPosition = useCallback(
     (x: number, y: number): Date | null => {
       const activePanel = panels[activeIndex.current];
       const scrollOffsetY = activePanel
-        ? (scrollOffsetYs.current.get(activePanel) ?? 0)
+        ? (scrollOffsetYsRef.current.get(activePanel) ?? 0)
         : 0;
       for (const [_, layout] of cellLayoutsRef.current.entries()) {
         if (
-          x >= layout.pageX - scrollOffsetX.current &&
-          x <= layout.pageX - scrollOffsetX.current + layout.width &&
+          x >= layout.pageX - scrollOffsetXRef.current &&
+          x <= layout.pageX - scrollOffsetXRef.current + layout.width &&
           y >= layout.pageY - scrollOffsetY &&
           y <= layout.pageY + layout.height - scrollOffsetY
         ) {
@@ -123,68 +129,106 @@ export const MonthCalendar = (props: {
     [panels]
   );
 
-  return (
-    <FlatList
-      horizontal
-      pagingEnabled={true}
-      getItemLayout={(_data, index) => {
+  const findPositionFromDate = useCallback(
+    (date: Date, month: string): { x: number; y: number } | null => {
+      const key = `${month}-${dayjs(date).format('YYYY-MM-DD')}`;
+      const weekdayHeight = weekdayTextHeightsRef.current.get(key) ?? 0;
+      const layout = cellLayoutsRef.current.get(key);
+      if (layout) {
         return {
-          length: width,
-          offset: width * index,
-          index,
+          x: layout.pageX - scrollOffsetXRef.current,
+          y: layout.pageY + weekdayHeight,
         };
-      }}
-      onMomentumScrollEnd={(e) => {
-        const scrollX = e.nativeEvent.contentOffset.x;
-        const newIndex = Math.round(scrollX / width);
-        const month = panels[newIndex];
-        if (month) {
-          const newDate = new Date(month);
-          onChangeDate?.(newDate);
-        }
-        activeIndex.current = newIndex;
-      }}
-      initialScrollIndex={HALF_PANEL_LENGTH}
-      decelerationRate={'fast'}
-      data={panels}
-      renderItem={({ item, index }) => {
-        return (
-          <MonthCalendarViewItem
-            month={item}
-            weekStartsOn={weekStartsOn}
-            events={events}
-            onPressEvent={onPressEvent}
-            onPressCell={onPressCell}
-            onLongPressCell={onLongPressCell}
-            delayLongPress={delayLongPress}
-            flatListIndex={index}
-            onRefresh={onRefresh}
-            refreshing={refreshing}
-            dayCellContainerStyle={dayCellContainerStyle}
-            dayCellTextStyle={dayCellTextStyle}
-            locale={locale}
-            weekdayCellContainerStyle={weekdayCellContainerStyle}
-            weekdayCellTextStyle={weekdayCellTextStyle}
-            todayCellTextStyle={todayCellTextStyle}
-            hiddenMonth={hiddenMonth}
-            monthFormat={monthFormat}
-            draggingEvent={draggingEvent}
-            setDraggingEvent={setDraggingEvent}
-            cellLayoutsRef={cellLayoutsRef}
-            findDateFromPosition={findDateFromPosition}
-            scrollOffsetYs={scrollOffsetYs}
-          />
+      } else {
+        return null;
+      }
+    },
+    []
+  );
+
+  return (
+    <View
+      style={styles.container}
+      ref={calendarContainerRef}
+      onLayout={() => {
+        calendarContainerRef.current?.measureInWindow(
+          (_pageX: number, pageY: number) => {
+            calendarContainerYRef.current = pageY;
+          }
         );
       }}
-      showsHorizontalScrollIndicator={false}
-      scrollEnabled={draggingEvent === null}
-      windowSize={5}
-      initialNumToRender={5}
-      maxToRenderPerBatch={5}
-      removeClippedSubviews={false}
-      onScroll={(e) => {
-        scrollOffsetX.current = e.nativeEvent.contentOffset.x;
-      }}
-    />
+    >
+      <FlatList
+        horizontal
+        pagingEnabled={true}
+        getItemLayout={(_data, index) => {
+          return {
+            length: width,
+            offset: width * index,
+            index,
+          };
+        }}
+        onMomentumScrollEnd={(e) => {
+          const scrollX = e.nativeEvent.contentOffset.x;
+          const newIndex = Math.round(scrollX / width);
+          const month = panels[newIndex];
+          if (month) {
+            const newDate = new Date(month);
+            onChangeDate?.(newDate);
+          }
+          activeIndex.current = newIndex;
+        }}
+        initialScrollIndex={HALF_PANEL_LENGTH}
+        decelerationRate={'fast'}
+        data={panels}
+        renderItem={({ item, index }) => {
+          return (
+            <MonthCalendarViewItem
+              month={item}
+              weekStartsOn={weekStartsOn}
+              events={events}
+              onPressEvent={onPressEvent}
+              onPressCell={onPressCell}
+              onLongPressCell={onLongPressCell}
+              delayLongPress={delayLongPress}
+              flatListIndex={index}
+              onRefresh={onRefresh}
+              refreshing={refreshing}
+              dayCellContainerStyle={dayCellContainerStyle}
+              dayCellTextStyle={dayCellTextStyle}
+              locale={locale}
+              weekdayCellContainerStyle={weekdayCellContainerStyle}
+              weekdayCellTextStyle={weekdayCellTextStyle}
+              todayCellTextStyle={todayCellTextStyle}
+              hiddenMonth={hiddenMonth}
+              monthFormat={monthFormat}
+              draggingEvent={draggingEvent}
+              setDraggingEvent={setDraggingEvent}
+              cellLayoutsRef={cellLayoutsRef}
+              findDateFromPosition={findDateFromPosition}
+              scrollOffsetYsRef={scrollOffsetYsRef}
+              findPositionFromDate={findPositionFromDate}
+              weekdayTextHeightsRef={weekdayTextHeightsRef}
+              calendarContainerRef={calendarContainerRef}
+            />
+          );
+        }}
+        showsHorizontalScrollIndicator={false}
+        scrollEnabled={draggingEvent === null}
+        windowSize={5}
+        initialNumToRender={5}
+        maxToRenderPerBatch={5}
+        removeClippedSubviews={false}
+        onScroll={(e) => {
+          scrollOffsetXRef.current = e.nativeEvent.contentOffset.x;
+        }}
+      />
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    position: 'relative',
+  },
+});
