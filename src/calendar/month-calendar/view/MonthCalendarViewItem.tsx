@@ -21,6 +21,7 @@ import { useEvents } from '../logic/useEvents';
 import { CELL_BORDER_WIDTH } from '../../../constants/size';
 import { RefreshControl } from 'react-native';
 import { useCallback, useMemo, useState } from 'react';
+import { MonthCalendarWeekDayRow } from './MonthCalendarWeekDayRow';
 
 export const MonthCalendarViewItem = (props: {
   month: string;
@@ -120,9 +121,8 @@ export const MonthCalendarViewItem = (props: {
         </View>
       )}
       <View onLayout={onLayoutWeekdayRow}>
-        <MonthCalendarWeekRow
+        <MonthCalendarWeekDayRow
           dates={weeks[0] ?? []}
-          isWeekdayHeader={true}
           locale={locale}
           weekdayCellContainerStyle={weekdayCellContainerStyle}
           weekdayCellTextStyle={weekdayCellTextStyle}
