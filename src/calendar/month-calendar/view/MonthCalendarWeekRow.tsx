@@ -54,7 +54,7 @@ export const MonthCalendarWeekRow = (props: {
             return bDiffDays - aDiffDays;
           });
 
-        const rows: (CalendarEvent | number)[] = [];
+        const events: (CalendarEvent | number)[] = [];
         if (weekId && props.eventPosition) {
           const rowNums = props.eventPosition.getRowNums({
             weekId,
@@ -64,11 +64,11 @@ export const MonthCalendarWeekRow = (props: {
           let eventIndex = 0;
           for (let ii = 1; ii <= rowsLength; ii++) {
             if (rowNums.includes(ii)) {
-              rows.push(ii);
+              events.push(ii);
             } else {
               const event = filteredEvents[eventIndex];
               if (event) {
-                rows.push(event);
+                events.push(event);
               }
               eventIndex++;
             }
@@ -109,19 +109,19 @@ export const MonthCalendarWeekRow = (props: {
                 {text}
               </Text>
             </View>
-            {rows.map((eventRow, rowIndex) => {
-              if (typeof eventRow === 'number') {
+            {events.map((event, rowIndex) => {
+              if (typeof event === 'number') {
                 return (
                   <View
-                    key={eventRow}
+                    key={event}
                     style={{ height: eventHeight, marginBottom: EVENT_GAP }}
                   />
                 );
               }
 
-              const rawStartDjs = dayjs(eventRow.start);
-              const startDjs = dateIndex === 0 ? djs : dayjs(eventRow.start);
-              const endDjs = dayjs(eventRow.end);
+              const rawStartDjs = dayjs(event.start);
+              const startDjs = dateIndex === 0 ? djs : dayjs(event.start);
+              const endDjs = dayjs(event.end);
               const diffDays = endDjs
                 .startOf('day')
                 .diff(startDjs.startOf('day'), 'day');
@@ -136,7 +136,7 @@ export const MonthCalendarWeekRow = (props: {
                 width += EVENT_GAP + 1;
               }
 
-              const isLastRow = rowIndex === rows.length - 1;
+              const isLastRow = rowIndex === events.length - 1;
 
               if (props.eventPosition && weekId) {
                 props.eventPosition.push({
@@ -149,12 +149,12 @@ export const MonthCalendarWeekRow = (props: {
 
               return (
                 <TouchableOpacity
-                  key={eventRow.id}
+                  key={event.id}
                   style={[
                     styles.event,
                     {
-                      backgroundColor: eventRow.backgroundColor,
-                      borderColor: eventRow.borderColor,
+                      backgroundColor: event.backgroundColor,
+                      borderColor: event.borderColor,
                       width: width,
                       height: eventHeight,
                     },
@@ -162,19 +162,19 @@ export const MonthCalendarWeekRow = (props: {
                     isLastRow ? styles.lastRowEvent : {},
                   ]}
                   onPress={() => {
-                    props.onPressEvent?.(eventRow);
+                    props.onPressEvent?.(event);
                   }}
                   onLongPress={() => {
-                    props.onLongPressEvent?.(eventRow);
+                    props.onLongPressEvent?.(event);
                   }}
                   delayLongPress={props.delayLongPressEvent}
                 >
                   <Text
                     numberOfLines={1}
                     ellipsizeMode="tail"
-                    style={[styles.eventTitle, { color: eventRow.color }]}
+                    style={[styles.eventTitle, { color: event.color }]}
                   >
-                    {eventRow.title}
+                    {event.title}
                   </Text>
                 </TouchableOpacity>
               );
