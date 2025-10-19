@@ -462,10 +462,10 @@ export default function App() {
         events={events}
         onPressEvent={handlePressEvent}
         onLongPressEvent={handleLongPressEvent}
-        delayLongPressEvent={200}
+        delayLongPressEvent={1000}
         onPressCell={handlePressCell}
         onLongPressCell={handleLongPressCell}
-        delayLongPressCell={200}
+        delayLongPressCell={1000}
         onRefresh={handleRefresh}
         refreshing={refreshing}
         dayCellContainerStyle={dayCellContainerStyle}
