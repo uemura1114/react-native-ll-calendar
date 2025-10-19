@@ -21,9 +21,11 @@ export const MonthCalendar = (props: {
   onChangeDate?: (date: Date) => void;
   events: CalendarEvent[];
   onPressEvent?: (event: CalendarEvent) => void;
+  onLongPressEvent?: (event: CalendarEvent) => void;
+  delayLongPressEvent?: number;
   onPressCell?: (date: Date) => void;
   onLongPressCell?: (date: Date) => void;
-  delayLongPress?: number;
+  delayLongPressCell?: number;
   onRefresh?: () => void;
   refreshing?: boolean;
   dayCellContainerStyle?: (date: Date) => ViewStyle;
@@ -41,9 +43,11 @@ export const MonthCalendar = (props: {
     onChangeDate,
     events,
     onPressEvent,
+    onLongPressEvent,
+    delayLongPressEvent,
     onPressCell,
     onLongPressCell,
-    delayLongPress,
+    delayLongPressCell,
     onRefresh,
     refreshing,
     dayCellContainerStyle,
@@ -112,9 +116,11 @@ export const MonthCalendar = (props: {
             weekStartsOn={weekStartsOn}
             events={events}
             onPressEvent={onPressEvent}
+            onLongPressEvent={onLongPressEvent}
+            delayLongPressEvent={delayLongPressEvent}
             onPressCell={onPressCell}
             onLongPressCell={onLongPressCell}
-            delayLongPress={delayLongPress}
+            delayLongPressCell={delayLongPressCell}
             flatListIndex={index}
             onRefresh={onRefresh}
             refreshing={refreshing}

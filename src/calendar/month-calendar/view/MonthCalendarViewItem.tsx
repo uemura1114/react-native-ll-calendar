@@ -27,9 +27,11 @@ export const MonthCalendarViewItem = (props: {
   weekStartsOn: WeekStartsOn;
   events: CalendarEvent[];
   onPressEvent?: (event: CalendarEvent) => void;
+  onLongPressEvent?: (event: CalendarEvent) => void;
+  delayLongPressEvent?: number;
   onPressCell?: (date: Date) => void;
   onLongPressCell?: (date: Date) => void;
-  delayLongPress?: number;
+  delayLongPressCell?: number;
   flatListIndex: number;
   onRefresh?: () => void;
   refreshing?: boolean;
@@ -47,9 +49,11 @@ export const MonthCalendarViewItem = (props: {
     weekStartsOn,
     events,
     onPressEvent,
+    onLongPressEvent,
+    delayLongPressEvent,
     onPressCell,
     onLongPressCell,
-    delayLongPress,
+    delayLongPressCell,
     flatListIndex,
     onRefresh,
     refreshing,
@@ -139,9 +143,11 @@ export const MonthCalendarViewItem = (props: {
               events={weekEvents}
               eventPosition={eventPosition}
               onPressEvent={onPressEvent}
+              onLongPressEvent={onLongPressEvent}
+              delayLongPressEvent={delayLongPressEvent}
               onPressCell={onPressCell}
               onLongPressCell={onLongPressCell}
-              delayLongPress={delayLongPress}
+              delayLongPressCell={delayLongPressCell}
               dayCellContainerStyle={dayCellContainerStyle}
               dayCellTextStyle={dayCellTextStyle}
               weekRowMinHeight={weekRowMinHeight}
