@@ -12,17 +12,10 @@ export const MonthCalendarWeekDayRow = (props: {
   weekdayCellContainerStyle?: (weekDayNum: WeekdayNum) => ViewStyle;
   weekdayCellTextStyle?: (weekDayNum: WeekdayNum) => TextStyle;
 }) => {
-  const {
-    locale = en,
-    dates,
-    weekdayCellContainerStyle,
-    weekdayCellTextStyle,
-  } = props;
-
   return (
     <View style={styles.container}>
-      {dates.map((djs, dateIndex) => {
-        const text = djs.locale(locale).format('ddd');
+      {props.dates.map((djs, dateIndex) => {
+        const text = djs.locale(props.locale ?? en).format('ddd');
 
         return (
           <View
@@ -32,12 +25,15 @@ export const MonthCalendarWeekDayRow = (props: {
             <View
               style={[
                 styles.dayCellInner,
-                weekdayCellContainerStyle?.(djs.day()),
+                props.weekdayCellContainerStyle?.(djs.day()),
               ]}
             />
             <View style={styles.dayCellLabel}>
               <Text
-                style={[styles.dayCellText, weekdayCellTextStyle?.(djs.day())]}
+                style={[
+                  styles.dayCellText,
+                  props.weekdayCellTextStyle?.(djs.day()),
+                ]}
               >
                 {text}
               </Text>

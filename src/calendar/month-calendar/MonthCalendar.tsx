@@ -37,29 +37,7 @@ export const MonthCalendar = (props: {
   hiddenMonth?: boolean;
   monthFormat?: string;
 }) => {
-  const {
-    defaultDate,
-    weekStartsOn = 0,
-    onChangeDate,
-    events,
-    onPressEvent,
-    onLongPressEvent,
-    delayLongPressEvent,
-    onPressCell,
-    onLongPressCell,
-    delayLongPressCell,
-    onRefresh,
-    refreshing,
-    dayCellContainerStyle,
-    dayCellTextStyle,
-    locale,
-    weekdayCellContainerStyle,
-    weekdayCellTextStyle,
-    todayCellTextStyle,
-    hiddenMonth,
-    monthFormat,
-  } = props;
-  const [dateState] = useState(defaultDate);
+  const [dateState] = useState(props.defaultDate);
   const [_activeIndex, setActiveIndex] = useState(HALF_PANEL_LENGTH);
   const defaultDateDjs = dayjs(dateState);
   const startOfDefaultDateDjs = defaultDateDjs.startOf('month');
@@ -102,7 +80,7 @@ export const MonthCalendar = (props: {
         const month = panels[newIndex];
         if (month) {
           const newDate = new Date(month);
-          onChangeDate?.(newDate);
+          props.onChangeDate?.(newDate);
         }
         setActiveIndex(newIndex);
       }}
@@ -113,25 +91,25 @@ export const MonthCalendar = (props: {
         return (
           <MonthCalendarViewItem
             month={item}
-            weekStartsOn={weekStartsOn}
-            events={events}
-            onPressEvent={onPressEvent}
-            onLongPressEvent={onLongPressEvent}
-            delayLongPressEvent={delayLongPressEvent}
-            onPressCell={onPressCell}
-            onLongPressCell={onLongPressCell}
-            delayLongPressCell={delayLongPressCell}
+            weekStartsOn={props.weekStartsOn ?? 0}
+            events={props.events}
+            onPressEvent={props.onPressEvent}
+            onLongPressEvent={props.onLongPressEvent}
+            delayLongPressEvent={props.delayLongPressEvent}
+            onPressCell={props.onPressCell}
+            onLongPressCell={props.onLongPressCell}
+            delayLongPressCell={props.delayLongPressCell}
             flatListIndex={index}
-            onRefresh={onRefresh}
-            refreshing={refreshing}
-            dayCellContainerStyle={dayCellContainerStyle}
-            dayCellTextStyle={dayCellTextStyle}
-            locale={locale}
-            weekdayCellContainerStyle={weekdayCellContainerStyle}
-            weekdayCellTextStyle={weekdayCellTextStyle}
-            todayCellTextStyle={todayCellTextStyle}
-            hiddenMonth={hiddenMonth}
-            monthFormat={monthFormat}
+            onRefresh={props.onRefresh}
+            refreshing={props.refreshing}
+            dayCellContainerStyle={props.dayCellContainerStyle}
+            dayCellTextStyle={props.dayCellTextStyle}
+            locale={props.locale}
+            weekdayCellContainerStyle={props.weekdayCellContainerStyle}
+            weekdayCellTextStyle={props.weekdayCellTextStyle}
+            todayCellTextStyle={props.todayCellTextStyle}
+            hiddenMonth={props.hiddenMonth}
+            monthFormat={props.monthFormat}
           />
         );
       }}

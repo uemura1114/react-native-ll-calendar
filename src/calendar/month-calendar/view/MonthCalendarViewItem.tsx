@@ -45,34 +45,15 @@ export const MonthCalendarViewItem = (props: {
   hiddenMonth?: boolean;
   monthFormat?: string;
 }) => {
-  const {
-    month,
-    weekStartsOn,
-    events,
-    onPressEvent,
-    onLongPressEvent,
-    delayLongPressEvent,
-    onPressCell,
-    onLongPressCell,
-    delayLongPressCell,
-    flatListIndex,
-    onRefresh,
-    refreshing,
-    dayCellContainerStyle,
-    dayCellTextStyle,
-    locale,
-    weekdayCellContainerStyle,
-    weekdayCellTextStyle,
-    todayCellTextStyle,
-    hiddenMonth,
-    monthFormat = 'YYYY/MM',
-  } = props;
   const { width } = useWindowDimensions();
   const eventPosition = new MonthCalendarEventPosition();
-  const date = new Date(month);
+  const date = new Date(props.month);
   const dateDjs = dayjs(date);
-  const startDate = monthlyStartDate({ date, weekStartsOn });
-  const endDate = monthlyEndDate({ date, weekStartsOn });
+  const startDate = monthlyStartDate({
+    date,
+    weekStartsOn: props.weekStartsOn,
+  });
+  const endDate = monthlyEndDate({ date, weekStartsOn: props.weekStartsOn });
   const endDjs = dayjs(endDate);
   const weeks: dayjs.Dayjs[][] = [];
   let currentDate = dayjs(startDate);
@@ -84,7 +65,10 @@ export const MonthCalendarViewItem = (props: {
     currentDate = currentDate.add(7, 'day');
   }
 
-  const { eventsGroupByWeekId } = useEvents({ events, weekStartsOn });
+  const { eventsGroupByWeekId } = useEvents({
+    events: props.events,
+    weekStartsOn: props.weekStartsOn,
+  });
 
   const [bodyHeight, setBodyHeight] = useState(0);
   const onLayoutBody = useCallback((e: LayoutChangeEvent) => {
@@ -107,25 +91,30 @@ export const MonthCalendarViewItem = (props: {
 
   return (
     <ScrollView
-      style={[styles.container, { width, zIndex: flatListIndex }]}
+      style={[styles.container, { width, zIndex: props.flatListIndex }]}
       refreshControl={
-        <RefreshControl refreshing={!!refreshing} onRefresh={onRefresh} />
+        <RefreshControl
+          refreshing={!!props.refreshing}
+          onRefresh={props.onRefresh}
+        />
       }
       onLayout={onLayoutBody}
     >
-      {hiddenMonth ? (
+      {props.hiddenMonth ? (
         <View style={styles.blankMonthContainer} />
       ) : (
         <View style={styles.monthContainer} onLayout={onLayoutMonthRow}>
-          <Text style={styles.monthText}>{dateDjs.format(monthFormat)}</Text>
+          <Text style={styles.monthText}>
+            {dateDjs.format(props.monthFormat ?? 'YYYY/MM')}
+          </Text>
         </View>
       )}
       <View onLayout={onLayoutWeekdayRow}>
         <MonthCalendarWeekDayRow
           dates={weeks[0] ?? []}
-          locale={locale}
-          weekdayCellContainerStyle={weekdayCellContainerStyle}
-          weekdayCellTextStyle={weekdayCellTextStyle}
+          locale={props.locale}
+          weekdayCellContainerStyle={props.weekdayCellContainerStyle}
+          weekdayCellTextStyle={props.weekdayCellTextStyle}
         />
       </View>
       <View>
@@ -142,16 +131,16 @@ export const MonthCalendarViewItem = (props: {
               dates={week}
               events={weekEvents}
               eventPosition={eventPosition}
-              onPressEvent={onPressEvent}
-              onLongPressEvent={onLongPressEvent}
-              delayLongPressEvent={delayLongPressEvent}
-              onPressCell={onPressCell}
-              onLongPressCell={onLongPressCell}
-              delayLongPressCell={delayLongPressCell}
-              dayCellContainerStyle={dayCellContainerStyle}
-              dayCellTextStyle={dayCellTextStyle}
+              onPressEvent={props.onPressEvent}
+              onLongPressEvent={props.onLongPressEvent}
+              delayLongPressEvent={props.delayLongPressEvent}
+              onPressCell={props.onPressCell}
+              onLongPressCell={props.onLongPressCell}
+              delayLongPressCell={props.delayLongPressCell}
+              dayCellContainerStyle={props.dayCellContainerStyle}
+              dayCellTextStyle={props.dayCellTextStyle}
               weekRowMinHeight={weekRowMinHeight}
-              todayCellTextStyle={todayCellTextStyle}
+              todayCellTextStyle={props.todayCellTextStyle}
             />
           );
         })}
