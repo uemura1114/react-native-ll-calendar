@@ -368,11 +368,15 @@ export default function App() {
     ];
   }, []);
 
-  const handleEventPress = useCallback((event: CalendarEvent) => {
+  const handlePressEvent = useCallback((event: CalendarEvent) => {
     Alert.alert('Notification', `pressed ${event.title}`);
   }, []);
 
-  const handleCellPress = useCallback((d: Date) => {
+  const handleLongPressEvent = useCallback((event: CalendarEvent) => {
+    Alert.alert('Notification', `Long pressed ${event.title}`);
+  }, []);
+
+  const handlePressCell = useCallback((d: Date) => {
     const djs = dayjs(d);
     Alert.alert('Notification', `pressed ${djs.format('YYYY-MM-DD')}`);
   }, []);
@@ -456,10 +460,12 @@ export default function App() {
         weekStartsOn={1}
         onChangeDate={handleChangeDate}
         events={events}
-        onPressEvent={handleEventPress}
-        onPressCell={handleCellPress}
+        onPressEvent={handlePressEvent}
+        onLongPressEvent={handleLongPressEvent}
+        delayLongPressEvent={200}
+        onPressCell={handlePressCell}
         onLongPressCell={handleLongPressCell}
-        delayLongPress={500}
+        delayLongPressCell={200}
         onRefresh={handleRefresh}
         refreshing={refreshing}
         dayCellContainerStyle={dayCellContainerStyle}

@@ -13,9 +13,11 @@ export const MonthCalendarWeekRow = (props: {
   events?: CalendarEvent[];
   eventPosition?: MonthCalendarEventPosition;
   onPressEvent?: (event: CalendarEvent) => void;
+  onLongPressEvent?: (event: CalendarEvent) => void;
+  delayLongPressEvent?: number;
   onPressCell?: (date: Date) => void;
   onLongPressCell?: (date: Date) => void;
-  delayLongPress?: number;
+  delayLongPressCell?: number;
   dayCellContainerStyle?: (date: Date) => ViewStyle;
   dayCellTextStyle?: (date: Date) => TextStyle;
   locale?: ILocale;
@@ -30,9 +32,11 @@ export const MonthCalendarWeekRow = (props: {
     events = [],
     eventPosition,
     onPressEvent,
+    onLongPressEvent,
+    delayLongPressEvent,
     onPressCell,
     onLongPressCell,
-    delayLongPress = 500,
+    delayLongPressCell = 500,
     dayCellContainerStyle,
     dayCellTextStyle,
     locale = en,
@@ -110,7 +114,7 @@ export const MonthCalendarWeekRow = (props: {
             onLongPress={() => {
               onLongPressCell?.(djs.toDate());
             }}
-            delayLongPress={delayLongPress}
+            delayLongPress={delayLongPressCell}
           >
             <View
               style={[
@@ -190,6 +194,10 @@ export const MonthCalendarWeekRow = (props: {
                   onPress={() => {
                     onPressEvent?.(eventRow);
                   }}
+                  onLongPress={() => {
+                    onLongPressEvent?.(eventRow);
+                  }}
+                  delayLongPress={delayLongPressEvent}
                 >
                   <Text
                     numberOfLines={1}
