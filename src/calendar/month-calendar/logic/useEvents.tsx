@@ -9,16 +9,14 @@ export const useEvents = (props: {
   events: CalendarEvent[];
   weekStartsOn: WeekStartsOn;
 }) => {
-  const { events, weekStartsOn } = props;
-
   const eventsGroupByWeekId: Record<string, CalendarEvent[]> = useMemo(() => {
     const groupedEvents: Record<string, CalendarEvent[]> = {};
 
-    events.forEach((event) => {
+    props.events.forEach((event) => {
       const weekIds: string[] = getWeekIds({
         start: event.start,
         end: event.end,
-        weekStartsOn,
+        weekStartsOn: props.weekStartsOn,
       });
       weekIds.forEach((weekId) => {
         if (!groupedEvents[weekId]) {
@@ -29,7 +27,7 @@ export const useEvents = (props: {
     });
 
     return groupedEvents;
-  }, [events, weekStartsOn]);
+  }, [props.events, props.weekStartsOn]);
 
   return { eventsGroupByWeekId };
 };

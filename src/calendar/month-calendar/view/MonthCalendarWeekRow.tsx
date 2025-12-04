@@ -1,5 +1,4 @@
 import dayjs from 'dayjs';
-import en from 'dayjs/locale/en';
 import { StyleSheet, useWindowDimensions } from 'react-native';
 import { Text, TouchableOpacity, View, type ViewStyle } from 'react-native';
 import type { CalendarEvent, WeekdayNum } from '../../../types/month-calendar';
@@ -9,8 +8,7 @@ import type { TextStyle } from 'react-native';
 
 export const MonthCalendarWeekRow = (props: {
   dates: dayjs.Dayjs[];
-  isWeekdayHeader?: boolean;
-  events?: CalendarEvent[];
+  events: CalendarEvent[];
   eventPosition?: MonthCalendarEventPosition;
   onPressEvent?: (event: CalendarEvent) => void;
   onLongPressEvent?: (event: CalendarEvent) => void;
@@ -20,69 +18,45 @@ export const MonthCalendarWeekRow = (props: {
   delayLongPressCell?: number;
   dayCellContainerStyle?: (date: Date) => ViewStyle;
   dayCellTextStyle?: (date: Date) => TextStyle;
-  locale?: ILocale;
   weekdayCellContainerStyle?: (weekDayNum: WeekdayNum) => ViewStyle;
   weekdayCellTextStyle?: (weekDayNum: WeekdayNum) => TextStyle;
   weekRowMinHeight?: number;
   todayCellTextStyle?: TextStyle;
 }) => {
-  const {
-    dates,
-    isWeekdayHeader,
-    events = [],
-    eventPosition,
-    onPressEvent,
-    onLongPressEvent,
-    delayLongPressEvent,
-    onPressCell,
-    onLongPressCell,
-    delayLongPressCell = 500,
-    dayCellContainerStyle,
-    dayCellTextStyle,
-    locale = en,
-    weekdayCellContainerStyle,
-    weekdayCellTextStyle,
-    weekRowMinHeight,
-    todayCellTextStyle,
-  } = props;
   const eventHeight = 26;
   const { width: screenWidth } = useWindowDimensions();
   const dateColumnWidth = screenWidth / 7;
-  const weekId = dates[0]?.format('YYYY-MM-DD');
-  if (weekId && eventPosition) {
-    eventPosition.resetResource(weekId);
+  const weekId = props.dates[0]?.format('YYYY-MM-DD');
+  if (weekId && props.eventPosition) {
+    props.eventPosition.resetResource(weekId);
   }
 
   return (
     <View style={styles.container}>
-      {dates.map((djs, dateIndex) => {
-        const text = isWeekdayHeader
-          ? djs.locale(locale).format('ddd')
-          : djs.format('D');
-        const filteredEvents = isWeekdayHeader
-          ? []
-          : events
-              .filter((event) => {
-                const startDjs = dayjs(event.start);
-                return (
-                  startDjs.format('YYYY-MM-DD') === djs.format('YYYY-MM-DD') ||
-                  (dateIndex === 0 && startDjs.isBefore(djs))
-                );
-              })
-              .sort((a, b) => {
-                const aStartDjs = dateIndex === 0 ? djs : dayjs(a.start);
-                const bStartDjs = dateIndex === 0 ? djs : dayjs(b.start);
-                const aEndDjs = dayjs(a.end);
-                const bEndDjs = dayjs(b.end);
-                const aDiffDays = aEndDjs.diff(aStartDjs, 'day');
-                const bDiffDays = bEndDjs.diff(bStartDjs, 'day');
+      {props.dates.map((djs, dateIndex) => {
+        const text = djs.format('D');
+        const filteredEvents = props.events
+          ?.filter((event) => {
+            const startDjs = dayjs(event.start);
+            return (
+              startDjs.format('YYYY-MM-DD') === djs.format('YYYY-MM-DD') ||
+              (dateIndex === 0 && startDjs.isBefore(djs))
+            );
+          })
+          .sort((a, b) => {
+            const aStartDjs = dateIndex === 0 ? djs : dayjs(a.start);
+            const bStartDjs = dateIndex === 0 ? djs : dayjs(b.start);
+            const aEndDjs = dayjs(a.end);
+            const bEndDjs = dayjs(b.end);
+            const aDiffDays = aEndDjs.diff(aStartDjs, 'day');
+            const bDiffDays = bEndDjs.diff(bStartDjs, 'day');
 
-                return bDiffDays - aDiffDays;
-              });
+            return bDiffDays - aDiffDays;
+          });
 
-        const rows: (CalendarEvent | number)[] = [];
-        if (weekId && eventPosition) {
-          const rowNums = eventPosition.getRowNums({
+        const events: (CalendarEvent | number)[] = [];
+        if (weekId && props.eventPosition) {
+          const rowNums = props.eventPosition.getRowNums({
             weekId,
             date: djs.toDate(),
           });
@@ -90,11 +64,11 @@ export const MonthCalendarWeekRow = (props: {
           let eventIndex = 0;
           for (let ii = 1; ii <= rowsLength; ii++) {
             if (rowNums.includes(ii)) {
-              rows.push(ii);
+              events.push(ii);
             } else {
               const event = filteredEvents[eventIndex];
               if (event) {
-                rows.push(event);
+                events.push(event);
               }
               eventIndex++;
             }
@@ -102,56 +76,52 @@ export const MonthCalendarWeekRow = (props: {
         }
         return (
           <TouchableOpacity
-            key={isWeekdayHeader ? djs.get('d') : djs.get('date')}
+            key={djs.get('date')}
             style={[
               styles.dayCellCountainer,
-              { minHeight: isWeekdayHeader ? undefined : weekRowMinHeight },
+              { minHeight: props.weekRowMinHeight },
               { zIndex: 7 - dateIndex },
             ]}
             onPress={() => {
-              onPressCell?.(djs.toDate());
+              props.onPressCell?.(djs.toDate());
             }}
             onLongPress={() => {
-              onLongPressCell?.(djs.toDate());
+              props.onLongPressCell?.(djs.toDate());
             }}
-            delayLongPress={delayLongPressCell}
+            delayLongPress={props.delayLongPressCell}
           >
             <View
               style={[
                 styles.dayCellInner,
-                isWeekdayHeader
-                  ? weekdayCellContainerStyle?.(djs.day())
-                  : dayCellContainerStyle?.(djs.toDate()),
+                props.dayCellContainerStyle?.(djs.toDate()),
               ]}
             />
             <View style={styles.dayCellLabel}>
               <Text
                 style={[
                   styles.dayCellText,
-                  isWeekdayHeader
-                    ? weekdayCellTextStyle?.(djs.day())
-                    : dayCellTextStyle?.(djs.toDate()),
-                  !isWeekdayHeader && dayjs(djs).isSame(dayjs(), 'day')
-                    ? todayCellTextStyle
+                  props.dayCellTextStyle?.(djs.toDate()),
+                  dayjs(djs).isSame(dayjs(), 'day')
+                    ? props.todayCellTextStyle
                     : {},
                 ]}
               >
                 {text}
               </Text>
             </View>
-            {rows.map((eventRow, rowIndex) => {
-              if (typeof eventRow === 'number') {
+            {events.map((event, rowIndex) => {
+              if (typeof event === 'number') {
                 return (
                   <View
-                    key={eventRow}
+                    key={event}
                     style={{ height: eventHeight, marginBottom: EVENT_GAP }}
                   />
                 );
               }
 
-              const rawStartDjs = dayjs(eventRow.start);
-              const startDjs = dateIndex === 0 ? djs : dayjs(eventRow.start);
-              const endDjs = dayjs(eventRow.end);
+              const rawStartDjs = dayjs(event.start);
+              const startDjs = dateIndex === 0 ? djs : dayjs(event.start);
+              const endDjs = dayjs(event.end);
               const diffDays = endDjs
                 .startOf('day')
                 .diff(startDjs.startOf('day'), 'day');
@@ -166,10 +136,10 @@ export const MonthCalendarWeekRow = (props: {
                 width += EVENT_GAP + 1;
               }
 
-              const isLastRow = rowIndex === rows.length - 1;
+              const isLastRow = rowIndex === events.length - 1;
 
-              if (eventPosition && weekId) {
-                eventPosition.push({
+              if (props.eventPosition && weekId) {
+                props.eventPosition.push({
                   weekId,
                   startDate: startDjs.toDate(),
                   days: diffDays + 1,
@@ -179,12 +149,12 @@ export const MonthCalendarWeekRow = (props: {
 
               return (
                 <TouchableOpacity
-                  key={eventRow.id}
+                  key={event.id}
                   style={[
                     styles.event,
                     {
-                      backgroundColor: eventRow.backgroundColor,
-                      borderColor: eventRow.borderColor,
+                      backgroundColor: event.backgroundColor,
+                      borderColor: event.borderColor,
                       width: width,
                       height: eventHeight,
                     },
@@ -192,19 +162,19 @@ export const MonthCalendarWeekRow = (props: {
                     isLastRow ? styles.lastRowEvent : {},
                   ]}
                   onPress={() => {
-                    onPressEvent?.(eventRow);
+                    props.onPressEvent?.(event);
                   }}
                   onLongPress={() => {
-                    onLongPressEvent?.(eventRow);
+                    props.onLongPressEvent?.(event);
                   }}
-                  delayLongPress={delayLongPressEvent}
+                  delayLongPress={props.delayLongPressEvent}
                 >
                   <Text
                     numberOfLines={1}
                     ellipsizeMode="tail"
-                    style={[styles.eventTitle, { color: eventRow.color }]}
+                    style={[styles.eventTitle, { color: event.color }]}
                   >
-                    {eventRow.title}
+                    {event.title}
                   </Text>
                 </TouchableOpacity>
               );
