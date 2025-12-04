@@ -39,6 +39,9 @@ const events: CalendarEvent[] = [
     backgroundColor: '#4ecdc4',
     borderColor: '#45b7aa',
     color: '#0e0e0e',
+    borderStyle: 'dashed',
+    borderWidth: 2,
+    borderRadius: 8,
   },
 ];
 
@@ -104,21 +107,24 @@ function App() {
 
 ### CalendarEvent
 
-| Property          | Type     | Required | Description       |
-| ----------------- | -------- | -------- | ----------------- |
-| `id`              | `string` | Yes      | Unique identifier |
-| `title`           | `string` | Yes      | Event title       |
-| `start`           | `Date`   | Yes      | Start date        |
-| `end`             | `Date`   | Yes      | End date          |
-| `backgroundColor` | `string` | Yes      | Background color  |
-| `borderColor`     | `string` | Yes      | Border color      |
-| `color`           | `string` | Yes      | Text color        |
+| Property          | Type                                    | Required | Description                    |
+| ----------------- | --------------------------------------- | -------- | ------------------------------ |
+| `id`              | `string`                                | Yes      | Unique identifier              |
+| `title`           | `string`                                | Yes      | Event title                    |
+| `start`           | `Date`                                  | Yes      | Start date                     |
+| `end`             | `Date`                                  | Yes      | End date                       |
+| `backgroundColor` | `string`                                | Yes      | Background color               |
+| `borderColor`     | `string`                                | Yes      | Border color                   |
+| `color`           | `string`                                | Yes      | Text color                     |
+| `borderStyle`     | `'solid' \| 'dashed' \| 'dotted'`       | No       | Border style                   |
+| `borderWidth`     | `number`                                | No       | Border width                   |
+| `borderRadius`    | `number`                                | No       | Border radius                  |
 
 ## Features
 
 - Horizontally scrollable month view
 - Multi-day event support
-- Customizable event colors
+- Customizable event colors and border styles
 - Event press handlers (tap and long press)
 - Date cell press handlers (tap and long press)
 - Configurable week start day (Sunday or Monday)
