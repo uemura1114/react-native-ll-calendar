@@ -27,8 +27,11 @@ export default function App() {
         start: new Date(currentYear, currentMonth, 5, 22, 0),
         end: new Date(currentYear, currentMonth, 6, 1, 0),
         backgroundColor: '#ff6b6b',
-        borderColor: '#e55353',
+        borderColor: '#000000',
         color: '#0e0e0e',
+        borderStyle: 'dashed',
+        borderWidth: 1,
+        borderRadius: 8,
       },
       {
         id: '1-2',

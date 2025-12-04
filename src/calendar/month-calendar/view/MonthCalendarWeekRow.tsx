@@ -157,6 +157,15 @@ export const MonthCalendarWeekRow = (props: {
                       borderColor: event.borderColor,
                       width: width,
                       height: eventHeight,
+                      ...(event.borderStyle !== undefined && {
+                        borderStyle: event.borderStyle,
+                      }),
+                      ...(event.borderWidth !== undefined && {
+                        borderWidth: event.borderWidth,
+                      }),
+                      ...(event.borderRadius !== undefined && {
+                        borderRadius: event.borderRadius,
+                      }),
                     },
                     isPrevDateEvent ? styles.prevDateEvent : {},
                     isLastRow ? styles.lastRowEvent : {},
