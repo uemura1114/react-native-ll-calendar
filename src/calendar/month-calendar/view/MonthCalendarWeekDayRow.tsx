@@ -20,7 +20,7 @@ export const MonthCalendarWeekDayRow = (props: {
         return (
           <View
             key={djs.get('d')}
-            style={[styles.dayCellCountainer, { zIndex: 7 - dateIndex }]}
+            style={[styles.dayCellContainer, { zIndex: 7 - dateIndex }]}
           >
             <View
               style={[
@@ -53,7 +53,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'white',
   },
-  dayCellCountainer: {
+  dayCellContainer: {
     flex: 1,
     borderRightWidth: CELL_BORDER_WIDTH,
     borderBottomWidth: CELL_BORDER_WIDTH,
