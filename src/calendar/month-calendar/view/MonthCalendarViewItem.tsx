@@ -44,6 +44,7 @@ export const MonthCalendarViewItem = (props: {
   todayCellTextStyle?: TextStyle;
   hiddenMonth?: boolean;
   monthFormat?: string;
+  stickyHeaderEnabled?: boolean;
 }) => {
   const { width } = useWindowDimensions();
   const eventPosition = new MonthCalendarEventPosition();
@@ -89,6 +90,10 @@ export const MonthCalendarViewItem = (props: {
     return (bodyHeight - monthRowHeight - weekdayRowHeight) / weeks.length;
   }, [bodyHeight, monthRowHeight, weekdayRowHeight, weeks.length]);
 
+  const stickyHeaderIndices = useMemo(() => {
+    return props.stickyHeaderEnabled ? [0] : [];
+  }, [props.stickyHeaderEnabled]);
+
   return (
     <ScrollView
       style={[styles.container, { width, zIndex: props.flatListIndex }]}
@@ -99,23 +104,26 @@ export const MonthCalendarViewItem = (props: {
         />
       }
       onLayout={onLayoutBody}
+      stickyHeaderIndices={stickyHeaderIndices}
     >
-      {props.hiddenMonth ? (
-        <View style={styles.blankMonthContainer} />
-      ) : (
-        <View style={styles.monthContainer} onLayout={onLayoutMonthRow}>
-          <Text style={styles.monthText}>
-            {dateDjs.format(props.monthFormat ?? 'YYYY/MM')}
-          </Text>
+      <View>
+        {props.hiddenMonth ? (
+          <View style={styles.blankMonthContainer} />
+        ) : (
+          <View style={styles.monthContainer} onLayout={onLayoutMonthRow}>
+            <Text style={styles.monthText}>
+              {dateDjs.format(props.monthFormat ?? 'YYYY/MM')}
+            </Text>
+          </View>
+        )}
+        <View onLayout={onLayoutWeekdayRow}>
+          <MonthCalendarWeekDayRow
+            dates={weeks[0] ?? []}
+            locale={props.locale}
+            weekdayCellContainerStyle={props.weekdayCellContainerStyle}
+            weekdayCellTextStyle={props.weekdayCellTextStyle}
+          />
         </View>
-      )}
-      <View onLayout={onLayoutWeekdayRow}>
-        <MonthCalendarWeekDayRow
-          dates={weeks[0] ?? []}
-          locale={props.locale}
-          weekdayCellContainerStyle={props.weekdayCellContainerStyle}
-          weekdayCellTextStyle={props.weekdayCellTextStyle}
-        />
       </View>
       <View>
         {weeks.map((week, index) => {
