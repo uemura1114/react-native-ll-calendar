@@ -36,6 +36,7 @@ export const MonthCalendar = (props: {
   todayCellTextStyle?: TextStyle;
   hiddenMonth?: boolean;
   monthFormat?: string;
+  stickyHeaderEnabled?: boolean;
 }) => {
   const [dateState] = useState(props.defaultDate);
   const [_activeIndex, setActiveIndex] = useState(HALF_PANEL_LENGTH);
@@ -110,6 +111,7 @@ export const MonthCalendar = (props: {
             todayCellTextStyle={props.todayCellTextStyle}
             hiddenMonth={props.hiddenMonth}
             monthFormat={props.monthFormat}
+            stickyHeaderEnabled={props.stickyHeaderEnabled}
           />
         );
       }}
