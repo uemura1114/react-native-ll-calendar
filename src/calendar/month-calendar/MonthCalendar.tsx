@@ -37,6 +37,7 @@ export const MonthCalendar = (props: {
   hiddenMonth?: boolean;
   monthFormat?: string;
   stickyHeaderEnabled?: boolean;
+  cellBorderColor?: string;
 }) => {
   const [dateState] = useState(props.defaultDate);
   const [_activeIndex, setActiveIndex] = useState(HALF_PANEL_LENGTH);
@@ -112,6 +113,7 @@ export const MonthCalendar = (props: {
             hiddenMonth={props.hiddenMonth}
             monthFormat={props.monthFormat}
             stickyHeaderEnabled={props.stickyHeaderEnabled}
+            cellBorderColor={props.cellBorderColor}
           />
         );
       }}

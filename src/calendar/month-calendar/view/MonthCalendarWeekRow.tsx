@@ -22,6 +22,7 @@ export const MonthCalendarWeekRow = (props: {
   weekdayCellTextStyle?: (weekDayNum: WeekdayNum) => TextStyle;
   weekRowMinHeight?: number;
   todayCellTextStyle?: TextStyle;
+  cellBorderColor?: string;
 }) => {
   const eventHeight = 26;
   const { width: screenWidth } = useWindowDimensions();
@@ -81,6 +82,7 @@ export const MonthCalendarWeekRow = (props: {
               styles.dayCellCountainer,
               { minHeight: props.weekRowMinHeight },
               { zIndex: 7 - dateIndex },
+              { borderColor: props.cellBorderColor ?? 'lightslategrey' },
             ]}
             onPress={() => {
               props.onPressCell?.(djs.toDate());

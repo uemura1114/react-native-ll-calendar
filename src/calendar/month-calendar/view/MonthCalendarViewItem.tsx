@@ -45,6 +45,7 @@ export const MonthCalendarViewItem = (props: {
   hiddenMonth?: boolean;
   monthFormat?: string;
   stickyHeaderEnabled?: boolean;
+  cellBorderColor?: string;
 }) => {
   const { width } = useWindowDimensions();
   const eventPosition = new MonthCalendarEventPosition();
@@ -96,7 +97,14 @@ export const MonthCalendarViewItem = (props: {
 
   return (
     <ScrollView
-      style={[styles.container, { width, zIndex: props.flatListIndex }]}
+      style={[
+        styles.container,
+        {
+          width,
+          zIndex: props.flatListIndex,
+          borderColor: props.cellBorderColor ?? 'lightslategrey',
+        },
+      ]}
       refreshControl={
         <RefreshControl
           refreshing={!!props.refreshing}
@@ -108,9 +116,20 @@ export const MonthCalendarViewItem = (props: {
     >
       <View>
         {props.hiddenMonth ? (
-          <View style={styles.blankMonthContainer} />
+          <View
+            style={[
+              styles.blankMonthContainer,
+              { borderColor: props.cellBorderColor ?? 'lightslategrey' },
+            ]}
+          />
         ) : (
-          <View style={styles.monthContainer} onLayout={onLayoutMonthRow}>
+          <View
+            style={[
+              styles.monthContainer,
+              { borderColor: props.cellBorderColor ?? 'lightslategrey' },
+            ]}
+            onLayout={onLayoutMonthRow}
+          >
             <Text style={styles.monthText}>
               {dateDjs.format(props.monthFormat ?? 'YYYY/MM')}
             </Text>
@@ -122,6 +141,7 @@ export const MonthCalendarViewItem = (props: {
             locale={props.locale}
             weekdayCellContainerStyle={props.weekdayCellContainerStyle}
             weekdayCellTextStyle={props.weekdayCellTextStyle}
+            cellBorderColor={props.cellBorderColor}
           />
         </View>
       </View>
@@ -149,6 +169,7 @@ export const MonthCalendarViewItem = (props: {
               dayCellTextStyle={props.dayCellTextStyle}
               weekRowMinHeight={weekRowMinHeight}
               todayCellTextStyle={props.todayCellTextStyle}
+              cellBorderColor={props.cellBorderColor}
             />
           );
         })}
@@ -160,17 +181,14 @@ export const MonthCalendarViewItem = (props: {
 const styles = StyleSheet.create({
   container: {
     height: '100%',
-    borderColor: 'lightslategrey',
     alignSelf: 'flex-start',
   },
   blankMonthContainer: {
     borderWidth: CELL_BORDER_WIDTH,
-    borderColor: 'lightslategrey',
   },
   monthContainer: {
     padding: 2,
     borderWidth: CELL_BORDER_WIDTH,
-    borderColor: 'lightslategrey',
     backgroundColor: 'white',
   },
   monthText: {

@@ -480,6 +480,7 @@ export default function App() {
         hiddenMonth={false}
         monthFormat={'YYYY/MM'}
         stickyHeaderEnabled={true}
+        cellBorderColor="#999999"
       />
     </View>
   );
