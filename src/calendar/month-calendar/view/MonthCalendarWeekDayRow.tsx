@@ -11,6 +11,7 @@ export const MonthCalendarWeekDayRow = (props: {
   dates: dayjs.Dayjs[];
   weekdayCellContainerStyle?: (weekDayNum: WeekdayNum) => ViewStyle;
   weekdayCellTextStyle?: (weekDayNum: WeekdayNum) => TextStyle;
+  cellBorderColor?: string;
 }) => {
   return (
     <View style={styles.container}>
@@ -20,7 +21,11 @@ export const MonthCalendarWeekDayRow = (props: {
         return (
           <View
             key={djs.get('d')}
-            style={[styles.dayCellContainer, { zIndex: 7 - dateIndex }]}
+            style={[
+              styles.dayCellContainer,
+              { zIndex: 7 - dateIndex },
+              { borderColor: props.cellBorderColor ?? 'lightslategrey' },
+            ]}
           >
             <View
               style={[
@@ -57,7 +62,6 @@ const styles = StyleSheet.create({
     flex: 1,
     borderRightWidth: CELL_BORDER_WIDTH,
     borderBottomWidth: CELL_BORDER_WIDTH,
-    borderColor: 'lightslategrey',
     backgroundColor: 'white',
     position: 'relative',
   },
