@@ -73,6 +73,7 @@ function App() {
       dayCellTextStyle={(date) => ({
         color: date.getDay() === 0 ? '#FF3B30' : '#000000',
       })}
+      stickyHeaderEnabled={true}
     />
   );
 }
@@ -104,6 +105,7 @@ function App() {
 | `weekdayCellTextStyle`      | `(weekDayNum: WeekdayNum) => TextStyle` | No       | -       | Style function for weekday cell text       |
 | `hiddenMonth`               | `boolean`                               | No       | `false` | Hide month header display                  |
 | `monthFormat`               | `string`                                | No       | -       | Custom format string for month display     |
+| `stickyHeaderEnabled`       | `boolean`                               | No       | `false` | Enable sticky headers for month and week   |
 
 ### CalendarEvent
 
@@ -133,6 +135,7 @@ function App() {
 - Locale support for internationalization
 - Optional month header visibility control
 - Custom month format display
+- Sticky header support for month and week rows
 - Spans 10 years before and after the default date
 
 ## License
