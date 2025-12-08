@@ -99,23 +99,26 @@ export const MonthCalendarViewItem = (props: {
         />
       }
       onLayout={onLayoutBody}
+      stickyHeaderIndices={[0]}
     >
-      {props.hiddenMonth ? (
-        <View style={styles.blankMonthContainer} />
-      ) : (
-        <View style={styles.monthContainer} onLayout={onLayoutMonthRow}>
-          <Text style={styles.monthText}>
-            {dateDjs.format(props.monthFormat ?? 'YYYY/MM')}
-          </Text>
+      <View>
+        {props.hiddenMonth ? (
+          <View style={styles.blankMonthContainer} />
+        ) : (
+          <View style={styles.monthContainer} onLayout={onLayoutMonthRow}>
+            <Text style={styles.monthText}>
+              {dateDjs.format(props.monthFormat ?? 'YYYY/MM')}
+            </Text>
+          </View>
+        )}
+        <View onLayout={onLayoutWeekdayRow}>
+          <MonthCalendarWeekDayRow
+            dates={weeks[0] ?? []}
+            locale={props.locale}
+            weekdayCellContainerStyle={props.weekdayCellContainerStyle}
+            weekdayCellTextStyle={props.weekdayCellTextStyle}
+          />
         </View>
-      )}
-      <View onLayout={onLayoutWeekdayRow}>
-        <MonthCalendarWeekDayRow
-          dates={weeks[0] ?? []}
-          locale={props.locale}
-          weekdayCellContainerStyle={props.weekdayCellContainerStyle}
-          weekdayCellTextStyle={props.weekdayCellTextStyle}
-        />
       </View>
       <View>
         {weeks.map((week, index) => {
