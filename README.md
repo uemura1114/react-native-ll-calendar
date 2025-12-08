@@ -74,6 +74,7 @@ function App() {
         color: date.getDay() === 0 ? '#FF3B30' : '#000000',
       })}
       stickyHeaderEnabled={true}
+      cellBorderColor="#CCCCCC"
     />
   );
 }
@@ -106,6 +107,7 @@ function App() {
 | `hiddenMonth`               | `boolean`                               | No       | `false` | Hide month header display                  |
 | `monthFormat`               | `string`                                | No       | -       | Custom format string for month display     |
 | `stickyHeaderEnabled`       | `boolean`                               | No       | `false` | Enable sticky headers for month and week   |
+| `cellBorderColor`           | `string`                                | No       | `'lightslategrey'` | Color for calendar cell borders |
 
 ### CalendarEvent
 
@@ -136,6 +138,7 @@ function App() {
 - Optional month header visibility control
 - Custom month format display
 - Sticky header support for month and week rows
+- Customizable cell border colors
 - Spans 10 years before and after the default date
 
 ## License
