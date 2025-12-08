@@ -44,6 +44,7 @@ export const MonthCalendarViewItem = (props: {
   todayCellTextStyle?: TextStyle;
   hiddenMonth?: boolean;
   monthFormat?: string;
+  stickyHeaderEnabled?: boolean;
 }) => {
   const { width } = useWindowDimensions();
   const eventPosition = new MonthCalendarEventPosition();
@@ -89,6 +90,14 @@ export const MonthCalendarViewItem = (props: {
     return (bodyHeight - monthRowHeight - weekdayRowHeight) / weeks.length;
   }, [bodyHeight, monthRowHeight, weekdayRowHeight, weeks.length]);
 
+  const stickyHeaderIndices = useMemo(() => {
+    if (props.stickyHeaderEnabled === undefined) {
+      return [0];
+    }
+
+    return props.stickyHeaderEnabled ? [0] : [];
+  }, [props.stickyHeaderEnabled]);
+
   return (
     <ScrollView
       style={[styles.container, { width, zIndex: props.flatListIndex }]}
@@ -99,7 +108,7 @@ export const MonthCalendarViewItem = (props: {
         />
       }
       onLayout={onLayoutBody}
-      stickyHeaderIndices={[0]}
+      stickyHeaderIndices={stickyHeaderIndices}
     >
       <View>
         {props.hiddenMonth ? (
