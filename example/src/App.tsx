@@ -479,6 +479,7 @@ export default function App() {
         todayCellTextStyle={todayCellTextStyle}
         hiddenMonth={false}
         monthFormat={'YYYY/MM'}
+        stickyHeaderEnabled={true}
       />
     </View>
   );
