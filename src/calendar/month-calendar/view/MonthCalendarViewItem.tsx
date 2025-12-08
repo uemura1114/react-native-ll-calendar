@@ -91,10 +91,6 @@ export const MonthCalendarViewItem = (props: {
   }, [bodyHeight, monthRowHeight, weekdayRowHeight, weeks.length]);
 
   const stickyHeaderIndices = useMemo(() => {
-    if (props.stickyHeaderEnabled === undefined) {
-      return [0];
-    }
-
     return props.stickyHeaderEnabled ? [0] : [];
   }, [props.stickyHeaderEnabled]);
 
