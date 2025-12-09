@@ -188,7 +188,11 @@ export const MonthCalendarWeekRow = (props: {
                   <Text
                     numberOfLines={1}
                     ellipsizeMode={props.eventEllipsizeMode ?? 'tail'}
-                    style={[styles.eventTitle, props.eventTextStyle?.(event)]}
+                    style={[
+                      styles.eventTitle,
+                      { color: event.color },
+                      props.eventTextStyle?.(event),
+                    ]}
                     allowFontScaling={props.allowFontScaling}
                   >
                     {event.title}
