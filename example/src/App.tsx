@@ -456,6 +456,12 @@ export default function App() {
     setSelectedDate(d);
   }, []);
 
+  const eventTextStyle = useCallback((_event: CalendarEvent): TextStyle => {
+    return {
+      fontSize: 14,
+    };
+  }, []);
+
   return (
     <View style={styles.container}>
       <MonthCalendar
@@ -481,6 +487,10 @@ export default function App() {
         monthFormat={'YYYY/MM'}
         stickyHeaderEnabled={true}
         cellBorderColor="#999999"
+        allowFontScaling={false}
+        eventHeight={32}
+        eventTextStyle={eventTextStyle}
+        eventEllipsizeMode={'clip'}
       />
     </View>
   );

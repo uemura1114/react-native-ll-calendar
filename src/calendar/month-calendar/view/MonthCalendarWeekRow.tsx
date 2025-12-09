@@ -23,8 +23,12 @@ export const MonthCalendarWeekRow = (props: {
   weekRowMinHeight?: number;
   todayCellTextStyle?: TextStyle;
   cellBorderColor?: string;
+  allowFontScaling?: boolean;
+  eventHeight?: number;
+  eventTextStyle?: (event: CalendarEvent) => TextStyle;
+  eventEllipsizeMode?: 'head' | 'middle' | 'tail' | 'clip';
 }) => {
-  const eventHeight = 26;
+  const eventHeight = props.eventHeight || 26;
   const { width: screenWidth } = useWindowDimensions();
   const dateColumnWidth = screenWidth / 7;
   const weekId = props.dates[0]?.format('YYYY-MM-DD');
@@ -107,6 +111,7 @@ export const MonthCalendarWeekRow = (props: {
                     ? props.todayCellTextStyle
                     : {},
                 ]}
+                allowFontScaling={props.allowFontScaling}
               >
                 {text}
               </Text>
@@ -182,8 +187,9 @@ export const MonthCalendarWeekRow = (props: {
                 >
                   <Text
                     numberOfLines={1}
-                    ellipsizeMode="tail"
-                    style={[styles.eventTitle, { color: event.color }]}
+                    ellipsizeMode={props.eventEllipsizeMode ?? 'tail'}
+                    style={[styles.eventTitle, props.eventTextStyle?.(event)]}
+                    allowFontScaling={props.allowFontScaling}
                   >
                     {event.title}
                   </Text>
@@ -226,7 +232,7 @@ const styles = StyleSheet.create({
   },
   dayCellText: {
     textAlign: 'center',
-    fontSize: 12,
+    fontSize: 14,
   },
   event: {
     borderWidth: 0.5,
@@ -247,6 +253,6 @@ const styles = StyleSheet.create({
     marginBottom: EVENT_GAP,
   },
   eventTitle: {
-    fontSize: 10,
+    fontSize: 12,
   },
 });

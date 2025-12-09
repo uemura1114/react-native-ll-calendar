@@ -108,6 +108,10 @@ function App() {
 | `monthFormat`               | `string`                                | No       | -       | Custom format string for month display     |
 | `stickyHeaderEnabled`       | `boolean`                               | No       | `false` | Enable sticky headers for month and week   |
 | `cellBorderColor`           | `string`                                | No       | `'lightslategrey'` | Color for calendar cell borders |
+| `allowFontScaling`          | `boolean`                               | No       | -       | Enable font scaling for text elements      |
+| `eventHeight`               | `number`                                | No       | `26`    | Height of event items in pixels            |
+| `eventTextStyle`            | `(event: CalendarEvent) => TextStyle`   | No       | -       | Style function for event text              |
+| `eventEllipsizeMode`       | `'head' \| 'middle' \| 'tail' \| 'clip'` | No       | `'tail'` | Ellipsize mode for event text              |
 
 ### CalendarEvent
 
@@ -139,6 +143,8 @@ function App() {
 - Custom month format display
 - Sticky header support for month and week rows
 - Customizable cell border colors
+- Font scaling control for text elements
+- Customizable event height and text styles
 - Spans 10 years before and after the default date
 
 ## License
