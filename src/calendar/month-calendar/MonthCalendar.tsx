@@ -38,6 +38,9 @@ export const MonthCalendar = (props: {
   monthFormat?: string;
   stickyHeaderEnabled?: boolean;
   cellBorderColor?: string;
+  allowFontScaling?: boolean;
+  eventHeight?: number;
+  eventTextStyle?: (event: CalendarEvent) => TextStyle;
 }) => {
   const [dateState] = useState(props.defaultDate);
   const [_activeIndex, setActiveIndex] = useState(HALF_PANEL_LENGTH);
@@ -114,6 +117,9 @@ export const MonthCalendar = (props: {
             monthFormat={props.monthFormat}
             stickyHeaderEnabled={props.stickyHeaderEnabled}
             cellBorderColor={props.cellBorderColor}
+            allowFontScaling={props.allowFontScaling}
+            eventHeight={props.eventHeight}
+            eventTextStyle={props.eventTextStyle}
           />
         );
       }}

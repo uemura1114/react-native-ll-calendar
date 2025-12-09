@@ -46,6 +46,9 @@ export const MonthCalendarViewItem = (props: {
   monthFormat?: string;
   stickyHeaderEnabled?: boolean;
   cellBorderColor?: string;
+  allowFontScaling?: boolean;
+  eventHeight?: number;
+  eventTextStyle?: (event: CalendarEvent) => TextStyle;
 }) => {
   const { width } = useWindowDimensions();
   const eventPosition = new MonthCalendarEventPosition();
@@ -130,7 +133,10 @@ export const MonthCalendarViewItem = (props: {
             ]}
             onLayout={onLayoutMonthRow}
           >
-            <Text style={styles.monthText}>
+            <Text
+              style={styles.monthText}
+              allowFontScaling={props.allowFontScaling}
+            >
               {dateDjs.format(props.monthFormat ?? 'YYYY/MM')}
             </Text>
           </View>
@@ -142,6 +148,7 @@ export const MonthCalendarViewItem = (props: {
             weekdayCellContainerStyle={props.weekdayCellContainerStyle}
             weekdayCellTextStyle={props.weekdayCellTextStyle}
             cellBorderColor={props.cellBorderColor}
+            allowFontScaling={props.allowFontScaling}
           />
         </View>
       </View>
@@ -170,6 +177,9 @@ export const MonthCalendarViewItem = (props: {
               weekRowMinHeight={weekRowMinHeight}
               todayCellTextStyle={props.todayCellTextStyle}
               cellBorderColor={props.cellBorderColor}
+              allowFontScaling={props.allowFontScaling}
+              eventHeight={props.eventHeight}
+              eventTextStyle={props.eventTextStyle}
             />
           );
         })}
@@ -193,5 +203,6 @@ const styles = StyleSheet.create({
   },
   monthText: {
     textAlign: 'center',
+    fontSize: 14,
   },
 });

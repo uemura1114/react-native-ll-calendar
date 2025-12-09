@@ -12,6 +12,7 @@ export const MonthCalendarWeekDayRow = (props: {
   weekdayCellContainerStyle?: (weekDayNum: WeekdayNum) => ViewStyle;
   weekdayCellTextStyle?: (weekDayNum: WeekdayNum) => TextStyle;
   cellBorderColor?: string;
+  allowFontScaling?: boolean;
 }) => {
   return (
     <View style={styles.container}>
@@ -39,6 +40,7 @@ export const MonthCalendarWeekDayRow = (props: {
                   styles.dayCellText,
                   props.weekdayCellTextStyle?.(djs.day()),
                 ]}
+                allowFontScaling={props.allowFontScaling}
               >
                 {text}
               </Text>
