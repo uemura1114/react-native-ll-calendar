@@ -49,6 +49,7 @@ export const MonthCalendarViewItem = (props: {
   allowFontScaling?: boolean;
   eventHeight?: number;
   eventTextStyle?: (event: CalendarEvent) => TextStyle;
+  eventEllipsizeMode?: 'head' | 'middle' | 'tail' | 'clip';
 }) => {
   const { width } = useWindowDimensions();
   const eventPosition = new MonthCalendarEventPosition();
@@ -180,6 +181,7 @@ export const MonthCalendarViewItem = (props: {
               allowFontScaling={props.allowFontScaling}
               eventHeight={props.eventHeight}
               eventTextStyle={props.eventTextStyle}
+              eventEllipsizeMode={props.eventEllipsizeMode}
             />
           );
         })}

@@ -26,6 +26,7 @@ export const MonthCalendarWeekRow = (props: {
   allowFontScaling?: boolean;
   eventHeight?: number;
   eventTextStyle?: (event: CalendarEvent) => TextStyle;
+  eventEllipsizeMode?: 'head' | 'middle' | 'tail' | 'clip';
 }) => {
   const eventHeight = props.eventHeight || 26;
   const { width: screenWidth } = useWindowDimensions();
@@ -186,7 +187,7 @@ export const MonthCalendarWeekRow = (props: {
                 >
                   <Text
                     numberOfLines={1}
-                    ellipsizeMode="tail"
+                    ellipsizeMode={props.eventEllipsizeMode ?? 'clip'}
                     style={[styles.eventTitle, props.eventTextStyle?.(event)]}
                     allowFontScaling={props.allowFontScaling}
                   >
