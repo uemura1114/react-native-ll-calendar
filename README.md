@@ -111,6 +111,7 @@ function App() {
 | `allowFontScaling`          | `boolean`                               | No       | -       | Enable font scaling for text elements      |
 | `eventHeight`               | `number`                                | No       | `26`    | Height of event items in pixels            |
 | `eventTextStyle`            | `(event: CalendarEvent) => TextStyle`   | No       | -       | Style function for event text              |
+| `eventEllipsizeMode`       | `'head' \| 'middle' \| 'tail' \| 'clip'` | No       | `'tail'` | Ellipsize mode for event text              |
 
 ### CalendarEvent
 
