@@ -490,6 +490,7 @@ export default function App() {
         allowFontScaling={false}
         eventHeight={32}
         eventTextStyle={eventTextStyle}
+        eventEllipsizeMode={'clip'}
       />
     </View>
   );
