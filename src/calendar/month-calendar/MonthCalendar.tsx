@@ -42,6 +42,7 @@ export const MonthCalendar = (props: {
   eventHeight?: number;
   eventTextStyle?: (event: CalendarEvent) => TextStyle;
   eventEllipsizeMode?: 'head' | 'middle' | 'tail' | 'clip';
+  bottomSpacing?: number;
 }) => {
   const [dateState] = useState(props.defaultDate);
   const [_activeIndex, setActiveIndex] = useState(HALF_PANEL_LENGTH);
@@ -122,6 +123,7 @@ export const MonthCalendar = (props: {
             eventHeight={props.eventHeight}
             eventTextStyle={props.eventTextStyle}
             eventEllipsizeMode={props.eventEllipsizeMode}
+            bottomSpacing={props.bottomSpacing}
           />
         );
       }}

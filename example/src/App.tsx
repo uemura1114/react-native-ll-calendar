@@ -491,6 +491,7 @@ export default function App() {
         eventHeight={32}
         eventTextStyle={eventTextStyle}
         eventEllipsizeMode={'clip'}
+        bottomSpacing={200}
       />
     </View>
   );
