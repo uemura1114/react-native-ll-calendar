@@ -1,11 +1,12 @@
 import dayjs from 'dayjs';
 import ja from 'dayjs/locale/ja';
-import { useCallback, useMemo, useState } from 'react';
-import { Alert, type ViewStyle } from 'react-native';
+import { useCallback, useMemo, useRef, useState } from 'react';
+import { type ViewStyle } from 'react-native';
 import { View, StyleSheet } from 'react-native';
 import { MonthCalendar, type CalendarEvent } from 'react-native-ll-calendar';
 import type { WeekdayNum } from '../../src/types/month-calendar';
 import type { TextStyle } from 'react-native';
+import type { MonthCalendarRef } from '../../src/calendar/month-calendar/MonthCalendar';
 
 export default function App() {
   const [date, setDate] = useState(new Date());
@@ -371,18 +372,55 @@ export default function App() {
     ];
   }, []);
 
-  const handlePressEvent = useCallback((event: CalendarEvent) => {
-    Alert.alert('Notification', `pressed ${event.title}`);
-  }, []);
+  const calendarRef = useRef<MonthCalendarRef>(null);
 
-  const handleLongPressEvent = useCallback((event: CalendarEvent) => {
-    Alert.alert('Notification', `Long pressed ${event.title}`);
-  }, []);
+  const handleScrollToTop = useCallback(() => {
+    calendarRef.current?.scrollMonthViewToOffset(
+      dayjs(date).format('YYYY-MM'),
+      0,
+      true
+    );
+  }, [date]);
 
-  const handlePressCell = useCallback((d: Date) => {
-    const djs = dayjs(d);
-    Alert.alert('Notification', `pressed ${djs.format('YYYY-MM-DD')}`);
-  }, []);
+  const handleScrollDown = useCallback(() => {
+    calendarRef.current?.scrollMonthViewToOffset(
+      dayjs(date).format('YYYY-MM'),
+      100,
+      true
+    );
+  }, [date]);
+
+  const getMonthRowHeight = useCallback(
+    (d: Date) => {
+      return calendarRef.current?.getMonthRowHeight(
+        dayjs(date).format('YYYY-MM'),
+        d
+      );
+    },
+    [date]
+  );
+
+  const handlePressEvent = useCallback(
+    (_event: CalendarEvent) => {
+      handleScrollToTop();
+    },
+    [handleScrollToTop]
+  );
+
+  const handleLongPressEvent = useCallback(
+    (_event: CalendarEvent) => {
+      handleScrollDown();
+    },
+    [handleScrollDown]
+  );
+
+  const handlePressCell = useCallback(
+    (d: Date) => {
+      const height = getMonthRowHeight(d);
+      console.log('height', height);
+    },
+    [getMonthRowHeight]
+  );
 
   const [refreshing, setRefreshing] = useState(false);
   const handleRefresh = useCallback(() => {
@@ -465,6 +503,7 @@ export default function App() {
   return (
     <View style={styles.container}>
       <MonthCalendar
+        ref={calendarRef}
         defaultDate={date}
         weekStartsOn={1}
         onChangeDate={handleChangeDate}

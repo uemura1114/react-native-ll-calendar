@@ -20,10 +20,23 @@ import { monthlyEndDate, monthlyStartDate } from '../../../utils/functions';
 import { useEvents } from '../logic/useEvents';
 import { CELL_BORDER_WIDTH } from '../../../constants/size';
 import { RefreshControl } from 'react-native';
-import { useCallback, useMemo, useState } from 'react';
+import {
+  useCallback,
+  useMemo,
+  useState,
+  forwardRef,
+  useImperativeHandle,
+  useRef,
+} from 'react';
 import { MonthCalendarWeekDayRow } from './MonthCalendarWeekDayRow';
 
-export const MonthCalendarViewItem = (props: {
+export interface MonthCalendarViewItemRef {
+  scrollTo: (options: { x?: number; y?: number; animated?: boolean }) => void;
+  scrollToEnd: (options?: { animated?: boolean }) => void;
+  getRowHeight: (date: Date) => number | undefined;
+}
+
+type MonthCalendarViewItemProps = {
   month: string;
   weekStartsOn: WeekStartsOn;
   events: CalendarEvent[];
@@ -51,7 +64,12 @@ export const MonthCalendarViewItem = (props: {
   eventTextStyle?: (event: CalendarEvent) => TextStyle;
   eventEllipsizeMode?: 'head' | 'middle' | 'tail' | 'clip';
   bottomSpacing?: number;
-}) => {
+};
+
+export const MonthCalendarViewItem = forwardRef<
+  MonthCalendarViewItemRef,
+  MonthCalendarViewItemProps
+>((props, ref) => {
   const { width } = useWindowDimensions();
   const eventPosition = new MonthCalendarEventPosition();
   const date = new Date(props.month);
@@ -100,8 +118,35 @@ export const MonthCalendarViewItem = (props: {
     return props.stickyHeaderEnabled ? [0] : [];
   }, [props.stickyHeaderEnabled]);
 
+  const scrollViewRef = useRef<any>(null);
+
+  const weekHeights = useRef(new Map<string, number>());
+
+  useImperativeHandle(ref, () => ({
+    scrollTo: (options) => {
+      scrollViewRef.current?.scrollTo(options);
+    },
+    scrollToEnd: (options) => {
+      scrollViewRef.current?.scrollToEnd(options);
+    },
+    getRowHeight: (targetDate: Date) => {
+      const targetDjs = dayjs(targetDate);
+
+      const foundWeek = weeks.find((week) =>
+        week.some((day) => day.isSame(targetDjs, 'day'))
+      );
+
+      if (foundWeek && foundWeek[0]) {
+        const weekId = foundWeek[0].format('YYYY-MM-DD');
+        return weekHeights.current.get(weekId);
+      }
+      return undefined;
+    },
+  }));
+
   return (
     <ScrollView
+      ref={scrollViewRef}
       style={[
         styles.container,
         {
@@ -183,6 +228,9 @@ export const MonthCalendarViewItem = (props: {
               eventHeight={props.eventHeight}
               eventTextStyle={props.eventTextStyle}
               eventEllipsizeMode={props.eventEllipsizeMode}
+              onLayout={(e) => {
+                weekHeights.current.set(weekId, e.nativeEvent.layout.height);
+              }}
             />
           );
         })}
@@ -190,7 +238,7 @@ export const MonthCalendarViewItem = (props: {
       <View style={{ height: props.bottomSpacing }} />
     </ScrollView>
   );
-};
+});
 
 const styles = StyleSheet.create({
   container: {
