@@ -50,6 +50,7 @@ export const MonthCalendarViewItem = (props: {
   eventHeight?: number;
   eventTextStyle?: (event: CalendarEvent) => TextStyle;
   eventEllipsizeMode?: 'head' | 'middle' | 'tail' | 'clip';
+  bottomSpacing?: number;
 }) => {
   const { width } = useWindowDimensions();
   const eventPosition = new MonthCalendarEventPosition();
@@ -186,6 +187,7 @@ export const MonthCalendarViewItem = (props: {
           );
         })}
       </View>
+      <View style={{ height: props.bottomSpacing }} />
     </ScrollView>
   );
 };

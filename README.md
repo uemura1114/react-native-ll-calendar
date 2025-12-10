@@ -112,6 +112,7 @@ function App() {
 | `eventHeight`               | `number`                                | No       | `26`    | Height of event items in pixels            |
 | `eventTextStyle`            | `(event: CalendarEvent) => TextStyle`   | No       | -       | Style function for event text              |
 | `eventEllipsizeMode`       | `'head' \| 'middle' \| 'tail' \| 'clip'` | No       | `'tail'` | Ellipsize mode for event text              |
+| `bottomSpacing`            | `number`                                | No       | -       | Bottom spacing in pixels for scrollable content |
 
 ### CalendarEvent
 
