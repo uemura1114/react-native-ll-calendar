@@ -56,7 +56,11 @@ export const MonthCalendarWeekRow = (props: {
             const aDiffDays = aEndDjs.diff(aStartDjs, 'day');
             const bDiffDays = bEndDjs.diff(bStartDjs, 'day');
 
-            return bDiffDays - aDiffDays;
+            if (aDiffDays !== bDiffDays) {
+              return bDiffDays - aDiffDays;
+            }
+
+            return dayjs(a.start).diff(dayjs(b.start));
           });
 
         const events: (CalendarEvent | number)[] = [];
