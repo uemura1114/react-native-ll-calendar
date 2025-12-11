@@ -1,5 +1,9 @@
 import dayjs from 'dayjs';
-import { StyleSheet, useWindowDimensions } from 'react-native';
+import {
+  StyleSheet,
+  useWindowDimensions,
+  type LayoutChangeEvent,
+} from 'react-native';
 import { Text, TouchableOpacity, View, type ViewStyle } from 'react-native';
 import type { CalendarEvent, WeekdayNum } from '../../../types/month-calendar';
 import type MonthCalendarEventPosition from '../../../utils/month-calendar-event-position';
@@ -27,6 +31,7 @@ export const MonthCalendarWeekRow = (props: {
   eventHeight?: number;
   eventTextStyle?: (event: CalendarEvent) => TextStyle;
   eventEllipsizeMode?: 'head' | 'middle' | 'tail' | 'clip';
+  onLayout?: (event: LayoutChangeEvent) => void;
 }) => {
   const eventHeight = props.eventHeight || 26;
   const { width: screenWidth } = useWindowDimensions();
@@ -37,7 +42,7 @@ export const MonthCalendarWeekRow = (props: {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={styles.container} onLayout={props.onLayout}>
       {props.dates.map((djs, dateIndex) => {
         const text = djs.format('D');
         const filteredEvents = props.events

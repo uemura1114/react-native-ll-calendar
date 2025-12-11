@@ -19,7 +19,10 @@ yarn add react-native-ll-calendar
 ## Usage
 
 ```tsx
-import { MonthCalendar, CalendarEvent } from 'react-native-ll-calendar';
+import { useState, useRef } from 'react';
+import { View, Button } from 'react-native';
+import dayjs from 'dayjs';
+import { MonthCalendar, CalendarEvent, MonthCalendarRef } from 'react-native-ll-calendar';
 
 const events: CalendarEvent[] = [
   {
@@ -31,51 +34,47 @@ const events: CalendarEvent[] = [
     borderColor: '#e55353',
     color: '#0e0e0e',
   },
-  {
-    id: '2',
-    title: 'Conference',
-    start: new Date(2025, 9, 10),
-    end: new Date(2025, 9, 12),
-    backgroundColor: '#4ecdc4',
-    borderColor: '#45b7aa',
-    color: '#0e0e0e',
-    borderStyle: 'dashed',
-    borderWidth: 2,
-    borderRadius: 8,
-  },
+  // ... more events
 ];
 
 function App() {
   const [date, setDate] = useState(new Date());
-  const [refreshing, setRefreshing] = useState(false);
+  const calendarRef = useRef<MonthCalendarRef>(null);
 
-  const handleRefresh = () => {
-    setRefreshing(true);
-    // Fetch new events or data
-    setTimeout(() => setRefreshing(false), 1000);
+  const handleScrollToTop = () => {
+    // Scroll to the top of the current month view
+    calendarRef.current?.scrollMonthViewToOffset(
+      dayjs(date).format('YYYY-MM'),
+      0,
+      true
+    );
+  };
+
+  const checkRowHeight = () => {
+    // Get the height of the row containing the specific date
+    const height = calendarRef.current?.getMonthRowHeight(
+      dayjs(date).format('YYYY-MM'),
+      new Date()
+    );
+    console.log('Row height:', height);
   };
 
   return (
-    <MonthCalendar
-      defaultDate={date}
-      weekStartsOn={1}
-      onChangeDate={(newDate) => setDate(newDate)}
-      events={events}
-      onPressEvent={(event) => console.log('Event pressed:', event.title)}
-      onLongPressEvent={(event) => console.log('Event long pressed:', event.title)}
-      delayLongPressEvent={500}
-      onPressCell={(date) => console.log('Cell pressed:', date)}
-      onLongPressCell={(date) => console.log('Cell long pressed:', date)}
-      delayLongPressCell={500}
-      onRefresh={handleRefresh}
-      refreshing={refreshing}
-      todayCellTextStyle={{ fontWeight: 'bold', color: '#007AFF' }}
-      dayCellTextStyle={(date) => ({
-        color: date.getDay() === 0 ? '#FF3B30' : '#000000',
-      })}
-      stickyHeaderEnabled={true}
-      cellBorderColor="#CCCCCC"
-    />
+    <View style={{ flex: 1 }}>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-around', padding: 10 }}>
+        <Button title="Scroll Top" onPress={handleScrollToTop} />
+        <Button title="Check Height" onPress={checkRowHeight} />
+      </View>
+      <MonthCalendar
+        ref={calendarRef}
+        defaultDate={date}
+        weekStartsOn={1}
+        onChangeDate={(newDate) => setDate(newDate)}
+        events={events}
+        onPressEvent={(event) => console.log('Event pressed:', event.title)}
+        // ... other props
+      />
+    </View>
   );
 }
 ```
@@ -114,6 +113,15 @@ function App() {
 | `eventEllipsizeMode`       | `'head' \| 'middle' \| 'tail' \| 'clip'` | No       | `'tail'` | Ellipsize mode for event text              |
 | `bottomSpacing`            | `number`                                | No       | -       | Bottom spacing in pixels for scrollable content |
 
+### MonthCalendarRef Methods
+
+You can access these methods by passing a `ref` to the `MonthCalendar` component.
+
+| Method | Signature | Description |
+| ------ | --------- | ----------- |
+| `scrollMonthViewToOffset` | `(monthKey: string, offset: number, animated?: boolean) => void` | Scrolls the view of the specified month (format: 'YYYY-MM') to a vertical offset. |
+| `getMonthRowHeight` | `(monthKey: string, date: Date) => number \| undefined` | Returns the height of the week row containing the specified date in the specified month. |
+
 ### CalendarEvent
 
 | Property          | Type                                    | Required | Description                    |
@@ -147,6 +155,8 @@ function App() {
 - Font scaling control for text elements
 - Customizable event height and text styles
 - Spans 10 years before and after the default date
+- **Programmatic scroll control via Ref**
+- **Dynamic row height retrieval via Ref**
 
 ## License
 
