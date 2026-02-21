@@ -2,13 +2,22 @@ import dayjs from 'dayjs';
 import ja from 'dayjs/locale/ja';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { type ViewStyle } from 'react-native';
-import { View, StyleSheet } from 'react-native';
-import { MonthCalendar, type CalendarEvent } from 'react-native-ll-calendar';
+import { View, StyleSheet, TouchableOpacity, Text } from 'react-native';
+import {
+  MonthCalendar,
+  ResourcesCalendar,
+  type CalendarEvent,
+  type ResourcesCalendarEvent,
+  type CalendarResource,
+} from 'react-native-ll-calendar';
 import type { WeekdayNum } from '../../src/types/month-calendar';
 import type { TextStyle } from 'react-native';
 import type { MonthCalendarRef } from '../../src/calendar/month-calendar/MonthCalendar';
 
+type TabType = 'month' | 'resources';
+
 export default function App() {
+  const [activeTab, setActiveTab] = useState<TabType>('month');
   const [date, setDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
@@ -372,6 +381,77 @@ export default function App() {
     ];
   }, []);
 
+  const { resourcesFromDate, resourcesToDate } = useMemo(() => {
+    const now = new Date();
+    return {
+      resourcesFromDate: new Date(now.getFullYear(), now.getMonth(), 1),
+      resourcesToDate: new Date(now.getFullYear(), now.getMonth() + 1, 0),
+    };
+  }, []);
+
+  const resources: CalendarResource[] = useMemo(
+    () => [
+      { id: 'r1', name: 'Room A' },
+      { id: 'r2', name: 'Room B' },
+      { id: 'r3', name: 'Seminar Room' },
+      { id: 'r4', name: 'Reception Room' },
+      { id: 'r5', name: 'Focus Room' },
+      { id: 'r6', name: 'Room C' },
+      { id: 'r7', name: 'Room D' },
+      { id: 'r8', name: 'Training Room' },
+      { id: 'r9', name: 'Lounge' },
+      { id: 'r10', name: 'Server Room' },
+      { id: 'r11', name: 'Room E' },
+      { id: 'r12', name: 'Executive Room' },
+      { id: 'r13', name: 'Brainstorm Space' },
+      { id: 'r14', name: 'Phone Booth 1' },
+      { id: 'r15', name: 'Phone Booth 2' },
+      { id: 'r16', name: 'Open Space' },
+      { id: 'r17', name: 'Workshop Room' },
+      { id: 'r18', name: 'Recording Studio' },
+      { id: 'r19', name: 'Design Studio' },
+      { id: 'r20', name: 'Relaxation Room' },
+    ],
+    []
+  );
+
+  const resourceEvents: ResourcesCalendarEvent[] = useMemo(() => {
+    const y = resourcesFromDate.getFullYear();
+    const m = resourcesFromDate.getMonth();
+    return [
+      {
+        id: 're1',
+        resourceId: 'r1',
+        title: 'Team Meeting',
+        start: new Date(y, m, 5, 10, 0),
+        end: new Date(y, m, 5, 12, 0),
+        backgroundColor: '#ff6b6b',
+        borderColor: '#e55353',
+        color: '#fff',
+      },
+      {
+        id: 're2',
+        resourceId: 'r2',
+        title: 'Job Interview',
+        start: new Date(y, m, 10, 14, 0),
+        end: new Date(y, m, 10, 15, 0),
+        backgroundColor: '#4ecdc4',
+        borderColor: '#45b7aa',
+        color: '#fff',
+      },
+      {
+        id: 're3',
+        resourceId: 'r3',
+        title: 'Training',
+        start: new Date(y, m, 15, 9, 0),
+        end: new Date(y, m, 17, 18, 0),
+        backgroundColor: '#a29bfe',
+        borderColor: '#6c5ce7',
+        color: '#fff',
+      },
+    ];
+  }, [resourcesFromDate]);
+
   const calendarRef = useRef<MonthCalendarRef>(null);
 
   const handleScrollToTop = useCallback(() => {
@@ -502,36 +582,76 @@ export default function App() {
 
   return (
     <View style={styles.container}>
-      <MonthCalendar
-        ref={calendarRef}
-        defaultDate={date}
-        weekStartsOn={1}
-        onChangeDate={handleChangeDate}
-        events={events}
-        onPressEvent={handlePressEvent}
-        onLongPressEvent={handleLongPressEvent}
-        delayLongPressEvent={1000}
-        onPressCell={handlePressCell}
-        onLongPressCell={handleLongPressCell}
-        delayLongPressCell={1000}
-        onRefresh={handleRefresh}
-        refreshing={refreshing}
-        dayCellContainerStyle={dayCellContainerStyle}
-        dayCellTextStyle={dayCellTextStyle}
-        locale={ja}
-        weekdayCellContainerStyle={weekdayCellContainerStyle}
-        weekdayCellTextStyle={weekdayCellTextStyle}
-        todayCellTextStyle={todayCellTextStyle}
-        hiddenMonth={false}
-        monthFormat={'YYYY/MM'}
-        stickyHeaderEnabled={true}
-        cellBorderColor="#999999"
-        allowFontScaling={false}
-        eventHeight={32}
-        eventTextStyle={eventTextStyle}
-        eventEllipsizeMode={'clip'}
-        bottomSpacing={200}
-      />
+      {/* Tab bar */}
+      <View style={styles.tabBar}>
+        <TouchableOpacity
+          style={[styles.tab, activeTab === 'month' && styles.activeTab]}
+          onPress={() => setActiveTab('month')}
+        >
+          <Text
+            style={[
+              styles.tabText,
+              activeTab === 'month' && styles.activeTabText,
+            ]}
+          >
+            Month
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.tab, activeTab === 'resources' && styles.activeTab]}
+          onPress={() => setActiveTab('resources')}
+        >
+          <Text
+            style={[
+              styles.tabText,
+              activeTab === 'resources' && styles.activeTabText,
+            ]}
+          >
+            Resources
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Content */}
+      {activeTab === 'month' ? (
+        <MonthCalendar
+          ref={calendarRef}
+          defaultDate={date}
+          weekStartsOn={1}
+          onChangeDate={handleChangeDate}
+          events={events}
+          onPressEvent={handlePressEvent}
+          onLongPressEvent={handleLongPressEvent}
+          delayLongPressEvent={1000}
+          onPressCell={handlePressCell}
+          onLongPressCell={handleLongPressCell}
+          delayLongPressCell={1000}
+          onRefresh={handleRefresh}
+          refreshing={refreshing}
+          dayCellContainerStyle={dayCellContainerStyle}
+          dayCellTextStyle={dayCellTextStyle}
+          locale={ja}
+          weekdayCellContainerStyle={weekdayCellContainerStyle}
+          weekdayCellTextStyle={weekdayCellTextStyle}
+          todayCellTextStyle={todayCellTextStyle}
+          hiddenMonth={false}
+          monthFormat={'YYYY/MM'}
+          stickyHeaderEnabled={true}
+          cellBorderColor="#999999"
+          allowFontScaling={false}
+          eventHeight={32}
+          eventTextStyle={eventTextStyle}
+          eventEllipsizeMode={'clip'}
+          bottomSpacing={200}
+        />
+      ) : (
+        <ResourcesCalendar
+          fromDate={resourcesFromDate}
+          toDate={resourcesToDate}
+          resources={resources}
+          events={resourceEvents}
+        />
+      )}
     </View>
   );
 }
@@ -539,7 +659,30 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    marginVertical: 80,
+    marginTop: 60,
     width: '100%',
+  },
+  tabBar: {
+    flexDirection: 'row',
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+    backgroundColor: '#fff',
+  },
+  tab: {
+    flex: 1,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  activeTab: {
+    borderBottomWidth: 2,
+    borderBottomColor: '#007AFF',
+  },
+  tabText: {
+    fontSize: 14,
+    color: '#888',
+  },
+  activeTabText: {
+    color: '#007AFF',
+    fontWeight: '600',
   },
 });
