@@ -11,6 +11,7 @@ import type {
   CalendarEvent,
   CalendarResource,
 } from '../../types/resources-calendar';
+import { CELL_BORDER_WIDTH } from '../../constants/size';
 
 type ResourcesCalendarProps = {
   fromDate: Date;
@@ -24,8 +25,8 @@ type ResourcesCalendarProps = {
 
 const DEFAULT_RESOURCE_COLUMN_WIDTH = 120;
 const DEFAULT_DATE_COLUMN_WIDTH = 80;
-const HEADER_HEIGHT = 48;
-const ROW_HEIGHT = 60;
+const HEADER_HEIGHT = 36;
+const ROW_HEIGHT = 44;
 
 type ScrollViewRef = React.ComponentRef<typeof ScrollView>;
 
@@ -78,13 +79,7 @@ const ResourcesCalendar = (props: ResourcesCalendarProps) => {
     <View style={styles.container}>
       {/* Fixed header row */}
       <View style={[styles.headerRow, { height: HEADER_HEIGHT }]}>
-        <View
-          style={[
-            styles.resourceCell,
-            styles.resourceHeaderCell,
-            { width: resourceColumnWidth },
-          ]}
-        />
+        <View style={[styles.resourceCell, { width: resourceColumnWidth }]} />
         <ScrollView
           ref={headerScrollRef}
           horizontal
@@ -113,6 +108,8 @@ const ResourcesCalendar = (props: ResourcesCalendarProps) => {
       <ScrollView
         style={styles.bodyScroll}
         showsVerticalScrollIndicator={false}
+        bounces={false}
+        overScrollMode="never"
       >
         <View style={styles.bodyContent}>
           {/* Resource name column */}
@@ -141,6 +138,8 @@ const ResourcesCalendar = (props: ResourcesCalendarProps) => {
             scrollEventThrottle={16}
             onScroll={handleDateScroll}
             style={styles.dateScrollView}
+            bounces={false}
+            overScrollMode="never"
           >
             <View>
               {resources.map((resource) => (
@@ -174,9 +173,8 @@ const styles = StyleSheet.create({
   },
   headerRow: {
     flexDirection: 'row',
-    backgroundColor: '#f5f5f5',
-    borderBottomWidth: 2,
-    borderBottomColor: '#ccc',
+    borderBottomWidth: CELL_BORDER_WIDTH,
+    borderBottomColor: 'lightslategrey',
   },
   bodyScroll: {
     flex: 1,
@@ -187,16 +185,12 @@ const styles = StyleSheet.create({
   resourceCell: {
     justifyContent: 'center',
     paddingHorizontal: 8,
-    borderRightWidth: StyleSheet.hairlineWidth,
-    borderRightColor: '#e0e0e0',
-    backgroundColor: '#fafafa',
-  },
-  resourceHeaderCell: {
-    backgroundColor: '#f5f5f5',
+    borderRightWidth: CELL_BORDER_WIDTH,
+    borderRightColor: 'lightslategrey',
   },
   resourceRow: {
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#e0e0e0',
+    borderBottomWidth: CELL_BORDER_WIDTH,
+    borderBottomColor: 'lightslategrey',
   },
   resourceName: {
     fontSize: 13,
@@ -206,8 +200,8 @@ const styles = StyleSheet.create({
   dateHeaderCell: {
     justifyContent: 'center',
     alignItems: 'center',
-    borderRightWidth: StyleSheet.hairlineWidth,
-    borderRightColor: '#e0e0e0',
+    borderRightWidth: CELL_BORDER_WIDTH,
+    borderRightColor: 'lightslategrey',
   },
   dateHeaderText: {
     fontSize: 13,
@@ -216,12 +210,12 @@ const styles = StyleSheet.create({
   },
   dateRow: {
     flexDirection: 'row',
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#e0e0e0',
+    borderBottomWidth: CELL_BORDER_WIDTH,
+    borderBottomColor: 'lightslategrey',
   },
   dateCell: {
-    borderRightWidth: StyleSheet.hairlineWidth,
-    borderRightColor: '#e0e0e0',
+    borderRightWidth: CELL_BORDER_WIDTH,
+    borderRightColor: 'lightslategrey',
   },
   dateScrollView: {
     flex: 1,
