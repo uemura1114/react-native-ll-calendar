@@ -411,6 +411,16 @@ export default function App() {
       { id: 'r18', name: 'Recording Studio' },
       { id: 'r19', name: 'Design Studio' },
       { id: 'r20', name: 'Relaxation Room' },
+      { id: 'r21', name: 'Conference Room 1' },
+      { id: 'r22', name: 'Conference Room 2' },
+      { id: 'r23', name: 'Meeting Pod A' },
+      { id: 'r24', name: 'Meeting Pod B' },
+      { id: 'r25', name: 'Rooftop Space' },
+      { id: 'r26', name: 'Cafeteria' },
+      { id: 'r27', name: 'Library Room' },
+      { id: 'r28', name: 'Innovation Lab' },
+      { id: 'r29', name: 'Media Room' },
+      { id: 'r30', name: 'Wellness Room' },
     ],
     []
   );
