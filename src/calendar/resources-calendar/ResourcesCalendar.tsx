@@ -19,6 +19,7 @@ type ResourcesCalendarProps = {
   resources: CalendarResource[];
   events: CalendarEvent[];
   renderDateLabel?: (date: Date) => React.JSX.Element;
+  renderResourceNameLabel?: (resource: CalendarResource) => React.JSX.Element;
   resourceColumnWidth?: number;
   dateColumnWidth?: number;
 };
@@ -55,6 +56,7 @@ const ResourcesCalendar = (props: ResourcesCalendarProps) => {
     toDate,
     resources,
     renderDateLabel,
+    renderResourceNameLabel,
     resourceColumnWidth = DEFAULT_RESOURCE_COLUMN_WIDTH,
     dateColumnWidth = DEFAULT_DATE_COLUMN_WIDTH,
   } = props;
@@ -123,9 +125,13 @@ const ResourcesCalendar = (props: ResourcesCalendarProps) => {
                   { height: ROW_HEIGHT },
                 ]}
               >
-                <Text style={styles.resourceName} numberOfLines={2}>
-                  {resource.name}
-                </Text>
+                {renderResourceNameLabel ? (
+                  renderResourceNameLabel(resource)
+                ) : (
+                  <Text style={styles.resourceName} numberOfLines={2}>
+                    {resource.name}
+                  </Text>
+                )}
               </View>
             ))}
           </View>
