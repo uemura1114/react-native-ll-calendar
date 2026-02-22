@@ -1,9 +1,15 @@
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import type {
   CalendarEvent,
   CalendarResource,
 } from '../../types/resources-calendar';
-import { ScrollView, StyleSheet, Text } from 'react-native';
+import {
+  type NativeScrollEvent,
+  type NativeSyntheticEvent,
+  ScrollView,
+  StyleSheet,
+  Text,
+} from 'react-native';
 import { View } from 'react-native';
 import { generateDates } from '../../utils/functions';
 import dayjs from 'dayjs';
@@ -27,9 +33,52 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
     [props.fromDate, props.toDate]
   );
 
+  const headerScrollRef = useRef<React.ComponentRef<typeof ScrollView>>(null);
+  const bodyScrollRef = useRef<React.ComponentRef<typeof ScrollView>>(null);
+  const isSyncing = useRef(false);
+
+  const handleHeaderScroll = useCallback(
+    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      if (isSyncing.current) {
+        isSyncing.current = false;
+        return;
+      }
+      isSyncing.current = true;
+      bodyScrollRef.current?.scrollTo({
+        x: event.nativeEvent.contentOffset.x,
+        animated: false,
+      });
+    },
+    []
+  );
+
+  const handleBodyScroll = useCallback(
+    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      if (isSyncing.current) {
+        isSyncing.current = false;
+        return;
+      }
+      isSyncing.current = true;
+      headerScrollRef.current?.scrollTo({
+        x: event.nativeEvent.contentOffset.x,
+        animated: false,
+      });
+    },
+    []
+  );
+
   return (
     <ScrollView stickyHeaderIndices={[0]}>
-      <ScrollView horizontal>
+      <ScrollView
+        ref={headerScrollRef}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        bounces={false}
+        overScrollMode="never"
+        onScroll={handleHeaderScroll}
+        scrollEventThrottle={16}
+        data-component-name="resources-calendar-header-row"
+      >
         <View style={styles.headerRow}>
           <View
             data-component-name="resources-calendar-resource-name-column"
@@ -50,7 +99,16 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
         </View>
       </ScrollView>
 
-      <ScrollView horizontal>
+      <ScrollView
+        ref={bodyScrollRef}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        bounces={false}
+        overScrollMode="never"
+        onScroll={handleBodyScroll}
+        scrollEventThrottle={16}
+        data-component-name="resources-calendar-body-row"
+      >
         <View>
           {props.resources.map((resource) => {
             return (
