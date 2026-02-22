@@ -662,6 +662,9 @@ export default function App() {
           events={resourceEvents}
           onRefresh={handleRefresh}
           refreshing={refreshing}
+          renderDateLabel={(d) => (
+            <Text>{dayjs(d).locale(ja).format('D(ddd)')}</Text>
+          )}
         />
       )}
     </View>
