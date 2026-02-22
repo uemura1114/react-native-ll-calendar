@@ -1,8 +1,12 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import type {
   CalendarEvent,
   CalendarResource,
 } from '../../types/resources-calendar';
+import { ScrollView, StyleSheet, Text } from 'react-native';
+import { View } from 'react-native';
+import { generateDates } from '../../utils/functions';
+import dayjs from 'dayjs';
 
 type ResourcesCalendarProps = {
   fromDate: Date;
@@ -17,6 +21,85 @@ type ResourcesCalendarProps = {
   refreshing?: boolean;
 };
 
-export function ResourcesCalendar(_props: ResourcesCalendarProps) {
-  return null;
+export function ResourcesCalendar(props: ResourcesCalendarProps) {
+  const dates = useMemo(
+    () => generateDates(props.fromDate, props.toDate),
+    [props.fromDate, props.toDate]
+  );
+
+  return (
+    <ScrollView stickyHeaderIndices={[0]}>
+      <ScrollView horizontal>
+        <View style={styles.headerRow}>
+          <View
+            data-component-name="resources-calendar-resource-name-column"
+            style={[
+              styles.resourceNameCellContainer,
+              styles.resourceNameColumn,
+            ]}
+          />
+          {dates.map((date) => (
+            <View
+              key={date.getTime()}
+              data-component-name="resources-calendar-date-cell"
+              style={styles.dateCellContainer}
+            >
+              <Text>{dayjs(date).format('D(ddd)')}</Text>
+            </View>
+          ))}
+        </View>
+      </ScrollView>
+
+      <ScrollView horizontal>
+        <View>
+          {props.resources.map((resource) => {
+            return (
+              <View style={styles.resourceRow}>
+                <View
+                  style={[
+                    styles.resourceNameCellContainer,
+                    styles.resourceNameColumn,
+                  ]}
+                >
+                  <Text>{resource.name}</Text>
+                </View>
+                {dates.map((date) => (
+                  <View key={date.getTime()} style={styles.dateCellContainer} />
+                ))}
+              </View>
+            );
+          })}
+        </View>
+      </ScrollView>
+    </ScrollView>
+  );
 }
+
+const styles = StyleSheet.create({
+  headerRow: {
+    flexDirection: 'row',
+    borderBottomWidth: 1,
+    borderRightWidth: 1,
+    borderBottomColor: 'lightslategrey',
+    backgroundColor: 'white',
+  },
+  dateCellContainer: {
+    width: 60,
+    borderRightWidth: 1,
+    borderColor: 'lightslategrey',
+  },
+  resourceNameCellContainer: {
+    width: 80,
+    borderRightWidth: 1,
+    borderColor: 'lightslategrey',
+  },
+  resourceRow: {
+    flexDirection: 'row',
+    borderBottomWidth: 1,
+    borderRightWidth: 1,
+    borderBottomColor: 'lightslategrey',
+  },
+  resourceNameColumn: {
+    width: 80,
+  },
+});
