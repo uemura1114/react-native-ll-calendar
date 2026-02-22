@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useRef } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import type {
   CalendarEvent,
   CalendarResource,
@@ -36,6 +36,7 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
   const headerScrollRef = useRef<React.ComponentRef<typeof ScrollView>>(null);
   const bodyScrollRef = useRef<React.ComponentRef<typeof ScrollView>>(null);
   const isSyncing = useRef(false);
+  const [scrollOffset, setScrollOffset] = useState(0);
 
   const handleHeaderScroll = useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -67,6 +68,13 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
     []
   );
 
+  const handleDateScrollEnd = useCallback(
+    (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+      setScrollOffset(e.nativeEvent.contentOffset.x);
+    },
+    []
+  );
+
   return (
     <ScrollView stickyHeaderIndices={[0]}>
       <ScrollView
@@ -79,14 +87,7 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
         scrollEventThrottle={16}
         data-component-name="resources-calendar-header-row"
       >
-        <View style={styles.headerRow}>
-          <View
-            data-component-name="resources-calendar-resource-name-column"
-            style={[
-              styles.resourceNameCellContainer,
-              styles.resourceNameColumn,
-            ]}
-          />
+        <View style={[styles.headerRow]}>
           {dates.map((date) => (
             <View
               key={date.getTime()}
@@ -108,18 +109,17 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
         onScroll={handleBodyScroll}
         scrollEventThrottle={16}
         data-component-name="resources-calendar-body-row"
+        onScrollEndDrag={handleDateScrollEnd}
+        onMomentumScrollEnd={handleDateScrollEnd}
       >
         <View>
           {props.resources.map((resource) => {
             return (
-              <View style={styles.resourceRow}>
-                <View
-                  style={[
-                    styles.resourceNameCellContainer,
-                    styles.resourceNameColumn,
-                  ]}
-                >
-                  <Text>{resource.name}</Text>
+              <View key={resource.id} style={styles.resourceRow}>
+                <View style={[styles.resourceNameFixedLabel]}>
+                  <Text style={{ marginLeft: scrollOffset }}>
+                    {resource.name}
+                  </Text>
                 </View>
                 {dates.map((date) => (
                   <View key={date.getTime()} style={styles.dateCellContainer} />
@@ -143,6 +143,7 @@ const styles = StyleSheet.create({
   },
   dateCellContainer: {
     width: 60,
+    borderTopWidth: 1,
     borderRightWidth: 1,
     borderColor: 'lightslategrey',
   },
@@ -156,8 +157,20 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderRightWidth: 1,
     borderBottomColor: 'lightslategrey',
+    minHeight: 32,
   },
   resourceNameColumn: {
     width: 80,
+  },
+  resourceNameFixedLabel: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    left: 0,
+    zIndex: 10,
+    backgroundColor: 'white',
+    borderRightWidth: 1,
+    borderBottomWidth: 1,
+    borderColor: 'lightslategrey',
   },
 });
