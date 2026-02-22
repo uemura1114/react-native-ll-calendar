@@ -689,7 +689,14 @@ export default function App() {
           onRefresh={handleRefresh}
           refreshing={refreshing}
           renderDateLabel={(d) => (
-            <Text>{dayjs(d).locale(ja).format('D(ddd)')}</Text>
+            <View style={styles.dateLabel}>
+              <Text style={styles.dateLabelText}>
+                {dayjs(d).locale(ja).format('D')}
+              </Text>
+              <Text style={styles.dateLabelText}>
+                {dayjs(d).locale(ja).format('(ddd)')}
+              </Text>
+            </View>
           )}
         />
       )}
@@ -725,5 +732,14 @@ const styles = StyleSheet.create({
   activeTabText: {
     color: '#007AFF',
     fontWeight: '600',
+  },
+  dateLabel: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    paddingVertical: 2,
+  },
+  dateLabelText: {
+    fontSize: 12,
+    lineHeight: 12,
   },
 });
