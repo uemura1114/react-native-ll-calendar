@@ -3,10 +3,10 @@ import {
   View,
   Text,
   ScrollView,
-  FlatList,
   StyleSheet,
   PanResponder,
-  type ListRenderItem,
+  type NativeSyntheticEvent,
+  type NativeScrollEvent,
 } from 'react-native';
 import type {
   CalendarEvent,
@@ -38,15 +38,13 @@ const MONTH_TEXT_PADDING = 8;
 
 type ScrollViewRef = React.ComponentRef<typeof ScrollView>;
 
+type RowMeasurement = { nameHeight: number; datesHeight: number };
+
 type MonthGroup = {
   year: number;
   month: number;
   dates: Date[];
 };
-
-type ListItem =
-  | { type: 'header' }
-  | { type: 'resource'; resource: CalendarResource };
 
 function generateDates(from: Date, to: Date): Date[] {
   const dates: Date[] = [];
@@ -112,45 +110,11 @@ const ResourcesCalendar = (props: ResourcesCalendarProps) => {
     });
   }, [monthGroups, dateColumnWidth]);
 
-  // Total scrollable width of the date area
-  const totalDatesWidth = dates.length * dateColumnWidth;
-
-  // Horizontal scroll state for sticky month label positioning (updated on scroll end)
   const [scrollOffset, setScrollOffset] = useState(0);
 
-  // Master horizontal scroll position — never causes re-renders
-  const scrollXRef = useRef(0);
-
-  // ── Scroll refs ──────────────────────────────────────────────────────────
-  // Ghost ScrollView: the sole horizontal touch/momentum handler
-  const ghostScrollRef = useRef<ScrollViewRef>(null);
-  // Header date labels: always scrollEnabled={false}, driven by ghost
   const headerScrollRef = useRef<ScrollViewRef>(null);
-  // All currently-rendered row date ScrollViews: scrollEnabled={false}, driven by ghost
-  const rowScrollRefs = useRef<Map<string, ScrollViewRef>>(new Map());
+  const dateScrollRef = useRef<ScrollViewRef>(null);
 
-  // Push a new x position to every follower
-  const syncScrollTo = useCallback((x: number) => {
-    headerScrollRef.current?.scrollTo({ x, animated: false });
-    rowScrollRefs.current.forEach((ref) => {
-      ref.scrollTo({ x, animated: false });
-    });
-  }, []);
-
-  // Called on every ghost onScroll event — single source of truth, no feedback loop
-  const handleGhostScroll = useCallback(
-    (x: number) => {
-      scrollXRef.current = x;
-      syncScrollTo(x);
-    },
-    [syncScrollTo]
-  );
-
-  const handleScrollEnd = useCallback((x: number) => {
-    setScrollOffset(x);
-  }, []);
-
-  // ── Resource name column resize ──────────────────────────────────────────
   const columnWidthRef = useRef(resourceColumnWidth);
   const [columnWidth, setColumnWidth] = useState(resourceColumnWidth);
   const dragStartWidthRef = useRef(resourceColumnWidth);
@@ -174,214 +138,219 @@ const ResourcesCalendar = (props: ResourcesCalendarProps) => {
     })
   ).current;
 
-  // ── FlatList data ────────────────────────────────────────────────────────
-  const listData = useMemo<ListItem[]>(
-    () => [
-      { type: 'header' },
-      ...resources.map((r) => ({ type: 'resource' as const, resource: r })),
-    ],
-    [resources]
+  const [rowMeasurements, setRowMeasurements] = useState<
+    Record<string, RowMeasurement>
+  >({});
+
+  const updateRowMeasurement = useCallback(
+    (resourceId: string, side: keyof RowMeasurement, height: number) => {
+      setRowMeasurements((prev) => {
+        if (prev[resourceId]?.[side] === height) {
+          return prev;
+        }
+
+        return {
+          ...prev,
+          [resourceId]: {
+            nameHeight: 0,
+            datesHeight: 0,
+            ...prev[resourceId],
+            [side]: height,
+          },
+        };
+      });
+    },
+    []
   );
 
-  const renderItem = useCallback<ListRenderItem<ListItem>>(
-    ({ item }) => {
-      // ── Header row (sticky via stickyHeaderIndices) ────────────────────
-      if (item.type === 'header') {
-        return (
-          <View style={[styles.headerRow, { height: TOTAL_HEADER_HEIGHT }]}>
-            {/* Corner placeholder — aligns with resource name column */}
-            <View
-              style={[
-                styles.cornerCell,
-                { width: columnWidth, height: TOTAL_HEADER_HEIGHT },
-              ]}
-            />
-            {/* Date labels — scrollEnabled=false, driven by ghost scroll */}
-            <ScrollView
-              ref={headerScrollRef}
-              horizontal
-              scrollEnabled={false}
-              showsHorizontalScrollIndicator={false}
-            >
-              <View>
-                {/* Month grouping row */}
-                <View style={styles.monthHeaderRow}>
-                  {monthGroups.map(({ year, month }, index) => {
-                    const { start: cellStart, width: cellWidth } =
-                      monthGroupOffsets[index]!;
-                    const textLeft = Math.max(
-                      MONTH_TEXT_PADDING,
-                      scrollOffset - cellStart + MONTH_TEXT_PADDING
-                    );
-                    return (
-                      <View
-                        key={`${year}-${month}`}
-                        style={[
-                          styles.monthHeaderCell,
-                          { width: cellWidth, height: MONTH_HEADER_HEIGHT },
-                        ]}
-                      >
-                        <Text
-                          numberOfLines={1}
-                          style={[
-                            styles.monthHeaderText,
-                            { marginLeft: textLeft },
-                          ]}
-                        >
-                          {formatMonth(year, month)}
-                        </Text>
-                      </View>
-                    );
-                  })}
-                </View>
-                {/* Day row */}
-                <View style={styles.dayHeaderRow}>
-                  {dates.map((date) => (
-                    <View
-                      key={date.getTime()}
-                      style={[
-                        styles.dateHeaderCell,
-                        { width: dateColumnWidth, height: DAY_HEADER_HEIGHT },
-                      ]}
-                    >
-                      {renderDateLabel ? (
-                        renderDateLabel(date)
-                      ) : (
-                        <Text style={styles.dateHeaderText}>
-                          {formatDay(date)}
-                        </Text>
-                      )}
-                    </View>
-                  ))}
-                </View>
-              </View>
-            </ScrollView>
-          </View>
-        );
+  const getRowMinHeight = useCallback(
+    (resourceId: string) => {
+      const m = rowMeasurements[resourceId];
+      if (!m) {
+        return ROW_HEIGHT;
       }
 
-      // ── Resource row ───────────────────────────────────────────────────
-      const { resource } = item;
-      return (
-        <View style={styles.resourceRow}>
-          {/* Fixed resource name cell */}
-          <View
-            style={[
-              styles.resourceNameCell,
-              { width: columnWidth, minHeight: ROW_HEIGHT },
-            ]}
-          >
-            {renderResourceNameLabel ? (
-              renderResourceNameLabel(resource)
-            ) : (
-              <Text style={styles.resourceName} numberOfLines={3}>
-                {resource.name}
-              </Text>
-            )}
-          </View>
-
-          {/* Date cells — scrollEnabled=false, position driven by ghost scroll */}
-          <ScrollView
-            ref={(r) => {
-              if (r) {
-                rowScrollRefs.current.set(resource.id, r);
-                // Newly-rendered rows must jump to current scroll position
-                r.scrollTo({ x: scrollXRef.current, animated: false });
-              } else {
-                rowScrollRefs.current.delete(resource.id);
-              }
-            }}
-            horizontal
-            scrollEnabled={false}
-            showsHorizontalScrollIndicator={false}
-          >
-            <View style={styles.dateCellsRow}>
-              {dates.map((date) => (
-                <View
-                  key={date.getTime()}
-                  style={[
-                    styles.dateCell,
-                    { width: dateColumnWidth, minHeight: ROW_HEIGHT },
-                  ]}
-                />
-              ))}
-            </View>
-          </ScrollView>
-        </View>
-      );
+      return Math.max(ROW_HEIGHT, m.nameHeight, m.datesHeight);
     },
-    [
-      columnWidth,
-      dates,
-      dateColumnWidth,
-      monthGroups,
-      monthGroupOffsets,
-      scrollOffset,
-      renderDateLabel,
-      renderResourceNameLabel,
-    ]
+    [rowMeasurements]
   );
 
-  const keyExtractor = useCallback(
-    (item: ListItem) =>
-      item.type === 'header' ? '__header__' : item.resource.id,
+  const handleDateScroll = useCallback(
+    (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+      const x = e.nativeEvent.contentOffset.x;
+      headerScrollRef.current?.scrollTo({ x, animated: false });
+    },
+    []
+  );
+
+  const handleDateScrollEnd = useCallback(
+    (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+      setScrollOffset(e.nativeEvent.contentOffset.x);
+    },
     []
   );
 
   return (
     <View style={styles.container}>
-      <FlatList
-        data={listData}
-        keyExtractor={keyExtractor}
-        renderItem={renderItem}
-        stickyHeaderIndices={[0]}
+      {/* Fixed header rows (month + day) */}
+      <View style={[styles.headerRow, { height: TOTAL_HEADER_HEIGHT }]}>
+        <View
+          style={[
+            styles.resourceCell,
+            { width: columnWidth, height: TOTAL_HEADER_HEIGHT },
+          ]}
+        />
+        <ScrollView
+          ref={headerScrollRef}
+          horizontal
+          scrollEnabled={false}
+          showsHorizontalScrollIndicator={false}
+        >
+          <View>
+            {/* Month row */}
+            <View style={styles.monthHeaderRow}>
+              {monthGroups.map(({ year, month }, index) => {
+                const { start: cellStart, width: cellWidth } =
+                  monthGroupOffsets[index]!;
+                const textLeft = Math.max(
+                  MONTH_TEXT_PADDING,
+                  scrollOffset - cellStart + MONTH_TEXT_PADDING
+                );
+                return (
+                  <View
+                    key={`${year}-${month}`}
+                    style={[
+                      styles.monthHeaderCell,
+                      { width: cellWidth, height: MONTH_HEADER_HEIGHT },
+                    ]}
+                  >
+                    <Text
+                      numberOfLines={1}
+                      style={[styles.monthHeaderText, { marginLeft: textLeft }]}
+                    >
+                      {formatMonth(year, month)}
+                    </Text>
+                  </View>
+                );
+              })}
+            </View>
+            {/* Day row */}
+            <View style={styles.dayHeaderRow}>
+              {dates.map((date) => (
+                <View
+                  key={date.getTime()}
+                  style={[
+                    styles.dateHeaderCell,
+                    { width: dateColumnWidth, height: DAY_HEADER_HEIGHT },
+                  ]}
+                >
+                  {renderDateLabel ? (
+                    renderDateLabel(date)
+                  ) : (
+                    <Text style={styles.dateHeaderText}>{formatDay(date)}</Text>
+                  )}
+                </View>
+              ))}
+            </View>
+          </View>
+        </ScrollView>
+      </View>
+
+      {/* Scrollable body */}
+      <ScrollView
+        style={styles.bodyScroll}
         showsVerticalScrollIndicator={false}
         bounces={false}
         overScrollMode="never"
-        removeClippedSubviews={false}
-        extraData={useMemo(
-          () => ({ columnWidth, scrollOffset }),
-          [columnWidth, scrollOffset]
-        )}
-      />
-
-      {/*
-       * Ghost horizontal ScrollView
-       *
-       * This is the ONLY scrollable horizontal view — it captures all horizontal
-       * touch events and momentum, then fans the x position out to the header and
-       * every row via syncScrollTo. Because followers are scrollEnabled={false},
-       * they never fire their own onScroll, so there is no feedback loop and no
-       * competing native scroll updates (= no jitter).
-       *
-       * Positioned over the date area (left edge = resource column right edge).
-       * Being a horizontal ScrollView, it releases vertical gestures so the
-       * FlatList's native vertical scroll continues to work normally.
-       */}
-      <ScrollView
-        ref={ghostScrollRef}
-        horizontal
-        scrollEnabled={true}
-        showsHorizontalScrollIndicator={false}
-        scrollEventThrottle={16}
-        bounces={false}
-        overScrollMode="never"
-        onScroll={(e) => handleGhostScroll(e.nativeEvent.contentOffset.x)}
-        onScrollEndDrag={(e) => handleScrollEnd(e.nativeEvent.contentOffset.x)}
-        onMomentumScrollEnd={(e) =>
-          handleScrollEnd(e.nativeEvent.contentOffset.x)
-        }
-        style={[styles.ghostHorizontalScroll, { left: columnWidth }]}
       >
-        {/* Content must be wide enough to scroll the full date range */}
-        <View style={{ width: totalDatesWidth, height: 1 }} />
+        <View style={styles.bodyContent}>
+          {/* Resource name column */}
+          <View
+            style={{ width: columnWidth }}
+            data-component-name="resource-name-column"
+          >
+            {resources.map((resource) => (
+              <View
+                key={resource.id}
+                style={[
+                  styles.resourceCell,
+                  styles.resourceRow,
+                  { minHeight: getRowMinHeight(resource.id) },
+                ]}
+                onLayout={(e) =>
+                  updateRowMeasurement(
+                    resource.id,
+                    'nameHeight',
+                    e.nativeEvent.layout.height
+                  )
+                }
+                data-component-name="resource-name-cell"
+              >
+                {renderResourceNameLabel ? (
+                  renderResourceNameLabel(resource)
+                ) : (
+                  <Text style={styles.resourceName} numberOfLines={3}>
+                    {resource.name}
+                  </Text>
+                )}
+              </View>
+            ))}
+          </View>
+
+          {/* Single horizontal ScrollView for all date columns */}
+          <ScrollView
+            ref={dateScrollRef}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            scrollEventThrottle={16}
+            onScroll={handleDateScroll}
+            onScrollEndDrag={handleDateScrollEnd}
+            onMomentumScrollEnd={handleDateScrollEnd}
+            style={styles.dateScrollView}
+            bounces={false}
+            overScrollMode="never"
+          >
+            <View>
+              {resources.map((resource) => (
+                <View
+                  key={resource.id}
+                  style={[
+                    styles.dateRow,
+                    { minHeight: getRowMinHeight(resource.id) },
+                  ]}
+                  onLayout={(e) =>
+                    updateRowMeasurement(
+                      resource.id,
+                      'datesHeight',
+                      e.nativeEvent.layout.height
+                    )
+                  }
+                  data-component-name="resource-dates-row"
+                >
+                  {dates.map((date) => (
+                    <View
+                      key={date.getTime()}
+                      style={[
+                        styles.dateCell,
+                        { width: dateColumnWidth, minHeight: ROW_HEIGHT },
+                      ]}
+                      data-component-name="resource-date-cell"
+                    />
+                  ))}
+                </View>
+              ))}
+            </View>
+          </ScrollView>
+        </View>
       </ScrollView>
 
-      {/* Drag handle overlay for resource column resize */}
+      {/* Drag handle overlay */}
       <View
         style={[
           styles.dragHandleOverlay,
-          { left: columnWidth - DRAG_HANDLE_HIT_WIDTH / 2 },
+          {
+            left: columnWidth - DRAG_HANDLE_HIT_WIDTH / 2,
+          },
         ]}
         {...panResponder.panHandlers}
       >
@@ -405,13 +374,7 @@ const styles = StyleSheet.create({
   headerRow: {
     flexDirection: 'row',
     borderBottomWidth: CELL_BORDER_WIDTH,
-    borderTopWidth: CELL_BORDER_WIDTH,
     borderBottomColor: 'lightslategrey',
-    backgroundColor: '#fff',
-  },
-  cornerCell: {
-    borderRightWidth: CELL_BORDER_WIDTH,
-    borderRightColor: 'lightslategrey',
   },
   monthHeaderRow: {
     flexDirection: 'row',
@@ -432,6 +395,27 @@ const styles = StyleSheet.create({
   dayHeaderRow: {
     flexDirection: 'row',
   },
+  bodyScroll: {
+    flex: 1,
+  },
+  bodyContent: {
+    flexDirection: 'row',
+  },
+  resourceCell: {
+    justifyContent: 'center',
+    paddingHorizontal: 8,
+    borderRightWidth: CELL_BORDER_WIDTH,
+    borderRightColor: 'lightslategrey',
+  },
+  resourceRow: {
+    borderBottomWidth: CELL_BORDER_WIDTH,
+    borderBottomColor: 'lightslategrey',
+  },
+  resourceName: {
+    fontSize: 13,
+    fontWeight: '500',
+    color: '#333',
+  },
   dateHeaderCell: {
     justifyContent: 'center',
     alignItems: 'center',
@@ -442,38 +426,17 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#333',
   },
-  resourceRow: {
+  dateRow: {
     flexDirection: 'row',
     borderBottomWidth: CELL_BORDER_WIDTH,
     borderBottomColor: 'lightslategrey',
-  },
-  resourceNameCell: {
-    justifyContent: 'center',
-    paddingHorizontal: 8,
-    borderRightWidth: CELL_BORDER_WIDTH,
-    borderRightColor: 'lightslategrey',
-  },
-  resourceName: {
-    fontSize: 13,
-    fontWeight: '500',
-    color: '#333',
-  },
-  dateCellsRow: {
-    flexDirection: 'row',
   },
   dateCell: {
     borderRightWidth: CELL_BORDER_WIDTH,
     borderRightColor: 'lightslategrey',
   },
-  // Transparent full-height overlay over the date area.
-  // horizontal=true means it only claims horizontal gestures; vertical gestures
-  // pass through to the underlying FlatList.
-  ghostHorizontalScroll: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    bottom: 0,
-    opacity: 0,
+  dateScrollView: {
+    flex: 1,
   },
   dragHandleOverlay: {
     position: 'absolute',
