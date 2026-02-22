@@ -113,7 +113,13 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
               data-component-name="resources-calendar-date-cell"
               style={styles.dateCellContainer}
             >
-              <Text>{dayjs(date).format('D(ddd)')}</Text>
+              {props.renderDateLabel ? (
+                props.renderDateLabel(date)
+              ) : (
+                <View>
+                  <Text>{dayjs(date).format('D(ddd)')}</Text>
+                </View>
+              )}
             </View>
           ))}
         </View>
@@ -137,14 +143,17 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
             return (
               <View key={resource.id} style={styles.resourceRow}>
                 <View style={[styles.resourceNameFixedLabel]}>
-                  <Text
-                    style={[
-                      styles.resourceNameFixedLabelText,
-                      { marginLeft: scrollOffset + 4 },
-                    ]}
-                  >
-                    {resource.name}
-                  </Text>
+                  <View style={{ marginLeft: scrollOffset + 4 }}>
+                    {props.renderResourceNameLabel ? (
+                      props.renderResourceNameLabel(resource)
+                    ) : (
+                      <View>
+                        <Text style={styles.resourceNameFixedLabelText}>
+                          {resource.name}
+                        </Text>
+                      </View>
+                    )}
+                  </View>
                 </View>
                 {dates.map((date) => (
                   <View key={date.getTime()} style={styles.dateCellContainer} />
