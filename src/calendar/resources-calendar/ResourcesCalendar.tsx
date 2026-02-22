@@ -7,6 +7,7 @@ import {
   PanResponder,
   type NativeSyntheticEvent,
   type NativeScrollEvent,
+  RefreshControl,
 } from 'react-native';
 import type {
   CalendarEvent,
@@ -24,6 +25,8 @@ type ResourcesCalendarProps = {
   renderResourceNameLabel?: (resource: CalendarResource) => React.JSX.Element;
   resourceColumnWidth?: number;
   dateColumnWidth?: number;
+  onRefresh?: () => void;
+  refreshing?: boolean;
 };
 
 const DEFAULT_RESOURCE_COLUMN_WIDTH = 120;
@@ -92,6 +95,8 @@ const ResourcesCalendar = (props: ResourcesCalendarProps) => {
     renderResourceNameLabel,
     resourceColumnWidth = DEFAULT_RESOURCE_COLUMN_WIDTH,
     dateColumnWidth = DEFAULT_DATE_COLUMN_WIDTH,
+    onRefresh,
+    refreshing,
   } = props;
 
   const dates = useMemo(
@@ -260,8 +265,9 @@ const ResourcesCalendar = (props: ResourcesCalendarProps) => {
       <ScrollView
         style={styles.bodyScroll}
         showsVerticalScrollIndicator={false}
-        bounces={false}
-        overScrollMode="never"
+        refreshControl={
+          <RefreshControl refreshing={!!refreshing} onRefresh={onRefresh} />
+        }
       >
         <View style={styles.bodyContent}>
           {/* Resource name column */}
@@ -400,6 +406,9 @@ const styles = StyleSheet.create({
   },
   bodyContent: {
     flexDirection: 'row',
+    borderTopWidth: CELL_BORDER_WIDTH,
+    borderTopColor: 'lightslategrey',
+    marginTop: -CELL_BORDER_WIDTH,
   },
   resourceCell: {
     justifyContent: 'center',

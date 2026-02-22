@@ -660,6 +660,8 @@ export default function App() {
           toDate={resourcesToDate}
           resources={resources}
           events={resourceEvents}
+          onRefresh={handleRefresh}
+          refreshing={refreshing}
         />
       )}
     </View>
