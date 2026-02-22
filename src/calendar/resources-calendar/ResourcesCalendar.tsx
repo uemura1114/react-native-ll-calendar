@@ -28,8 +28,8 @@ type ResourcesCalendarProps = {
 
 const DEFAULT_RESOURCE_COLUMN_WIDTH = 120;
 const DEFAULT_DATE_COLUMN_WIDTH = 80;
-const MONTH_HEADER_HEIGHT = 22;
-const DAY_HEADER_HEIGHT = 22;
+const MONTH_HEADER_HEIGHT = 18;
+const DAY_HEADER_HEIGHT = 18;
 const TOTAL_HEADER_HEIGHT = MONTH_HEADER_HEIGHT + DAY_HEADER_HEIGHT;
 const ROW_HEIGHT = 44;
 const MIN_RESOURCE_COLUMN_WIDTH = 30;
@@ -79,7 +79,8 @@ function formatDay(date: Date): string {
 }
 
 function formatMonth(year: number, month: number): string {
-  return `${year}年${month}月`;
+  const dateDjs = dayjs(`${year}-${month}-01`);
+  return dateDjs.format('YYYY/MM');
 }
 
 const ResourcesCalendar = (props: ResourcesCalendarProps) => {
@@ -382,7 +383,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'flex-start',
     overflow: 'hidden',
-    paddingVertical: 2,
     borderRightWidth: CELL_BORDER_WIDTH,
     borderRightColor: 'lightslategrey',
     borderBottomWidth: CELL_BORDER_WIDTH,
@@ -440,10 +440,11 @@ const styles = StyleSheet.create({
   },
   dragHandleOverlay: {
     position: 'absolute',
-    top: 0,
-    height: TOTAL_HEADER_HEIGHT,
+    top: MONTH_HEADER_HEIGHT,
+    height: DAY_HEADER_HEIGHT,
     width: DRAG_HANDLE_HIT_WIDTH,
     alignItems: 'center',
+    paddingHorizontal: 8,
   },
   dragHandleIconContainer: {
     flex: 1,
