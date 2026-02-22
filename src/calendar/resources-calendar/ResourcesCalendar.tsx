@@ -27,14 +27,23 @@ type ResourcesCalendarProps = {
 
 const DEFAULT_RESOURCE_COLUMN_WIDTH = 120;
 const DEFAULT_DATE_COLUMN_WIDTH = 80;
-const HEADER_HEIGHT = 36;
+const MONTH_HEADER_HEIGHT = 28;
+const DAY_HEADER_HEIGHT = 36;
+const TOTAL_HEADER_HEIGHT = MONTH_HEADER_HEIGHT + DAY_HEADER_HEIGHT;
 const ROW_HEIGHT = 44;
 const MIN_RESOURCE_COLUMN_WIDTH = 30;
 const DRAG_HANDLE_HIT_WIDTH = 16;
+const MONTH_TEXT_PADDING = 8;
 
 type ScrollViewRef = React.ComponentRef<typeof ScrollView>;
 
 type RowMeasurement = { nameHeight: number; datesHeight: number };
+
+type MonthGroup = {
+  year: number;
+  month: number;
+  dates: Date[];
+};
 
 function generateDates(from: Date, to: Date): Date[] {
   const dates: Date[] = [];
@@ -49,10 +58,27 @@ function generateDates(from: Date, to: Date): Date[] {
   return dates;
 }
 
-function formatDate(date: Date): string {
-  const month = date.getMonth() + 1;
-  const day = date.getDate();
-  return `${month}/${day}`;
+function groupDatesByMonth(dates: Date[]): MonthGroup[] {
+  const groups: MonthGroup[] = [];
+  for (const date of dates) {
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const last = groups[groups.length - 1];
+    if (last && last.year === year && last.month === month) {
+      last.dates.push(date);
+    } else {
+      groups.push({ year, month, dates: [date] });
+    }
+  }
+  return groups;
+}
+
+function formatDay(date: Date): string {
+  return String(date.getDate());
+}
+
+function formatMonth(year: number, month: number): string {
+  return `${year}年${month}月`;
 }
 
 const ResourcesCalendar = (props: ResourcesCalendarProps) => {
@@ -70,6 +96,19 @@ const ResourcesCalendar = (props: ResourcesCalendarProps) => {
     () => generateDates(fromDate, toDate),
     [fromDate, toDate]
   );
+
+  const monthGroups = useMemo(() => groupDatesByMonth(dates), [dates]);
+
+  const monthGroupOffsets = useMemo(() => {
+    let offset = 0;
+    return monthGroups.map((group) => {
+      const start = offset;
+      offset += group.dates.length * dateColumnWidth;
+      return { start, width: group.dates.length * dateColumnWidth };
+    });
+  }, [monthGroups, dateColumnWidth]);
+
+  const [scrollOffset, setScrollOffset] = useState(0);
 
   const headerScrollRef = useRef<ScrollViewRef>(null);
   const dateScrollRef = useRef<ScrollViewRef>(null);
@@ -142,32 +181,76 @@ const ResourcesCalendar = (props: ResourcesCalendarProps) => {
     []
   );
 
+  const handleDateScrollEnd = useCallback(
+    (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+      setScrollOffset(e.nativeEvent.contentOffset.x);
+    },
+    []
+  );
+
   return (
     <View style={styles.container}>
-      {/* Fixed header row */}
-      <View style={[styles.headerRow, { height: HEADER_HEIGHT }]}>
-        <View style={[styles.resourceCell, { width: columnWidth }]} />
+      {/* Fixed header rows (month + day) */}
+      <View style={[styles.headerRow, { height: TOTAL_HEADER_HEIGHT }]}>
+        <View
+          style={[
+            styles.resourceCell,
+            { width: columnWidth, height: TOTAL_HEADER_HEIGHT },
+          ]}
+        />
         <ScrollView
           ref={headerScrollRef}
           horizontal
           scrollEnabled={false}
           showsHorizontalScrollIndicator={false}
         >
-          {dates.map((date) => (
-            <View
-              key={date.getTime()}
-              style={[
-                styles.dateHeaderCell,
-                { width: dateColumnWidth, height: HEADER_HEIGHT },
-              ]}
-            >
-              {renderDateLabel ? (
-                renderDateLabel(date)
-              ) : (
-                <Text style={styles.dateHeaderText}>{formatDate(date)}</Text>
-              )}
+          <View>
+            {/* Month row */}
+            <View style={styles.monthHeaderRow}>
+              {monthGroups.map(({ year, month }, index) => {
+                const { start: cellStart, width: cellWidth } =
+                  monthGroupOffsets[index]!;
+                const textLeft = Math.max(
+                  MONTH_TEXT_PADDING,
+                  scrollOffset - cellStart + MONTH_TEXT_PADDING
+                );
+                return (
+                  <View
+                    key={`${year}-${month}`}
+                    style={[
+                      styles.monthHeaderCell,
+                      { width: cellWidth, height: MONTH_HEADER_HEIGHT },
+                    ]}
+                  >
+                    <Text
+                      numberOfLines={1}
+                      style={[styles.monthHeaderText, { marginLeft: textLeft }]}
+                    >
+                      {formatMonth(year, month)}
+                    </Text>
+                  </View>
+                );
+              })}
             </View>
-          ))}
+            {/* Day row */}
+            <View style={styles.dayHeaderRow}>
+              {dates.map((date) => (
+                <View
+                  key={date.getTime()}
+                  style={[
+                    styles.dateHeaderCell,
+                    { width: dateColumnWidth, height: DAY_HEADER_HEIGHT },
+                  ]}
+                >
+                  {renderDateLabel ? (
+                    renderDateLabel(date)
+                  ) : (
+                    <Text style={styles.dateHeaderText}>{formatDay(date)}</Text>
+                  )}
+                </View>
+              ))}
+            </View>
+          </View>
         </ScrollView>
       </View>
 
@@ -219,6 +302,8 @@ const ResourcesCalendar = (props: ResourcesCalendarProps) => {
             showsHorizontalScrollIndicator={false}
             scrollEventThrottle={16}
             onScroll={handleDateScroll}
+            onScrollEndDrag={handleDateScrollEnd}
+            onMomentumScrollEnd={handleDateScrollEnd}
             style={styles.dateScrollView}
             bounces={false}
             overScrollMode="never"
@@ -289,6 +374,27 @@ const styles = StyleSheet.create({
     borderBottomWidth: CELL_BORDER_WIDTH,
     borderBottomColor: 'lightslategrey',
   },
+  monthHeaderRow: {
+    flexDirection: 'row',
+  },
+  monthHeaderCell: {
+    justifyContent: 'center',
+    alignItems: 'flex-start',
+    overflow: 'hidden',
+    borderRightWidth: CELL_BORDER_WIDTH,
+    borderRightColor: 'lightslategrey',
+    borderBottomWidth: CELL_BORDER_WIDTH,
+    borderBottomColor: 'lightslategrey',
+    backgroundColor: '#f0f4f8',
+  },
+  monthHeaderText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#555',
+  },
+  dayHeaderRow: {
+    flexDirection: 'row',
+  },
   bodyScroll: {
     flex: 1,
   },
@@ -336,7 +442,7 @@ const styles = StyleSheet.create({
   dragHandleOverlay: {
     position: 'absolute',
     top: 0,
-    height: HEADER_HEIGHT,
+    height: TOTAL_HEADER_HEIGHT,
     width: DRAG_HANDLE_HIT_WIDTH,
     alignItems: 'center',
   },

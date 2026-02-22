@@ -384,7 +384,7 @@ export default function App() {
   const { resourcesFromDate, resourcesToDate } = useMemo(() => {
     const now = new Date();
     return {
-      resourcesFromDate: new Date(now.getFullYear(), now.getMonth(), 1),
+      resourcesFromDate: new Date(now.getFullYear(), now.getMonth() - 1, 1),
       resourcesToDate: new Date(now.getFullYear(), now.getMonth() + 1, 0),
     };
   }, []);
