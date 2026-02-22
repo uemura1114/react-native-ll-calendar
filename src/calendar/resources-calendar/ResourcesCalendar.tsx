@@ -36,6 +36,7 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
   const headerScrollRef = useRef<React.ComponentRef<typeof ScrollView>>(null);
   const bodyScrollRef = useRef<React.ComponentRef<typeof ScrollView>>(null);
   const isSyncing = useRef(false);
+  const isMomentumScrolling = useRef(false);
   const [scrollOffset, setScrollOffset] = useState(0);
 
   const handleHeaderScroll = useCallback(
@@ -68,8 +69,26 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
     []
   );
 
-  const handleDateScrollEnd = useCallback(
+  const handleScrollEndDrag = useCallback(
     (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+      const x = e.nativeEvent.contentOffset.x;
+      // onMomentumScrollBegin が先に発火するか確認するため setTimeout で遅延
+      setTimeout(() => {
+        if (!isMomentumScrolling.current) {
+          setScrollOffset(x);
+        }
+      }, 0);
+    },
+    []
+  );
+
+  const handleMomentumScrollBegin = useCallback(() => {
+    isMomentumScrolling.current = true;
+  }, []);
+
+  const handleMomentumScrollEnd = useCallback(
+    (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+      isMomentumScrolling.current = false;
       setScrollOffset(e.nativeEvent.contentOffset.x);
     },
     []
@@ -109,8 +128,9 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
         onScroll={handleBodyScroll}
         scrollEventThrottle={16}
         data-component-name="resources-calendar-body-row"
-        onScrollEndDrag={handleDateScrollEnd}
-        onMomentumScrollEnd={handleDateScrollEnd}
+        onScrollEndDrag={handleScrollEndDrag}
+        onMomentumScrollBegin={handleMomentumScrollBegin}
+        onMomentumScrollEnd={handleMomentumScrollEnd}
       >
         <View>
           {props.resources.map((resource) => {
