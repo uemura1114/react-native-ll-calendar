@@ -13,6 +13,7 @@ import type {
   CalendarResource,
 } from '../../types/resources-calendar';
 import { CELL_BORDER_WIDTH } from '../../constants/size';
+import dayjs from 'dayjs';
 
 type ResourcesCalendarProps = {
   fromDate: Date;
@@ -27,8 +28,8 @@ type ResourcesCalendarProps = {
 
 const DEFAULT_RESOURCE_COLUMN_WIDTH = 120;
 const DEFAULT_DATE_COLUMN_WIDTH = 80;
-const MONTH_HEADER_HEIGHT = 28;
-const DAY_HEADER_HEIGHT = 36;
+const MONTH_HEADER_HEIGHT = 22;
+const DAY_HEADER_HEIGHT = 22;
 const TOTAL_HEADER_HEIGHT = MONTH_HEADER_HEIGHT + DAY_HEADER_HEIGHT;
 const ROW_HEIGHT = 44;
 const MIN_RESOURCE_COLUMN_WIDTH = 30;
@@ -74,7 +75,7 @@ function groupDatesByMonth(dates: Date[]): MonthGroup[] {
 }
 
 function formatDay(date: Date): string {
-  return String(date.getDate());
+  return dayjs(date).format('D');
 }
 
 function formatMonth(year: number, month: number): string {
@@ -381,16 +382,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'flex-start',
     overflow: 'hidden',
+    paddingVertical: 2,
     borderRightWidth: CELL_BORDER_WIDTH,
     borderRightColor: 'lightslategrey',
     borderBottomWidth: CELL_BORDER_WIDTH,
     borderBottomColor: 'lightslategrey',
-    backgroundColor: '#f0f4f8',
+    backgroundColor: 'white',
   },
   monthHeaderText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#555',
+    fontSize: 14,
   },
   dayHeaderRow: {
     flexDirection: 'row',
@@ -424,7 +424,6 @@ const styles = StyleSheet.create({
   },
   dateHeaderText: {
     fontSize: 13,
-    fontWeight: '600',
     color: '#333',
   },
   dateRow: {
@@ -463,7 +462,7 @@ const styles = StyleSheet.create({
     borderRightWidth: 5,
     borderTopColor: 'transparent',
     borderBottomColor: 'transparent',
-    borderRightColor: 'lightslategrey',
+    borderRightColor: 'black',
   },
   dragHandleArrowLine: {
     width: 6,
@@ -478,7 +477,7 @@ const styles = StyleSheet.create({
     borderLeftWidth: 5,
     borderTopColor: 'transparent',
     borderBottomColor: 'transparent',
-    borderLeftColor: 'lightslategrey',
+    borderLeftColor: 'black',
   },
 });
 
