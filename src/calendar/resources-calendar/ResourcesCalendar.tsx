@@ -1,4 +1,4 @@
-import React, { useRef, useCallback, useMemo } from 'react';
+import React, { useRef, useCallback, useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -30,6 +30,8 @@ const HEADER_HEIGHT = 36;
 const ROW_HEIGHT = 44;
 
 type ScrollViewRef = React.ComponentRef<typeof ScrollView>;
+
+type RowMeasurement = { nameHeight: number; datesHeight: number };
 
 function generateDates(from: Date, to: Date): Date[] {
   const dates: Date[] = [];
@@ -68,6 +70,43 @@ const ResourcesCalendar = (props: ResourcesCalendarProps) => {
 
   const headerScrollRef = useRef<ScrollViewRef>(null);
   const dateScrollRef = useRef<ScrollViewRef>(null);
+
+  const [rowMeasurements, setRowMeasurements] = useState<
+    Record<string, RowMeasurement>
+  >({});
+
+  const updateRowMeasurement = useCallback(
+    (resourceId: string, side: keyof RowMeasurement, height: number) => {
+      setRowMeasurements((prev) => {
+        if (prev[resourceId]?.[side] === height) {
+          return prev;
+        }
+
+        return {
+          ...prev,
+          [resourceId]: {
+            nameHeight: 0,
+            datesHeight: 0,
+            ...prev[resourceId],
+            [side]: height,
+          },
+        };
+      });
+    },
+    []
+  );
+
+  const getRowMinHeight = useCallback(
+    (resourceId: string) => {
+      const m = rowMeasurements[resourceId];
+      if (!m) {
+        return ROW_HEIGHT;
+      }
+
+      return Math.max(ROW_HEIGHT, m.nameHeight, m.datesHeight);
+    },
+    [rowMeasurements]
+  );
 
   const handleDateScroll = useCallback(
     (e: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -115,20 +154,31 @@ const ResourcesCalendar = (props: ResourcesCalendarProps) => {
       >
         <View style={styles.bodyContent}>
           {/* Resource name column */}
-          <View style={{ width: resourceColumnWidth }}>
+          <View
+            style={{ width: resourceColumnWidth }}
+            data-component-name="resource-name-column"
+          >
             {resources.map((resource) => (
               <View
                 key={resource.id}
                 style={[
                   styles.resourceCell,
                   styles.resourceRow,
-                  { height: ROW_HEIGHT },
+                  { minHeight: getRowMinHeight(resource.id) },
                 ]}
+                onLayout={(e) =>
+                  updateRowMeasurement(
+                    resource.id,
+                    'nameHeight',
+                    e.nativeEvent.layout.height
+                  )
+                }
+                data-component-name="resource-name-cell"
               >
                 {renderResourceNameLabel ? (
                   renderResourceNameLabel(resource)
                 ) : (
-                  <Text style={styles.resourceName} numberOfLines={2}>
+                  <Text style={styles.resourceName} numberOfLines={3}>
                     {resource.name}
                   </Text>
                 )}
@@ -151,15 +201,27 @@ const ResourcesCalendar = (props: ResourcesCalendarProps) => {
               {resources.map((resource) => (
                 <View
                   key={resource.id}
-                  style={[styles.dateRow, { height: ROW_HEIGHT }]}
+                  style={[
+                    styles.dateRow,
+                    { minHeight: getRowMinHeight(resource.id) },
+                  ]}
+                  onLayout={(e) =>
+                    updateRowMeasurement(
+                      resource.id,
+                      'datesHeight',
+                      e.nativeEvent.layout.height
+                    )
+                  }
+                  data-component-name="resource-dates-row"
                 >
                   {dates.map((date) => (
                     <View
                       key={date.getTime()}
                       style={[
                         styles.dateCell,
-                        { width: dateColumnWidth, height: ROW_HEIGHT },
+                        { width: dateColumnWidth, minHeight: ROW_HEIGHT },
                       ]}
+                      data-component-name="resource-date-cell"
                     />
                   ))}
                 </View>
