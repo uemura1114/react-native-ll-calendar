@@ -4,6 +4,7 @@ import {
   Text,
   ScrollView,
   StyleSheet,
+  PanResponder,
   type NativeSyntheticEvent,
   type NativeScrollEvent,
 } from 'react-native';
@@ -28,6 +29,8 @@ const DEFAULT_RESOURCE_COLUMN_WIDTH = 120;
 const DEFAULT_DATE_COLUMN_WIDTH = 80;
 const HEADER_HEIGHT = 36;
 const ROW_HEIGHT = 44;
+const MIN_RESOURCE_COLUMN_WIDTH = 30;
+const DRAG_HANDLE_HIT_WIDTH = 16;
 
 type ScrollViewRef = React.ComponentRef<typeof ScrollView>;
 
@@ -70,6 +73,29 @@ const ResourcesCalendar = (props: ResourcesCalendarProps) => {
 
   const headerScrollRef = useRef<ScrollViewRef>(null);
   const dateScrollRef = useRef<ScrollViewRef>(null);
+
+  const columnWidthRef = useRef(resourceColumnWidth);
+  const [columnWidth, setColumnWidth] = useState(resourceColumnWidth);
+  const dragStartWidthRef = useRef(resourceColumnWidth);
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: () => true,
+      onPanResponderTerminationRequest: () => false,
+      onPanResponderGrant: () => {
+        dragStartWidthRef.current = columnWidthRef.current;
+      },
+      onPanResponderMove: (_, gestureState) => {
+        const newWidth = Math.max(
+          MIN_RESOURCE_COLUMN_WIDTH,
+          dragStartWidthRef.current + gestureState.dx
+        );
+        columnWidthRef.current = newWidth;
+        setColumnWidth(newWidth);
+      },
+    })
+  ).current;
 
   const [rowMeasurements, setRowMeasurements] = useState<
     Record<string, RowMeasurement>
@@ -120,7 +146,7 @@ const ResourcesCalendar = (props: ResourcesCalendarProps) => {
     <View style={styles.container}>
       {/* Fixed header row */}
       <View style={[styles.headerRow, { height: HEADER_HEIGHT }]}>
-        <View style={[styles.resourceCell, { width: resourceColumnWidth }]} />
+        <View style={[styles.resourceCell, { width: columnWidth }]} />
         <ScrollView
           ref={headerScrollRef}
           horizontal
@@ -155,7 +181,7 @@ const ResourcesCalendar = (props: ResourcesCalendarProps) => {
         <View style={styles.bodyContent}>
           {/* Resource name column */}
           <View
-            style={{ width: resourceColumnWidth }}
+            style={{ width: columnWidth }}
             data-component-name="resource-name-column"
           >
             {resources.map((resource) => (
@@ -230,6 +256,25 @@ const ResourcesCalendar = (props: ResourcesCalendarProps) => {
           </ScrollView>
         </View>
       </ScrollView>
+
+      {/* Drag handle overlay */}
+      <View
+        style={[
+          styles.dragHandleOverlay,
+          {
+            left: columnWidth - DRAG_HANDLE_HIT_WIDTH / 2,
+          },
+        ]}
+        {...panResponder.panHandlers}
+      >
+        <View style={styles.dragHandleIconContainer}>
+          <View style={styles.dragHandleArrow}>
+            <View style={styles.dragHandleArrowLeft} />
+            <View style={styles.dragHandleArrowLine} />
+            <View style={styles.dragHandleArrowRight} />
+          </View>
+        </View>
+      </View>
     </View>
   );
 };
@@ -287,6 +332,47 @@ const styles = StyleSheet.create({
   },
   dateScrollView: {
     flex: 1,
+  },
+  dragHandleOverlay: {
+    position: 'absolute',
+    top: 0,
+    height: HEADER_HEIGHT,
+    width: DRAG_HANDLE_HIT_WIDTH,
+    alignItems: 'center',
+  },
+  dragHandleIconContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  dragHandleArrow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  dragHandleArrowLeft: {
+    width: 0,
+    height: 0,
+    borderTopWidth: 4,
+    borderBottomWidth: 4,
+    borderRightWidth: 5,
+    borderTopColor: 'transparent',
+    borderBottomColor: 'transparent',
+    borderRightColor: 'lightslategrey',
+  },
+  dragHandleArrowLine: {
+    width: 6,
+    height: 1.5,
+    backgroundColor: 'transparent',
+  },
+  dragHandleArrowRight: {
+    width: 0,
+    height: 0,
+    borderTopWidth: 4,
+    borderBottomWidth: 4,
+    borderLeftWidth: 5,
+    borderTopColor: 'transparent',
+    borderBottomColor: 'transparent',
+    borderLeftColor: 'lightslategrey',
   },
 });
 
