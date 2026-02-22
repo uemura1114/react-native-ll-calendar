@@ -137,7 +137,12 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
             return (
               <View key={resource.id} style={styles.resourceRow}>
                 <View style={[styles.resourceNameFixedLabel]}>
-                  <Text style={{ marginLeft: scrollOffset }}>
+                  <Text
+                    style={[
+                      styles.resourceNameFixedLabelText,
+                      { marginLeft: scrollOffset + 4 },
+                    ]}
+                  >
                     {resource.name}
                   </Text>
                 </View>
@@ -156,28 +161,31 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
 const styles = StyleSheet.create({
   headerRow: {
     flexDirection: 'row',
-    borderBottomWidth: 1,
-    borderRightWidth: 1,
+    borderBottomWidth: 0.5,
+    borderRightWidth: 0.5,
     borderBottomColor: 'lightslategrey',
     backgroundColor: 'white',
   },
   dateCellContainer: {
     width: 60,
-    borderTopWidth: 1,
-    borderRightWidth: 1,
+    borderTopWidth: 0.5,
+    borderRightWidth: 0.5,
     borderColor: 'lightslategrey',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   resourceNameCellContainer: {
     width: 80,
-    borderRightWidth: 1,
+    borderRightWidth: 0.5,
     borderColor: 'lightslategrey',
   },
   resourceRow: {
     flexDirection: 'row',
     borderBottomWidth: 1,
-    borderRightWidth: 1,
+    borderRightWidth: 0.5,
     borderBottomColor: 'lightslategrey',
-    minHeight: 32,
+    minHeight: 40,
   },
   resourceNameColumn: {
     width: 80,
@@ -188,9 +196,12 @@ const styles = StyleSheet.create({
     right: 0,
     left: 0,
     zIndex: 10,
-    backgroundColor: 'white',
-    borderRightWidth: 1,
-    borderBottomWidth: 1,
+    borderBottomWidth: 0.5,
     borderColor: 'lightslategrey',
+    backgroundColor: '#EEEEEE',
+  },
+  resourceNameFixedLabelText: {
+    fontSize: 12,
+    color: 'black',
   },
 });
