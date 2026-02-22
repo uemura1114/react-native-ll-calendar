@@ -34,7 +34,7 @@ const DEFAULT_DATE_COLUMN_WIDTH = 80;
 const MONTH_HEADER_HEIGHT = 18;
 const DAY_HEADER_HEIGHT = 18;
 const TOTAL_HEADER_HEIGHT = MONTH_HEADER_HEIGHT + DAY_HEADER_HEIGHT;
-const ROW_HEIGHT = 44;
+const MIN_ROW_HEIGHT = 44;
 const MIN_RESOURCE_COLUMN_WIDTH = 30;
 const DRAG_HANDLE_HIT_WIDTH = 16;
 const MONTH_TEXT_PADDING = 8;
@@ -172,10 +172,10 @@ const ResourcesCalendar = (props: ResourcesCalendarProps) => {
     (resourceId: string) => {
       const m = rowMeasurements[resourceId];
       if (!m) {
-        return ROW_HEIGHT;
+        return MIN_ROW_HEIGHT;
       }
 
-      return Math.max(ROW_HEIGHT, m.nameHeight, m.datesHeight);
+      return Math.max(MIN_ROW_HEIGHT, m.nameHeight, m.datesHeight);
     },
     [rowMeasurements]
   );
@@ -338,7 +338,7 @@ const ResourcesCalendar = (props: ResourcesCalendarProps) => {
                       key={date.getTime()}
                       style={[
                         styles.dateCell,
-                        { width: dateColumnWidth, minHeight: ROW_HEIGHT },
+                        { width: dateColumnWidth, minHeight: MIN_ROW_HEIGHT },
                       ]}
                       data-component-name="resource-date-cell"
                     />
