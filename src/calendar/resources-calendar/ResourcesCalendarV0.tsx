@@ -8,6 +8,7 @@ import {
   type NativeSyntheticEvent,
   type NativeScrollEvent,
   RefreshControl,
+  type LayoutChangeEvent,
 } from 'react-native';
 import type {
   CalendarEvent,
@@ -16,7 +17,7 @@ import type {
 import { CELL_BORDER_WIDTH } from '../../constants/size';
 import dayjs from 'dayjs';
 
-type ResourcesCalendarProps = {
+type ResourcesCalendarV0Props = {
   fromDate: Date;
   toDate: Date;
   resources: CalendarResource[];
@@ -40,8 +41,6 @@ const DRAG_HANDLE_HIT_WIDTH = 16;
 const MONTH_TEXT_PADDING = 8;
 
 type ScrollViewRef = React.ComponentRef<typeof ScrollView>;
-
-type RowMeasurement = { nameHeight: number; datesHeight: number };
 
 type MonthGroup = {
   year: number;
@@ -86,7 +85,7 @@ function formatMonth(year: number, month: number): string {
   return dateDjs.format('YYYY/MM');
 }
 
-const ResourcesCalendar = (props: ResourcesCalendarProps) => {
+const ResourcesCalendarV0 = (props: ResourcesCalendarV0Props) => {
   const {
     fromDate,
     toDate,
@@ -143,41 +142,33 @@ const ResourcesCalendar = (props: ResourcesCalendarProps) => {
     })
   ).current;
 
-  const [rowMeasurements, setRowMeasurements] = useState<
-    Record<string, RowMeasurement>
-  >({});
+  // Track row heights
+  const [rowHeights, setRowHeights] = useState<{ [key: string]: number }>({});
 
-  const updateRowMeasurement = useCallback(
-    (resourceId: string, side: keyof RowMeasurement, height: number) => {
-      setRowMeasurements((prev) => {
-        if (prev[resourceId]?.[side] === height) {
-          return prev;
-        }
-
-        return {
-          ...prev,
-          [resourceId]: {
-            nameHeight: 0,
-            datesHeight: 0,
-            ...prev[resourceId],
-            [side]: height,
-          },
-        };
+  // Handle row height measurement from main content
+  const handleRowLayout = useCallback(
+    (resourceId: string, event: LayoutChangeEvent) => {
+      const { height } = event.nativeEvent.layout;
+      setRowHeights((prev) => {
+        return { ...prev, [resourceId]: height };
       });
     },
     []
   );
 
-  const getRowMinHeight = useCallback(
-    (resourceId: string) => {
-      const m = rowMeasurements[resourceId];
-      if (!m) {
-        return MIN_ROW_HEIGHT;
-      }
-
-      return Math.max(MIN_ROW_HEIGHT, m.nameHeight, m.datesHeight);
+  // Handle row height measurement from resource column
+  const handleResourceLayout = useCallback(
+    (resourceId: string, event: LayoutChangeEvent) => {
+      const { height } = event.nativeEvent.layout;
+      setRowHeights((prev) => {
+        const currentHeight = prev[resourceId] || 0;
+        if (height > currentHeight) {
+          return { ...prev, [resourceId]: height };
+        }
+        return prev;
+      });
     },
-    [rowMeasurements]
+    []
   );
 
   const handleDateScroll = useCallback(
@@ -229,12 +220,17 @@ const ResourcesCalendar = (props: ResourcesCalendarProps) => {
                       { width: cellWidth, height: MONTH_HEADER_HEIGHT },
                     ]}
                   >
-                    <Text
-                      numberOfLines={1}
-                      style={[styles.monthHeaderText, { marginLeft: textLeft }]}
-                    >
-                      {formatMonth(year, month)}
-                    </Text>
+                    <View style={[{ marginLeft: textLeft }]}>
+                      <Text
+                        numberOfLines={1}
+                        style={[
+                          styles.monthHeaderText,
+                          // { marginLeft: textLeft },
+                        ]}
+                      >
+                        {formatMonth(year, month)}
+                      </Text>
+                    </View>
                   </View>
                 );
               })}
@@ -281,24 +277,19 @@ const ResourcesCalendar = (props: ResourcesCalendarProps) => {
                 style={[
                   styles.resourceCell,
                   styles.resourceRow,
-                  { minHeight: getRowMinHeight(resource.id) },
+                  { minHeight: rowHeights[resource.id] ?? MIN_ROW_HEIGHT },
                 ]}
-                onLayout={(e) =>
-                  updateRowMeasurement(
-                    resource.id,
-                    'nameHeight',
-                    e.nativeEvent.layout.height
-                  )
-                }
                 data-component-name="resource-name-cell"
               >
-                {renderResourceNameLabel ? (
-                  renderResourceNameLabel(resource)
-                ) : (
-                  <Text style={styles.resourceName} numberOfLines={3}>
-                    {resource.name}
-                  </Text>
-                )}
+                <View onLayout={(e) => handleResourceLayout(resource.id, e)}>
+                  {renderResourceNameLabel ? (
+                    renderResourceNameLabel(resource)
+                  ) : (
+                    <Text style={styles.resourceName} numberOfLines={9}>
+                      {resource.name}
+                    </Text>
+                  )}
+                </View>
               </View>
             ))}
           </View>
@@ -322,24 +313,15 @@ const ResourcesCalendar = (props: ResourcesCalendarProps) => {
                   key={resource.id}
                   style={[
                     styles.dateRow,
-                    { minHeight: getRowMinHeight(resource.id) },
+                    { minHeight: rowHeights[resource.id] ?? MIN_ROW_HEIGHT },
                   ]}
-                  onLayout={(e) =>
-                    updateRowMeasurement(
-                      resource.id,
-                      'datesHeight',
-                      e.nativeEvent.layout.height
-                    )
-                  }
                   data-component-name="resource-dates-row"
+                  onLayout={(e) => handleRowLayout(resource.id, e)}
                 >
                   {dates.map((date) => (
                     <View
                       key={date.getTime()}
-                      style={[
-                        styles.dateCell,
-                        { width: dateColumnWidth, minHeight: MIN_ROW_HEIGHT },
-                      ]}
+                      style={[styles.dateCell, { width: dateColumnWidth }]}
                       data-component-name="resource-date-cell"
                     />
                   ))}
@@ -491,4 +473,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ResourcesCalendar;
+export default ResourcesCalendarV0;
