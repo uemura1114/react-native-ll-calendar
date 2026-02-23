@@ -11,7 +11,7 @@ import {
   Text,
 } from 'react-native';
 import { View } from 'react-native';
-import { generateDates } from '../../utils/functions';
+import { generateDates, groupDatesByMonth } from '../../utils/functions';
 import dayjs from 'dayjs';
 
 type ResourcesCalendarProps = {
@@ -27,11 +27,26 @@ type ResourcesCalendarProps = {
   refreshing?: boolean;
 };
 
+const DEFAULT_DATE_COLUMN_WIDTH = 60;
+
 export function ResourcesCalendar(props: ResourcesCalendarProps) {
+  const dateColumnWidth = props.dateColumnWidth ?? DEFAULT_DATE_COLUMN_WIDTH;
+
   const dates = useMemo(
     () => generateDates(props.fromDate, props.toDate),
     [props.fromDate, props.toDate]
   );
+
+  const monthGroups = useMemo(() => groupDatesByMonth(dates), [dates]);
+
+  const monthGroupOffsets = useMemo(() => {
+    let offset = 0;
+    return monthGroups.map((group) => {
+      const start = offset;
+      offset += group.dates.length * dateColumnWidth;
+      return { start, width: group.dates.length * dateColumnWidth };
+    });
+  }, [monthGroups, dateColumnWidth]);
 
   const headerScrollRef = useRef<React.ComponentRef<typeof ScrollView>>(null);
   const bodyScrollRef = useRef<React.ComponentRef<typeof ScrollView>>(null);
@@ -106,22 +121,45 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
         scrollEventThrottle={16}
         data-component-name="resources-calendar-header-row"
       >
-        <View style={[styles.headerRow]}>
-          {dates.map((date) => (
-            <View
-              key={date.getTime()}
-              data-component-name="resources-calendar-date-cell"
-              style={styles.dateCellContainer}
-            >
-              {props.renderDateLabel ? (
-                props.renderDateLabel(date)
-              ) : (
-                <View>
-                  <Text>{dayjs(date).format('D(ddd)')}</Text>
+        <View>
+          {/* Month row */}
+          <View style={styles.monthHeaderRow}>
+            {monthGroups.map(({ year, month }, index) => {
+              const { start: cellStart, width: cellWidth } =
+                monthGroupOffsets[index]!;
+              const textLeft = Math.max(8, scrollOffset - cellStart + 8);
+              return (
+                <View
+                  key={`${year}-${month}`}
+                  style={[styles.monthHeaderCell, { width: cellWidth }]}
+                >
+                  <View style={{ marginLeft: textLeft }}>
+                    <Text numberOfLines={1} style={styles.monthHeaderText}>
+                      {dayjs(`${year}-${month}-01`).format('YYYY/MM')}
+                    </Text>
+                  </View>
                 </View>
-              )}
-            </View>
-          ))}
+              );
+            })}
+          </View>
+          {/* Day row */}
+          <View style={styles.headerRow}>
+            {dates.map((date) => (
+              <View
+                key={date.getTime()}
+                data-component-name="resources-calendar-date-cell"
+                style={[styles.dateCellContainer, { width: dateColumnWidth }]}
+              >
+                {props.renderDateLabel ? (
+                  props.renderDateLabel(date)
+                ) : (
+                  <View>
+                    <Text>{dayjs(date).format('D(ddd)')}</Text>
+                  </View>
+                )}
+              </View>
+            ))}
+          </View>
         </View>
       </ScrollView>
 
@@ -173,6 +211,24 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
 }
 
 const styles = StyleSheet.create({
+  monthHeaderRow: {
+    flexDirection: 'row',
+    backgroundColor: 'white',
+  },
+  monthHeaderCell: {
+    justifyContent: 'center',
+    alignItems: 'flex-start',
+    overflow: 'hidden',
+    borderRightWidth: 0.5,
+    borderRightColor: 'lightslategrey',
+    borderTopWidth: 0.5,
+    borderTopColor: 'lightslategrey',
+    height: 18,
+  },
+  monthHeaderText: {
+    fontSize: 12,
+    color: '#333',
+  },
   headerRow: {
     flexDirection: 'row',
     borderBottomWidth: 0.5,
