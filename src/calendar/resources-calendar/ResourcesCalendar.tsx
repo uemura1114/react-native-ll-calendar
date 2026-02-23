@@ -34,6 +34,7 @@ type ResourcesCalendarProps = {
 
 const DEFAULT_DATE_COLUMN_WIDTH = 60;
 const EVENT_HEIGHT = 26;
+const CELL_BORDER_WIDTH = 0.5;
 
 export function ResourcesCalendar(props: ResourcesCalendarProps) {
   const dateColumnWidth = props.dateColumnWidth ?? DEFAULT_DATE_COLUMN_WIDTH;
@@ -281,8 +282,9 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
                       <View
                         key={date.getTime()}
                         style={[
-                          styles.dateCellContainer,
+                          styles.contentCellContainer,
                           { width: dateColumnWidth },
+                          { zIndex: dates.length - dateIndex },
                         ]}
                       >
                         {cellEvents.map((event, rowIndex) => {
@@ -312,7 +314,7 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
                           let width =
                             (diffDays + 1) * dateColumnWidth -
                             EVENT_GAP * 2 -
-                            0.5 * 2;
+                            CELL_BORDER_WIDTH * 2;
                           if (isPrevDateEvent) {
                             width += EVENT_GAP + 1;
                           }
@@ -327,6 +329,7 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
 
                           return (
                             <TouchableOpacity
+                              data-component-name="resources-calendar-event"
                               key={event.id}
                               style={[
                                 styles.event,
@@ -383,9 +386,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'flex-start',
     overflow: 'hidden',
-    borderRightWidth: 0.5,
+    borderRightWidth: CELL_BORDER_WIDTH,
     borderRightColor: 'lightslategrey',
-    borderTopWidth: 0.5,
+    borderTopWidth: CELL_BORDER_WIDTH,
     borderTopColor: 'lightslategrey',
     height: 18,
   },
@@ -395,41 +398,45 @@ const styles = StyleSheet.create({
   },
   headerRow: {
     flexDirection: 'row',
-    borderBottomWidth: 0.5,
-    borderRightWidth: 0.5,
+    borderBottomWidth: CELL_BORDER_WIDTH,
+    borderRightWidth: CELL_BORDER_WIDTH,
     borderBottomColor: 'lightslategrey',
     backgroundColor: 'white',
   },
   dateCellContainer: {
     width: 60,
-    borderTopWidth: 0.5,
-    borderRightWidth: 0.5,
+    borderTopWidth: CELL_BORDER_WIDTH,
+    borderRightWidth: CELL_BORDER_WIDTH,
     borderColor: 'lightslategrey',
-    overflow: 'hidden',
   },
   resourceNameCellContainer: {
     width: 80,
-    borderRightWidth: 0.5,
+    borderRightWidth: CELL_BORDER_WIDTH,
     borderColor: 'lightslategrey',
   },
   resourceRow: {
     flexDirection: 'column',
-    borderBottomWidth: 0.5,
-    borderRightWidth: 0.5,
+    borderBottomWidth: CELL_BORDER_WIDTH,
+    borderRightWidth: CELL_BORDER_WIDTH,
     borderBottomColor: 'lightslategrey',
   },
   resourceRowContentArea: {
     flexDirection: 'row',
-    borderBottomWidth: 0.5,
-    borderColor: 'lightslategrey',
     minHeight: 30,
+  },
+  contentCellContainer: {
+    paddingBottom: EVENT_GAP,
+    width: 60,
+    borderTopWidth: CELL_BORDER_WIDTH,
+    borderRightWidth: CELL_BORDER_WIDTH,
+    borderColor: 'lightslategrey',
   },
   resourceNameColumn: {
     width: 80,
   },
   resourceNameFixedLabel: {
     width: '100%',
-    borderBottomWidth: 0.5,
+    borderBottomWidth: CELL_BORDER_WIDTH,
     borderColor: 'lightslategrey',
     backgroundColor: '#EEEEEE',
   },
