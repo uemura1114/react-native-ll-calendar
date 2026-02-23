@@ -46,6 +46,7 @@ type ResourcesCalendarProps = {
   dateCellContainerStyle?: (date: Date) => ViewStyle;
   cellContainerStyle?: (resource: CalendarResource, date: Date) => ViewStyle;
   hiddenMonth?: boolean;
+  allowFontScaling?: boolean;
 };
 
 const DEFAULT_DATE_COLUMN_WIDTH = 60;
@@ -69,6 +70,7 @@ type ResourceRowProps = {
   eventTextStyle?: (event: CalendarEvent) => TextStyle;
   eventEllipsizeMode?: 'head' | 'middle' | 'tail' | 'clip';
   cellContainerStyle?: (resource: CalendarResource, date: Date) => ViewStyle;
+  allowFontScaling?: boolean;
 };
 
 function ResourceRow({
@@ -88,6 +90,7 @@ function ResourceRow({
   eventTextStyle,
   eventEllipsizeMode,
   cellContainerStyle,
+  allowFontScaling,
 }: ResourceRowProps) {
   const resourceEvents = eventsByResourceId.get(resource.id) ?? [];
   const eventPosition = new ResourcesCalendarEventPosition();
@@ -100,7 +103,10 @@ function ResourceRow({
             renderResourceNameLabel(resource)
           ) : (
             <View>
-              <Text style={styles.resourceNameFixedLabelText}>
+              <Text
+                allowFontScaling={allowFontScaling}
+                style={styles.resourceNameFixedLabelText}
+              >
                 {resource.name}
               </Text>
             </View>
@@ -238,6 +244,7 @@ function ResourceRow({
                     <Text
                       numberOfLines={1}
                       ellipsizeMode={eventEllipsizeMode ?? 'tail'}
+                      allowFontScaling={allowFontScaling}
                       style={[
                         styles.eventTitle,
                         { color: event.color },
@@ -369,6 +376,7 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
     eventTextStyle: props.eventTextStyle,
     eventEllipsizeMode: props.eventEllipsizeMode,
     cellContainerStyle: props.cellContainerStyle,
+    allowFontScaling: props.allowFontScaling,
   };
 
   return (
@@ -410,6 +418,7 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
                         <View>
                           <Text
                             numberOfLines={1}
+                            allowFontScaling={props.allowFontScaling}
                             style={styles.monthHeaderText}
                           >
                             {dayjs(`${year}-${month}-01`).format('YYYY/MM')}
@@ -438,7 +447,9 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
                   props.renderDateLabel(date)
                 ) : (
                   <View>
-                    <Text>{dayjs(date).format('D(ddd)')}</Text>
+                    <Text allowFontScaling={props.allowFontScaling}>
+                      {dayjs(date).format('D(ddd)')}
+                    </Text>
                   </View>
                 )}
               </View>
