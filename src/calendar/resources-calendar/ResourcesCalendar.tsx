@@ -254,11 +254,9 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
   const headerScrollRef = useRef<ScrollViewRef>(null);
   const bodyScrollRef = useRef<ScrollViewRef>(null);
   const syncingCount = useRef(0);
-  const isMomentumScrolling = useRef(false);
-  const isMomentumScrollingForFixed = useRef(false);
   const isScrolling = useRef(false);
   const isScrollingForFixed = useRef(false);
-  const [scrollOffset, setScrollOffset] = useState(0);
+  const [scrollOffset] = useState(0);
 
   const syncScrollTo = useCallback(
     (x: number, exclude: React.RefObject<ScrollViewRef | null>) => {
@@ -307,80 +305,6 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
     [syncScrollTo]
   );
 
-  const handleScrollEndDrag = useCallback(
-    (e: NativeSyntheticEvent<NativeScrollEvent>) => {
-      if (isMomentumScrollingForFixed.current) {
-        return;
-      }
-
-      const x = e.nativeEvent.contentOffset.x;
-      // onMomentumScrollBegin が先に発火するか確認するため setTimeout で遅延
-      setTimeout(() => {
-        if (!isMomentumScrolling.current) {
-          setScrollOffset(x);
-        }
-      }, 0);
-    },
-    []
-  );
-
-  const handleMomentumScrollBegin = useCallback(() => {
-    if (isMomentumScrollingForFixed.current) {
-      return;
-    }
-
-    isMomentumScrolling.current = true;
-  }, []);
-
-  const handleMomentumScrollEnd = useCallback(
-    (e: NativeSyntheticEvent<NativeScrollEvent>) => {
-      if (isMomentumScrollingForFixed.current) {
-        return;
-      }
-
-      isMomentumScrolling.current = false;
-      setScrollOffset(e.nativeEvent.contentOffset.x);
-    },
-    []
-  );
-
-  const handleScrollEndDragForFixed = useCallback(
-    (e: NativeSyntheticEvent<NativeScrollEvent>) => {
-      if (isMomentumScrolling.current) {
-        return;
-      }
-
-      const x = e.nativeEvent.contentOffset.x;
-      // onMomentumScrollBegin が先に発火するか確認するため setTimeout で遅延
-      setTimeout(() => {
-        if (!isMomentumScrollingForFixed.current) {
-          setScrollOffset(x);
-        }
-      }, 0);
-    },
-    []
-  );
-
-  const handleMomentumScrollBeginForFixed = useCallback(() => {
-    if (isMomentumScrolling.current) {
-      return;
-    }
-
-    isMomentumScrollingForFixed.current = true;
-  }, []);
-
-  const handleMomentumScrollEndForFixed = useCallback(
-    (e: NativeSyntheticEvent<NativeScrollEvent>) => {
-      if (isMomentumScrolling.current) {
-        return;
-      }
-
-      isMomentumScrollingForFixed.current = false;
-      setScrollOffset(e.nativeEvent.contentOffset.x);
-    },
-    []
-  );
-
   const commonRowProps = {
     dates,
     dateColumnWidth,
@@ -408,9 +332,6 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
         onScroll={handleHeaderScroll}
         scrollEventThrottle={16}
         data-component-name="resources-calendar-header-row"
-        onScrollEndDrag={handleScrollEndDragForFixed}
-        onMomentumScrollBegin={handleMomentumScrollBeginForFixed}
-        onMomentumScrollEnd={handleMomentumScrollEndForFixed}
       >
         <View>
           <View style={styles.monthHeaderRow}>
@@ -478,9 +399,6 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
         onScroll={handleBodyScroll}
         scrollEventThrottle={16}
         data-component-name="resources-calendar-body-row"
-        onScrollEndDrag={handleScrollEndDrag}
-        onMomentumScrollBegin={handleMomentumScrollBegin}
-        onMomentumScrollEnd={handleMomentumScrollEnd}
       >
         <View>
           {scrollableResources.map((resource) => (
