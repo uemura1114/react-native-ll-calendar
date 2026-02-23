@@ -33,7 +33,7 @@ type ResourcesCalendarProps = {
 };
 
 const DEFAULT_DATE_COLUMN_WIDTH = 60;
-const EVENT_HEIGHT = 26;
+const EVENT_HEIGHT = 22;
 const CELL_BORDER_WIDTH = 0.5;
 
 export function ResourcesCalendar(props: ResourcesCalendarProps) {

@@ -427,41 +427,102 @@ export default function App() {
   );
 
   const resourceEvents: ResourcesCalendarEvent[] = useMemo(() => {
-    const y = resourcesFromDate.getFullYear();
-    const m = resourcesFromDate.getMonth();
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = now.getMonth();
     return [
       {
-        id: 're1',
+        id: 're-r1-a',
         resourceId: 'r1',
-        title: 'Team Meeting',
-        start: new Date(y, m, 5, 10, 0),
-        end: new Date(y, m, 5, 12, 0),
+        title: 'Event A (1-5)',
+        start: new Date(y, m, 1),
+        end: new Date(y, m, 5),
         backgroundColor: '#ff6b6b',
         borderColor: '#e55353',
-        color: '#fff',
+        color: '#333',
       },
       {
-        id: 're2',
-        resourceId: 'r2',
-        title: 'Job Interview',
-        start: new Date(y, m, 10, 14, 0),
-        end: new Date(y, m, 10, 15, 0),
+        id: 're-r1-b',
+        resourceId: 'r1',
+        title: 'Event B (2-4)',
+        start: new Date(y, m, 2),
+        end: new Date(y, m, 4),
         backgroundColor: '#4ecdc4',
         borderColor: '#45b7aa',
-        color: '#fff',
+        color: '#333',
       },
       {
-        id: 're3',
-        resourceId: 'r3',
-        title: 'Training',
-        start: new Date(y, m, 15, 9, 0),
-        end: new Date(y, m, 17, 18, 0),
+        id: 're-r1-c',
+        resourceId: 'r1',
+        title: 'Event C (3-5)',
+        start: new Date(y, m, 3),
+        end: new Date(y, m, 5),
         backgroundColor: '#a29bfe',
         borderColor: '#6c5ce7',
-        color: '#fff',
+        color: '#333',
+      },
+      {
+        id: 're-r2-a',
+        resourceId: 'r2',
+        title: 'Meeting A (1-3)',
+        start: new Date(y, m, 1),
+        end: new Date(y, m, 3),
+        backgroundColor: '#ff6b6b',
+        borderColor: '#e55353',
+        color: '#333',
+      },
+      {
+        id: 're-r2-b',
+        resourceId: 'r2',
+        title: 'Meeting B (2-5)',
+        start: new Date(y, m, 2),
+        end: new Date(y, m, 5),
+        backgroundColor: '#4ecdc4',
+        borderColor: '#45b7aa',
+        color: '#333',
+      },
+      {
+        id: 're-r2-c',
+        resourceId: 'r2',
+        title: 'Meeting C (1)',
+        start: new Date(y, m, 1),
+        end: new Date(y, m, 1),
+        backgroundColor: '#74b9ff',
+        borderColor: '#0984e3',
+        color: '#333',
+      },
+      {
+        id: 're-r3-a',
+        resourceId: 'r3',
+        title: 'Step A (1-4)',
+        start: new Date(y, m, 1),
+        end: new Date(y, m, 4),
+        backgroundColor: '#00b894',
+        borderColor: '#00a085',
+        color: '#333',
+      },
+      {
+        id: 're-r3-b',
+        resourceId: 'r3',
+        title: 'Step B (2-5)',
+        start: new Date(y, m, 2),
+        end: new Date(y, m, 5),
+        backgroundColor: '#fd79a8',
+        borderColor: '#e84393',
+        color: '#333',
+      },
+      {
+        id: 're-r3-c',
+        resourceId: 'r3',
+        title: 'Step C (3-5)',
+        start: new Date(y, m, 3),
+        end: new Date(y, m, 5),
+        backgroundColor: '#ffeaa7',
+        borderColor: '#fdcb6e',
+        color: '#333',
       },
     ];
-  }, [resourcesFromDate]);
+  }, []);
 
   const calendarRef = useRef<MonthCalendarRef>(null);
 
