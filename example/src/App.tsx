@@ -809,7 +809,12 @@ export default function App() {
           bottomSpacing={200}
           eventTextStyle={(_event) => ({ fontSize: 12 })}
           eventEllipsizeMode={'clip'}
-          dayCellContainerStyle={(_resource, d) =>
+          dateCellContainerStyle={(d) =>
+            d.getDay() === 0 || d.getDay() === 6
+              ? { backgroundColor: '#f5f5f5' }
+              : {}
+          }
+          cellContainerStyle={(_resource, d) =>
             d.getDay() === 0 || d.getDay() === 6
               ? { backgroundColor: '#f5f5f5' }
               : {}

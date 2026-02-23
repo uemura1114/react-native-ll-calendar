@@ -43,7 +43,8 @@ type ResourcesCalendarProps = {
   bottomSpacing?: number;
   eventTextStyle?: (event: CalendarEvent) => TextStyle;
   eventEllipsizeMode?: 'head' | 'middle' | 'tail' | 'clip';
-  dayCellContainerStyle?: (resource: CalendarResource, date: Date) => ViewStyle;
+  dateCellContainerStyle?: (date: Date) => ViewStyle;
+  cellContainerStyle?: (resource: CalendarResource, date: Date) => ViewStyle;
 };
 
 const DEFAULT_DATE_COLUMN_WIDTH = 60;
@@ -66,7 +67,7 @@ type ResourceRowProps = {
   eventHeight: number;
   eventTextStyle?: (event: CalendarEvent) => TextStyle;
   eventEllipsizeMode?: 'head' | 'middle' | 'tail' | 'clip';
-  dayCellContainerStyle?: (resource: CalendarResource, date: Date) => ViewStyle;
+  cellContainerStyle?: (resource: CalendarResource, date: Date) => ViewStyle;
 };
 
 function ResourceRow({
@@ -85,7 +86,7 @@ function ResourceRow({
   eventHeight,
   eventTextStyle,
   eventEllipsizeMode,
-  dayCellContainerStyle,
+  cellContainerStyle,
 }: ResourceRowProps) {
   const resourceEvents = eventsByResourceId.get(resource.id) ?? [];
   const eventPosition = new ResourcesCalendarEventPosition();
@@ -160,7 +161,7 @@ function ResourceRow({
                 styles.contentCellContainer,
                 { width: dateColumnWidth },
                 { zIndex: dates.length - dateIndex },
-                dayCellContainerStyle?.(resource, date),
+                cellContainerStyle?.(resource, date),
               ]}
               onPress={() => onPressCell?.(resource, date)}
               onLongPress={() => onLongPressCell?.(resource, date)}
@@ -366,7 +367,7 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
     eventHeight: props.eventHeight ?? DEFAULT_EVENT_HEIGHT,
     eventTextStyle: props.eventTextStyle,
     eventEllipsizeMode: props.eventEllipsizeMode,
-    dayCellContainerStyle: props.dayCellContainerStyle,
+    cellContainerStyle: props.cellContainerStyle,
   };
 
   return (
@@ -421,7 +422,11 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
               <View
                 key={date.getTime()}
                 data-component-name="resources-calendar-date-cell"
-                style={[styles.dateCellContainer, { width: dateColumnWidth }]}
+                style={[
+                  styles.dateCellContainer,
+                  { width: dateColumnWidth },
+                  props.dateCellContainerStyle?.(date),
+                ]}
               >
                 {props.renderDateLabel ? (
                   props.renderDateLabel(date)
