@@ -179,7 +179,7 @@ function ResourceRow({
                 if (typeof event === 'number') {
                   return (
                     <View
-                      key={event}
+                      key={`spacer-${rowIndex}`}
                       style={{
                         height: eventHeight,
                         marginBottom: EVENT_GAP,
@@ -278,8 +278,12 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
   const monthGroups = useMemo(() => groupDatesByMonth(dates), [dates]);
 
   const eventsByResourceId = useMemo(() => {
-    const map = new Map<string, CalendarEvent[]>();
+    const deduped = new Map<string, CalendarEvent>();
     for (const event of props.events) {
+      deduped.set(event.id, event);
+    }
+    const map = new Map<string, CalendarEvent[]>();
+    for (const event of deduped.values()) {
       const list = map.get(event.resourceId) ?? [];
       list.push(event);
       map.set(event.resourceId, list);
