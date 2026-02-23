@@ -6,6 +6,7 @@ import type {
 import {
   type NativeScrollEvent,
   type NativeSyntheticEvent,
+  RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
@@ -110,7 +111,15 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
   );
 
   return (
-    <ScrollView stickyHeaderIndices={[0]}>
+    <ScrollView
+      stickyHeaderIndices={[0]}
+      refreshControl={
+        <RefreshControl
+          refreshing={!!props.refreshing}
+          onRefresh={props.onRefresh}
+        />
+      }
+    >
       <ScrollView
         ref={headerScrollRef}
         horizontal
