@@ -574,6 +574,24 @@ export default function App() {
     [getMonthRowHeight]
   );
 
+  const handleResourcesPressCell = useCallback(
+    (resource: CalendarResource, d: Date) => {
+      console.log('onPressCell', resource.name, dayjs(d).format('YYYY-MM-DD'));
+    },
+    []
+  );
+
+  const handleResourcesLongPressCell = useCallback(
+    (resource: CalendarResource, d: Date) => {
+      console.log(
+        'onLongPressCell',
+        resource.name,
+        dayjs(d).format('YYYY-MM-DD')
+      );
+    },
+    []
+  );
+
   const [refreshing, setRefreshing] = useState(false);
   const handleRefresh = useCallback(() => {
     setRefreshing(true);
@@ -767,6 +785,9 @@ export default function App() {
             </View>
           )}
           fixedRowCount={2}
+          onPressCell={handleResourcesPressCell}
+          onLongPressCell={handleResourcesLongPressCell}
+          delayLongPressCell={1000}
         />
       )}
     </View>

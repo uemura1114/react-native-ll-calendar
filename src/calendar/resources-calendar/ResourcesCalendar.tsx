@@ -31,6 +31,9 @@ type ResourcesCalendarProps = {
   onRefresh?: () => void;
   refreshing?: boolean;
   fixedRowCount?: number;
+  onPressCell?: (resource: CalendarResource, date: Date) => void;
+  onLongPressCell?: (resource: CalendarResource, date: Date) => void;
+  delayLongPressCell?: number;
 };
 
 const DEFAULT_DATE_COLUMN_WIDTH = 60;
@@ -44,6 +47,9 @@ type ResourceRowProps = {
   scrollOffset: number;
   eventsByResourceId: Map<string, CalendarEvent[]>;
   renderResourceNameLabel?: (resource: CalendarResource) => React.JSX.Element;
+  onPressCell?: (resource: CalendarResource, date: Date) => void;
+  onLongPressCell?: (resource: CalendarResource, date: Date) => void;
+  delayLongPressCell?: number;
 };
 
 function ResourceRow({
@@ -53,6 +59,9 @@ function ResourceRow({
   scrollOffset,
   eventsByResourceId,
   renderResourceNameLabel,
+  onPressCell,
+  onLongPressCell,
+  delayLongPressCell,
 }: ResourceRowProps) {
   const resourceEvents = eventsByResourceId.get(resource.id) ?? [];
   const eventPosition = new ResourcesCalendarEventPosition();
@@ -121,13 +130,17 @@ function ResourceRow({
           }
 
           return (
-            <View
+            <TouchableOpacity
               key={date.getTime()}
               style={[
                 styles.contentCellContainer,
                 { width: dateColumnWidth },
                 { zIndex: dates.length - dateIndex },
               ]}
+              onPress={() => onPressCell?.(resource, date)}
+              onLongPress={() => onLongPressCell?.(resource, date)}
+              delayLongPress={delayLongPressCell}
+              activeOpacity={1}
             >
               {cellEvents.map((event, rowIndex) => {
                 if (typeof event === 'number') {
@@ -202,7 +215,7 @@ function ResourceRow({
                   </TouchableOpacity>
                 );
               })}
-            </View>
+            </TouchableOpacity>
           );
         })}
       </View>
@@ -312,6 +325,9 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
     scrollOffset,
     eventsByResourceId,
     renderResourceNameLabel: props.renderResourceNameLabel,
+    onPressCell: props.onPressCell,
+    onLongPressCell: props.onLongPressCell,
+    delayLongPressCell: props.delayLongPressCell,
   };
 
   return (
