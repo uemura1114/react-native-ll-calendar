@@ -257,10 +257,15 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
   const activeScrollerTimer = useRef<ReturnType<typeof setTimeout> | null>(
     null
   );
-  const [scrollOffset] = useState(0);
+  const lastScrollX = useRef(0);
+  const [scrollOffset, setScrollOffset] = useState(0);
 
+  // スクロール停止後にラベルを追従させる。
+  // activeScroller のタイムアウトが切れた = スクロール停止とみなし、
+  // その時点の lastScrollX を state に反映する。
   const releaseActiveScroller = useCallback(() => {
     activeScroller.current = null;
+    setScrollOffset(lastScrollX.current);
   }, []);
 
   const handleHeaderScroll = useCallback(
@@ -268,17 +273,16 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
       if (activeScroller.current === 'body') {
         return;
       }
+      const x = event.nativeEvent.contentOffset.x;
+      lastScrollX.current = x;
       activeScroller.current = 'header';
 
       if (activeScrollerTimer.current != null) {
         clearTimeout(activeScrollerTimer.current);
       }
-      activeScrollerTimer.current = setTimeout(releaseActiveScroller, 100);
+      activeScrollerTimer.current = setTimeout(releaseActiveScroller, 150);
 
-      bodyScrollRef.current?.scrollTo({
-        x: event.nativeEvent.contentOffset.x,
-        animated: false,
-      });
+      bodyScrollRef.current?.scrollTo({ x, animated: false });
     },
     [releaseActiveScroller]
   );
@@ -288,17 +292,16 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
       if (activeScroller.current === 'header') {
         return;
       }
+      const x = event.nativeEvent.contentOffset.x;
+      lastScrollX.current = x;
       activeScroller.current = 'body';
 
       if (activeScrollerTimer.current != null) {
         clearTimeout(activeScrollerTimer.current);
       }
-      activeScrollerTimer.current = setTimeout(releaseActiveScroller, 100);
+      activeScrollerTimer.current = setTimeout(releaseActiveScroller, 150);
 
-      headerScrollRef.current?.scrollTo({
-        x: event.nativeEvent.contentOffset.x,
-        animated: false,
-      });
+      headerScrollRef.current?.scrollTo({ x, animated: false });
     },
     [releaseActiveScroller]
   );

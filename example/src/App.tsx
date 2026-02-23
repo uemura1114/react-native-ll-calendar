@@ -766,7 +766,7 @@ export default function App() {
               </Text>
             </View>
           )}
-          fixedRowCount={6}
+          fixedRowCount={2}
         />
       )}
     </View>
