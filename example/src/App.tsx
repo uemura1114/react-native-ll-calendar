@@ -781,16 +781,30 @@ export default function App() {
           events={resourceEvents}
           onRefresh={handleRefresh}
           refreshing={refreshing}
-          renderDateLabel={(d) => (
-            <View style={styles.dateLabel}>
-              <Text style={styles.dateLabelText}>
-                {dayjs(d).locale(ja).format('D')}
-              </Text>
-              <Text style={styles.dateLabelText}>
-                {dayjs(d).locale(ja).format('(ddd)')}
-              </Text>
-            </View>
-          )}
+          renderDateLabel={(d) => {
+            const todayStyle = {
+              backgroundColor: 'green',
+              borderRadius: 99,
+            };
+            const todayTextStyle = {
+              color: 'white',
+            };
+            const isToday = dayjs(d).isSame(dayjs(new Date()), 'day');
+            return (
+              <View style={[styles.dateLabel, isToday ? todayStyle : {}]}>
+                <Text
+                  style={[styles.dateLabelText, isToday ? todayTextStyle : {}]}
+                >
+                  {dayjs(d).locale(ja).format('D')}
+                </Text>
+                <Text
+                  style={[styles.dateLabelText, isToday ? todayTextStyle : {}]}
+                >
+                  {dayjs(d).locale(ja).format('(ddd)')}
+                </Text>
+              </View>
+            );
+          }}
           renderMonthLabel={(year, month) => (
             <View>
               <Text style={styles.monthLabelText}>
@@ -809,16 +823,22 @@ export default function App() {
           bottomSpacing={200}
           eventTextStyle={(_event) => ({ fontSize: 12 })}
           eventEllipsizeMode={'clip'}
-          dateCellContainerStyle={(d) =>
-            d.getDay() === 0 || d.getDay() === 6
-              ? { backgroundColor: '#f5f5f5' }
-              : {}
-          }
-          cellContainerStyle={(_resource, d) =>
-            d.getDay() === 0 || d.getDay() === 6
-              ? { backgroundColor: '#f5f5f5' }
-              : {}
-          }
+          dateCellContainerStyle={(d) => {
+            const commonStyle: ViewStyle = {};
+            if (d.getDay() === 0 || d.getDay() === 6) {
+              return { ...commonStyle, backgroundColor: '#f5f5f5' };
+            } else {
+              return { ...commonStyle, backgroundColor: '#fff' };
+            }
+          }}
+          cellContainerStyle={(_resource, d) => {
+            const commonStyle: ViewStyle = { paddingBottom: 8 };
+            if (d.getDay() === 0 || d.getDay() === 6) {
+              return { ...commonStyle, backgroundColor: '#f5f5f5' };
+            } else {
+              return { ...commonStyle, backgroundColor: '#fff' };
+            }
+          }}
         />
       )}
     </View>
