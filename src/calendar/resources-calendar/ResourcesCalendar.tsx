@@ -45,6 +45,7 @@ type ResourcesCalendarProps = {
   eventEllipsizeMode?: 'head' | 'middle' | 'tail' | 'clip';
   dateCellContainerStyle?: (date: Date) => ViewStyle;
   cellContainerStyle?: (resource: CalendarResource, date: Date) => ViewStyle;
+  hiddenMonth?: boolean;
 };
 
 const DEFAULT_DATE_COLUMN_WIDTH = 60;
@@ -391,31 +392,36 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
         data-component-name="resources-calendar-header-row"
       >
         <View>
-          <View style={styles.monthHeaderRow}>
-            {monthGroups.map(({ year, month }, index) => {
-              const { start: cellStart, width: cellWidth } =
-                monthGroupOffsets[index]!;
-              const textLeft = Math.max(8, scrollOffset - cellStart + 8);
-              return (
-                <View
-                  key={`${year}-${month}`}
-                  style={[styles.monthHeaderCell, { width: cellWidth }]}
-                >
-                  <View style={{ marginLeft: textLeft }}>
-                    {props.renderMonthLabel ? (
-                      props.renderMonthLabel(year, month)
-                    ) : (
-                      <View>
-                        <Text numberOfLines={1} style={styles.monthHeaderText}>
-                          {dayjs(`${year}-${month}-01`).format('YYYY/MM')}
-                        </Text>
-                      </View>
-                    )}
+          {!props.hiddenMonth && (
+            <View style={styles.monthHeaderRow}>
+              {monthGroups.map(({ year, month }, index) => {
+                const { start: cellStart, width: cellWidth } =
+                  monthGroupOffsets[index]!;
+                const textLeft = Math.max(8, scrollOffset - cellStart + 8);
+                return (
+                  <View
+                    key={`${year}-${month}`}
+                    style={[styles.monthHeaderCell, { width: cellWidth }]}
+                  >
+                    <View style={{ marginLeft: textLeft }}>
+                      {props.renderMonthLabel ? (
+                        props.renderMonthLabel(year, month)
+                      ) : (
+                        <View>
+                          <Text
+                            numberOfLines={1}
+                            style={styles.monthHeaderText}
+                          >
+                            {dayjs(`${year}-${month}-01`).format('YYYY/MM')}
+                          </Text>
+                        </View>
+                      )}
+                    </View>
                   </View>
-                </View>
-              );
-            })}
-          </View>
+                );
+              })}
+            </View>
+          )}
 
           <View style={styles.headerRow}>
             {dates.map((date) => (
