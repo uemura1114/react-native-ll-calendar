@@ -155,9 +155,14 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
                     )}
                   </View>
                 </View>
-                {dates.map((date) => (
-                  <View key={date.getTime()} style={styles.dateCellContainer} />
-                ))}
+                <View style={styles.resourceRowContentArea}>
+                  {dates.map((date) => (
+                    <View
+                      key={date.getTime()}
+                      style={styles.dateCellContainer}
+                    />
+                  ))}
+                </View>
               </View>
             );
           })}
@@ -190,21 +195,22 @@ const styles = StyleSheet.create({
     borderColor: 'lightslategrey',
   },
   resourceRow: {
-    flexDirection: 'row',
-    borderBottomWidth: 1,
+    flexDirection: 'column',
+    borderBottomWidth: 0.5,
     borderRightWidth: 0.5,
     borderBottomColor: 'lightslategrey',
-    minHeight: 40,
+  },
+  resourceRowContentArea: {
+    flexDirection: 'row',
+    borderBottomWidth: 0.5,
+    borderColor: 'lightslategrey',
+    minHeight: 30,
   },
   resourceNameColumn: {
     width: 80,
   },
   resourceNameFixedLabel: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    left: 0,
-    zIndex: 10,
+    width: '100%',
     borderBottomWidth: 0.5,
     borderColor: 'lightslategrey',
     backgroundColor: '#EEEEEE',
