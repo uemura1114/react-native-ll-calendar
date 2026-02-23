@@ -77,3 +77,37 @@ export function getWeekIds(args: {
   }
   return weekIds;
 }
+
+export function generateDates(from: Date, to: Date): Date[] {
+  const dates: Date[] = [];
+  const current = new Date(from);
+  current.setHours(0, 0, 0, 0);
+  const end = new Date(to);
+  end.setHours(0, 0, 0, 0);
+  while (current <= end) {
+    dates.push(new Date(current));
+    current.setDate(current.getDate() + 1);
+  }
+  return dates;
+}
+
+type MonthGroup = {
+  year: number;
+  month: number;
+  dates: Date[];
+};
+
+export function groupDatesByMonth(dates: Date[]): MonthGroup[] {
+  const groups: MonthGroup[] = [];
+  for (const date of dates) {
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const last = groups[groups.length - 1];
+    if (last && last.year === year && last.month === month) {
+      last.dates.push(date);
+    } else {
+      groups.push({ year, month, dates: [date] });
+    }
+  }
+  return groups;
+}

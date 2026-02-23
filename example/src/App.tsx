@@ -2,13 +2,22 @@ import dayjs from 'dayjs';
 import ja from 'dayjs/locale/ja';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { type ViewStyle } from 'react-native';
-import { View, StyleSheet } from 'react-native';
-import { MonthCalendar, type CalendarEvent } from 'react-native-ll-calendar';
+import { View, StyleSheet, TouchableOpacity, Text } from 'react-native';
+import {
+  MonthCalendar,
+  ResourcesCalendar,
+  type CalendarEvent,
+  type ResourcesCalendarEvent,
+  type CalendarResource,
+} from 'react-native-ll-calendar';
 import type { WeekdayNum } from '../../src/types/month-calendar';
 import type { TextStyle } from 'react-native';
 import type { MonthCalendarRef } from '../../src/calendar/month-calendar/MonthCalendar';
 
+type TabType = 'month' | 'resources';
+
 export default function App() {
+  const [activeTab, setActiveTab] = useState<TabType>('month');
   const [date, setDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
@@ -372,6 +381,148 @@ export default function App() {
     ];
   }, []);
 
+  const { resourcesFromDate, resourcesToDate } = useMemo(() => {
+    const now = new Date();
+    return {
+      resourcesFromDate: new Date(now.getFullYear(), now.getMonth(), -2),
+      resourcesToDate: new Date(now.getFullYear(), now.getMonth() + 1, 0),
+    };
+  }, []);
+
+  const resources: CalendarResource[] = useMemo(
+    () => [
+      { id: 'r1', name: 'Room A' },
+      { id: 'r2', name: 'Room B' },
+      { id: 'r3', name: 'Seminar Room' },
+      { id: 'r4', name: 'Reception Room' },
+      { id: 'r5', name: 'Focus Room' },
+      { id: 'r6', name: 'Room C' },
+      { id: 'r7', name: 'Room D' },
+      { id: 'r8', name: 'Training Room' },
+      { id: 'r9', name: 'Lounge' },
+      { id: 'r10', name: 'Server Room' },
+      { id: 'r11', name: 'Room E' },
+      { id: 'r12', name: 'Executive Room' },
+      { id: 'r13', name: 'Brainstorm Space' },
+      { id: 'r14', name: 'Phone Booth 1' },
+      { id: 'r15', name: 'Phone Booth 2' },
+      { id: 'r16', name: 'Open Space' },
+      { id: 'r17', name: 'Workshop Room' },
+      { id: 'r18', name: 'Recording Studio' },
+      { id: 'r19', name: 'Design Studio' },
+      { id: 'r20', name: 'Relaxation Room' },
+      { id: 'r21', name: 'Conference Room 1' },
+      { id: 'r22', name: 'Conference Room 2' },
+      { id: 'r23', name: 'Meeting Pod A' },
+      { id: 'r24', name: 'Meeting Pod B' },
+      { id: 'r25', name: 'Rooftop Space' },
+      { id: 'r26', name: 'Cafeteria' },
+      { id: 'r27', name: 'Library Room' },
+      { id: 'r28', name: 'Innovation Lab' },
+      { id: 'r29', name: 'Media Room' },
+      { id: 'r30', name: 'Wellness Room' },
+    ],
+    []
+  );
+
+  const resourceEvents: ResourcesCalendarEvent[] = useMemo(() => {
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = now.getMonth();
+    return [
+      {
+        id: 're-r1-a',
+        resourceId: 'r1',
+        title: 'Event A (1-5)',
+        start: new Date(y, m, 1),
+        end: new Date(y, m, 5),
+        backgroundColor: '#ff6b6b',
+        borderColor: '#e55353',
+        color: '#333',
+      },
+      {
+        id: 're-r1-b',
+        resourceId: 'r1',
+        title: 'Event B (2-4)',
+        start: new Date(y, m, 2),
+        end: new Date(y, m, 4),
+        backgroundColor: '#4ecdc4',
+        borderColor: '#45b7aa',
+        color: '#333',
+      },
+      {
+        id: 're-r1-c',
+        resourceId: 'r1',
+        title: 'Event C (3-5)',
+        start: new Date(y, m, 3),
+        end: new Date(y, m, 5),
+        backgroundColor: '#a29bfe',
+        borderColor: '#6c5ce7',
+        color: '#333',
+      },
+      {
+        id: 're-r2-a',
+        resourceId: 'r2',
+        title: 'Meeting A (1-3)',
+        start: new Date(y, m, 1),
+        end: new Date(y, m, 3),
+        backgroundColor: '#ff6b6b',
+        borderColor: '#e55353',
+        color: '#333',
+      },
+      {
+        id: 're-r2-b',
+        resourceId: 'r2',
+        title: 'Meeting B (2-5)',
+        start: new Date(y, m, 2),
+        end: new Date(y, m, 5),
+        backgroundColor: '#4ecdc4',
+        borderColor: '#45b7aa',
+        color: '#333',
+      },
+      {
+        id: 're-r2-c',
+        resourceId: 'r2',
+        title: 'Meeting C (1)',
+        start: new Date(y, m, 1),
+        end: new Date(y, m, 1),
+        backgroundColor: '#74b9ff',
+        borderColor: '#0984e3',
+        color: '#333',
+      },
+      {
+        id: 're-r3-a',
+        resourceId: 'r3',
+        title: 'Step A (1-4)',
+        start: new Date(y, m, 1),
+        end: new Date(y, m, 4),
+        backgroundColor: '#00b894',
+        borderColor: '#00a085',
+        color: '#333',
+      },
+      {
+        id: 're-r3-b',
+        resourceId: 'r3',
+        title: 'Step B (2-5)',
+        start: new Date(y, m, 2),
+        end: new Date(y, m, 5),
+        backgroundColor: '#fd79a8',
+        borderColor: '#e84393',
+        color: '#333',
+      },
+      {
+        id: 're-r3-c',
+        resourceId: 'r3',
+        title: 'Step C (3-5)',
+        start: new Date(y, m, 3),
+        end: new Date(y, m, 5),
+        backgroundColor: '#ffeaa7',
+        borderColor: '#fdcb6e',
+        color: '#333',
+      },
+    ];
+  }, []);
+
   const calendarRef = useRef<MonthCalendarRef>(null);
 
   const handleScrollToTop = useCallback(() => {
@@ -420,6 +571,38 @@ export default function App() {
       console.log('height', height);
     },
     [getMonthRowHeight]
+  );
+
+  const handleResourcesPressCell = useCallback(
+    (resource: CalendarResource, d: Date) => {
+      console.log('onPressCell', resource.name, dayjs(d).format('YYYY-MM-DD'));
+    },
+    []
+  );
+
+  const handleResourcesLongPressCell = useCallback(
+    (resource: CalendarResource, d: Date) => {
+      console.log(
+        'onLongPressCell',
+        resource.name,
+        dayjs(d).format('YYYY-MM-DD')
+      );
+    },
+    []
+  );
+
+  const handleResourcesPressEvent = useCallback(
+    (event: ResourcesCalendarEvent) => {
+      console.log('onPressEvent', event.id, event.title);
+    },
+    []
+  );
+
+  const handleResourcesLongPressEvent = useCallback(
+    (event: ResourcesCalendarEvent) => {
+      console.log('onLongPressEvent', event.id, event.title);
+    },
+    []
   );
 
   const [refreshing, setRefreshing] = useState(false);
@@ -502,36 +685,136 @@ export default function App() {
 
   return (
     <View style={styles.container}>
-      <MonthCalendar
-        ref={calendarRef}
-        defaultDate={date}
-        weekStartsOn={1}
-        onChangeDate={handleChangeDate}
-        events={events}
-        onPressEvent={handlePressEvent}
-        onLongPressEvent={handleLongPressEvent}
-        delayLongPressEvent={1000}
-        onPressCell={handlePressCell}
-        onLongPressCell={handleLongPressCell}
-        delayLongPressCell={1000}
-        onRefresh={handleRefresh}
-        refreshing={refreshing}
-        dayCellContainerStyle={dayCellContainerStyle}
-        dayCellTextStyle={dayCellTextStyle}
-        locale={ja}
-        weekdayCellContainerStyle={weekdayCellContainerStyle}
-        weekdayCellTextStyle={weekdayCellTextStyle}
-        todayCellTextStyle={todayCellTextStyle}
-        hiddenMonth={false}
-        monthFormat={'YYYY/MM'}
-        stickyHeaderEnabled={true}
-        cellBorderColor="#999999"
-        allowFontScaling={false}
-        eventHeight={32}
-        eventTextStyle={eventTextStyle}
-        eventEllipsizeMode={'clip'}
-        bottomSpacing={200}
-      />
+      {/* Tab bar */}
+      <View style={styles.tabBar}>
+        <TouchableOpacity
+          style={[styles.tab, activeTab === 'month' && styles.activeTab]}
+          onPress={() => setActiveTab('month')}
+        >
+          <Text
+            style={[
+              styles.tabText,
+              activeTab === 'month' && styles.activeTabText,
+            ]}
+          >
+            Month
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.tab, activeTab === 'resources' && styles.activeTab]}
+          onPress={() => setActiveTab('resources')}
+        >
+          <Text
+            style={[
+              styles.tabText,
+              activeTab === 'resources' && styles.activeTabText,
+            ]}
+          >
+            Resources
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Content */}
+      {activeTab === 'month' ? (
+        <MonthCalendar
+          ref={calendarRef}
+          defaultDate={date}
+          weekStartsOn={1}
+          onChangeDate={handleChangeDate}
+          events={events}
+          onPressEvent={handlePressEvent}
+          onLongPressEvent={handleLongPressEvent}
+          delayLongPressEvent={1000}
+          onPressCell={handlePressCell}
+          onLongPressCell={handleLongPressCell}
+          delayLongPressCell={1000}
+          onRefresh={handleRefresh}
+          refreshing={refreshing}
+          dayCellContainerStyle={dayCellContainerStyle}
+          dayCellTextStyle={dayCellTextStyle}
+          locale={ja}
+          weekdayCellContainerStyle={weekdayCellContainerStyle}
+          weekdayCellTextStyle={weekdayCellTextStyle}
+          todayCellTextStyle={todayCellTextStyle}
+          hiddenMonth={false}
+          monthFormat={'YYYY/MM'}
+          stickyHeaderEnabled={true}
+          cellBorderColor="#999999"
+          allowFontScaling={false}
+          eventHeight={32}
+          eventTextStyle={eventTextStyle}
+          eventEllipsizeMode={'clip'}
+          bottomSpacing={200}
+        />
+      ) : (
+        <ResourcesCalendar
+          fromDate={resourcesFromDate}
+          toDate={resourcesToDate}
+          resources={resources}
+          events={resourceEvents}
+          onRefresh={handleRefresh}
+          refreshing={refreshing}
+          renderDateLabel={(d) => {
+            const todayStyle = {
+              backgroundColor: 'green',
+              borderRadius: 99,
+            };
+            const todayTextStyle = {
+              color: 'white',
+            };
+            const isToday = dayjs(d).isSame(dayjs(new Date()), 'day');
+            return (
+              <View style={[styles.dateLabel, isToday ? todayStyle : {}]}>
+                <Text
+                  style={[styles.dateLabelText, isToday ? todayTextStyle : {}]}
+                >
+                  {dayjs(d).locale(ja).format('D')}
+                </Text>
+                <Text
+                  style={[styles.dateLabelText, isToday ? todayTextStyle : {}]}
+                >
+                  {dayjs(d).locale(ja).format('(ddd)')}
+                </Text>
+              </View>
+            );
+          }}
+          renderMonthLabel={(year, month) => (
+            <View>
+              <Text style={styles.monthLabelText}>
+                {dayjs(`${year}-${month}-01`).locale(ja).format('YYYY年M月')}
+              </Text>
+            </View>
+          )}
+          fixedRowCount={2}
+          onPressCell={handleResourcesPressCell}
+          onLongPressCell={handleResourcesLongPressCell}
+          delayLongPressCell={1000}
+          onPressEvent={handleResourcesPressEvent}
+          onLongPressEvent={handleResourcesLongPressEvent}
+          delayLongPressEvent={1000}
+          eventHeight={22}
+          bottomSpacing={200}
+          eventTextStyle={(_event) => ({ fontSize: 12 })}
+          eventEllipsizeMode={'clip'}
+          dateCellContainerStyle={(d) => {
+            const commonStyle: ViewStyle = {};
+            if (d.getDay() === 0 || d.getDay() === 6) {
+              return { ...commonStyle, backgroundColor: '#f5f5f5' };
+            } else {
+              return { ...commonStyle, backgroundColor: '#fff' };
+            }
+          }}
+          cellContainerStyle={(_resource, d) => {
+            const commonStyle: ViewStyle = { paddingBottom: 8 };
+            if (d.getDay() === 0 || d.getDay() === 6) {
+              return { ...commonStyle, backgroundColor: '#f5f5f5' };
+            } else {
+              return { ...commonStyle, backgroundColor: '#fff' };
+            }
+          }}
+        />
+      )}
     </View>
   );
 }
@@ -539,7 +822,44 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    marginVertical: 80,
+    marginTop: 60,
     width: '100%',
+  },
+  tabBar: {
+    flexDirection: 'row',
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+    backgroundColor: '#fff',
+  },
+  tab: {
+    flex: 1,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  activeTab: {
+    borderBottomWidth: 2,
+    borderBottomColor: '#007AFF',
+  },
+  tabText: {
+    fontSize: 14,
+    color: '#888',
+  },
+  activeTabText: {
+    color: '#007AFF',
+    fontWeight: '600',
+  },
+  dateLabel: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    paddingVertical: 2,
+  },
+  dateLabelText: {
+    fontSize: 12,
+    lineHeight: 12,
+  },
+  monthLabelText: {
+    fontSize: 12,
+    color: '#333',
+    fontWeight: '600',
   },
 });
