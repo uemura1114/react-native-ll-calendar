@@ -179,7 +179,7 @@ function ResourceRow({
                 if (typeof event === 'number') {
                   return (
                     <View
-                      key={event}
+                      key={`spacer-${rowIndex}`}
                       style={{
                         height: eventHeight,
                         marginBottom: EVENT_GAP,
