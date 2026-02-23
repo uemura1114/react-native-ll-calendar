@@ -21,6 +21,7 @@ type ResourcesCalendarProps = {
   resources: CalendarResource[];
   events: CalendarEvent[];
   renderDateLabel?: (date: Date) => React.JSX.Element;
+  renderMonthLabel?: (year: number, month: number) => React.JSX.Element;
   renderResourceNameLabel?: (resource: CalendarResource) => React.JSX.Element;
   resourceColumnWidth?: number;
   dateColumnWidth?: number;
@@ -143,9 +144,15 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
                   style={[styles.monthHeaderCell, { width: cellWidth }]}
                 >
                   <View style={{ marginLeft: textLeft }}>
-                    <Text numberOfLines={1} style={styles.monthHeaderText}>
-                      {dayjs(`${year}-${month}-01`).format('YYYY/MM')}
-                    </Text>
+                    {props.renderMonthLabel ? (
+                      props.renderMonthLabel(year, month)
+                    ) : (
+                      <View>
+                        <Text numberOfLines={1} style={styles.monthHeaderText}>
+                          {dayjs(`${year}-${month}-01`).format('YYYY/MM')}
+                        </Text>
+                      </View>
+                    )}
                   </View>
                 </View>
               );

@@ -698,6 +698,13 @@ export default function App() {
               </Text>
             </View>
           )}
+          renderMonthLabel={(year, month) => (
+            <View>
+              <Text style={styles.monthLabelText}>
+                {dayjs(`${year}-${month}-01`).locale(ja).format('YYYY年M月')}
+              </Text>
+            </View>
+          )}
         />
       )}
     </View>
@@ -741,5 +748,10 @@ const styles = StyleSheet.create({
   dateLabelText: {
     fontSize: 12,
     lineHeight: 12,
+  },
+  monthLabelText: {
+    fontSize: 12,
+    color: '#333',
+    fontWeight: '600',
   },
 });
