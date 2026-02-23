@@ -6,7 +6,6 @@ import { View, StyleSheet, TouchableOpacity, Text } from 'react-native';
 import {
   MonthCalendar,
   ResourcesCalendar,
-  ResourcesCalendarV0,
   type CalendarEvent,
   type ResourcesCalendarEvent,
   type CalendarResource,
@@ -15,7 +14,7 @@ import type { WeekdayNum } from '../../src/types/month-calendar';
 import type { TextStyle } from 'react-native';
 import type { MonthCalendarRef } from '../../src/calendar/month-calendar/MonthCalendar';
 
-type TabType = 'month' | 'resources-v0' | 'resources';
+type TabType = 'month' | 'resources';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<TabType>('month');
@@ -702,19 +701,6 @@ export default function App() {
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.tab, activeTab === 'resources-v0' && styles.activeTab]}
-          onPress={() => setActiveTab('resources-v0')}
-        >
-          <Text
-            style={[
-              styles.tabText,
-              activeTab === 'resources-v0' && styles.activeTabText,
-            ]}
-          >
-            Resources V0
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
           style={[styles.tab, activeTab === 'resources' && styles.activeTab]}
           onPress={() => setActiveTab('resources')}
         >
@@ -760,18 +746,6 @@ export default function App() {
           eventTextStyle={eventTextStyle}
           eventEllipsizeMode={'clip'}
           bottomSpacing={200}
-        />
-      ) : activeTab === 'resources-v0' ? (
-        <ResourcesCalendarV0
-          fromDate={resourcesFromDate}
-          toDate={resourcesToDate}
-          resources={resources}
-          events={resourceEvents}
-          onRefresh={handleRefresh}
-          refreshing={refreshing}
-          renderDateLabel={(d) => (
-            <Text>{dayjs(d).locale(ja).format('D(ddd)')}</Text>
-          )}
         />
       ) : (
         <ResourcesCalendar
