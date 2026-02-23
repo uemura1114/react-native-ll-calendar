@@ -15,7 +15,7 @@ import {
 import { View } from 'react-native';
 import { generateDates, groupDatesByMonth } from '../../utils/functions';
 import dayjs from 'dayjs';
-import MonthCalendarEventPosition from '../../utils/month-calendar-event-position';
+import ResourcesCalendarEventPosition from '../../utils/resources-calendar-event-position';
 import { EVENT_GAP } from '../../constants/size';
 
 type ResourcesCalendarProps = {
@@ -209,7 +209,7 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
         <View>
           {props.resources.map((resource) => {
             const resourceEvents = eventsByResourceId.get(resource.id) ?? [];
-            const eventPosition = new MonthCalendarEventPosition();
+            const eventPosition = new ResourcesCalendarEventPosition();
 
             return (
               <View key={resource.id} style={styles.resourceRow}>
@@ -259,7 +259,7 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
 
                     // 行番号を考慮してイベントを配置（重複回避）
                     const rowNums = eventPosition.getRowNums({
-                      weekId: resource.id,
+                      resourceId: resource.id,
                       date,
                     });
                     const cellEvents: (CalendarEvent | number)[] = [];
@@ -319,7 +319,7 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
 
                           // 位置情報を記録
                           eventPosition.push({
-                            weekId: resource.id,
+                            resourceId: resource.id,
                             startDate: startDjs.toDate(),
                             days: diffDays + 1,
                             rowNum: rowIndex + 1,
