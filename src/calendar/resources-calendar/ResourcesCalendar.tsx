@@ -30,14 +30,191 @@ type ResourcesCalendarProps = {
   dateColumnWidth?: number;
   onRefresh?: () => void;
   refreshing?: boolean;
+  fixedRowCount?: number;
 };
 
 const DEFAULT_DATE_COLUMN_WIDTH = 60;
 const EVENT_HEIGHT = 22;
 const CELL_BORDER_WIDTH = 0.5;
 
+type ResourceRowProps = {
+  resource: CalendarResource;
+  dates: Date[];
+  dateColumnWidth: number;
+  scrollOffset: number;
+  eventsByResourceId: Map<string, CalendarEvent[]>;
+  renderResourceNameLabel?: (resource: CalendarResource) => React.JSX.Element;
+};
+
+function ResourceRow({
+  resource,
+  dates,
+  dateColumnWidth,
+  scrollOffset,
+  eventsByResourceId,
+  renderResourceNameLabel,
+}: ResourceRowProps) {
+  const resourceEvents = eventsByResourceId.get(resource.id) ?? [];
+  const eventPosition = new ResourcesCalendarEventPosition();
+
+  return (
+    <View style={styles.resourceRow}>
+      <View style={[styles.resourceNameFixedLabel]}>
+        <View style={{ marginLeft: scrollOffset + 4 }}>
+          {renderResourceNameLabel ? (
+            renderResourceNameLabel(resource)
+          ) : (
+            <View>
+              <Text style={styles.resourceNameFixedLabelText}>
+                {resource.name}
+              </Text>
+            </View>
+          )}
+        </View>
+      </View>
+      <View style={styles.resourceRowContentArea}>
+        {dates.map((date, dateIndex) => {
+          const djs = dayjs(date);
+
+          // この日付が開始日のイベント、または行の先頭で前日から続くイベントを抽出
+          const filteredEvents = resourceEvents
+            .filter((event) => {
+              const startDjs = dayjs(event.start);
+              return (
+                startDjs.format('YYYY-MM-DD') === djs.format('YYYY-MM-DD') ||
+                (dateIndex === 0 && startDjs.isBefore(djs))
+              );
+            })
+            .sort((a, b) => {
+              const aStartDjs = dateIndex === 0 ? djs : dayjs(a.start);
+              const bStartDjs = dateIndex === 0 ? djs : dayjs(b.start);
+              const aDiffDays = dayjs(a.end)
+                .startOf('day')
+                .diff(aStartDjs.startOf('day'), 'day');
+              const bDiffDays = dayjs(b.end)
+                .startOf('day')
+                .diff(bStartDjs.startOf('day'), 'day');
+              if (aDiffDays !== bDiffDays) {
+                return bDiffDays - aDiffDays;
+              }
+              return dayjs(a.start).diff(dayjs(b.start));
+            });
+
+          // 行番号を考慮してイベントを配置（重複回避）
+          const rowNums = eventPosition.getRowNums({
+            resourceId: resource.id,
+            date,
+          });
+          const cellEvents: (CalendarEvent | number)[] = [];
+          const rowsLength = rowNums.length + filteredEvents.length;
+          let eventIndex = 0;
+          for (let ii = 1; ii <= rowsLength; ii++) {
+            if (rowNums.includes(ii)) {
+              cellEvents.push(ii);
+            } else {
+              const event = filteredEvents[eventIndex];
+              if (event) {
+                cellEvents.push(event);
+              }
+              eventIndex++;
+            }
+          }
+
+          return (
+            <View
+              key={date.getTime()}
+              style={[
+                styles.contentCellContainer,
+                { width: dateColumnWidth },
+                { zIndex: dates.length - dateIndex },
+              ]}
+            >
+              {cellEvents.map((event, rowIndex) => {
+                if (typeof event === 'number') {
+                  return (
+                    <View
+                      key={event}
+                      style={{
+                        height: EVENT_HEIGHT,
+                        marginBottom: EVENT_GAP,
+                      }}
+                    />
+                  );
+                }
+
+                const rawStartDjs = dayjs(event.start);
+                const startDjs = dateIndex === 0 ? djs : dayjs(event.start);
+                const endDjs = dayjs(event.end);
+                const diffDays = endDjs
+                  .startOf('day')
+                  .diff(startDjs.startOf('day'), 'day');
+                const isPrevDateEvent =
+                  dateIndex === 0 && rawStartDjs.isBefore(djs);
+
+                // イベントの幅を日数に応じて計算
+                let width =
+                  (diffDays + 1) * dateColumnWidth -
+                  EVENT_GAP * 2 -
+                  CELL_BORDER_WIDTH * 2;
+                if (isPrevDateEvent) {
+                  width += EVENT_GAP + 1;
+                }
+
+                // 位置情報を記録
+                eventPosition.push({
+                  resourceId: resource.id,
+                  startDate: startDjs.toDate(),
+                  days: diffDays + 1,
+                  rowNum: rowIndex + 1,
+                });
+
+                return (
+                  <TouchableOpacity
+                    data-component-name="resources-calendar-event"
+                    key={event.id}
+                    style={[
+                      styles.event,
+                      {
+                        backgroundColor: event.backgroundColor,
+                        borderColor: event.borderColor,
+                        width,
+                        height: EVENT_HEIGHT,
+                        ...(event.borderStyle !== undefined && {
+                          borderStyle: event.borderStyle,
+                        }),
+                        ...(event.borderWidth !== undefined && {
+                          borderWidth: event.borderWidth,
+                        }),
+                        ...(event.borderRadius !== undefined && {
+                          borderRadius: event.borderRadius,
+                        }),
+                      },
+                      isPrevDateEvent ? styles.prevDateEvent : {},
+                    ]}
+                  >
+                    <Text
+                      numberOfLines={1}
+                      ellipsizeMode="tail"
+                      style={[styles.eventTitle, { color: event.color }]}
+                    >
+                      {event.title}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          );
+        })}
+      </View>
+    </View>
+  );
+}
+
+type ScrollViewRef = React.ComponentRef<typeof ScrollView>;
+
 export function ResourcesCalendar(props: ResourcesCalendarProps) {
   const dateColumnWidth = props.dateColumnWidth ?? DEFAULT_DATE_COLUMN_WIDTH;
+  const fixedRowCount = props.fixedRowCount ?? 0;
 
   const dates = useMemo(
     () => generateDates(props.fromDate, props.toDate),
@@ -65,44 +242,77 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
     });
   }, [monthGroups, dateColumnWidth]);
 
-  const headerScrollRef = useRef<React.ComponentRef<typeof ScrollView>>(null);
-  const bodyScrollRef = useRef<React.ComponentRef<typeof ScrollView>>(null);
-  const isSyncing = useRef(false);
+  const fixedResources = useMemo(
+    () => props.resources.slice(0, fixedRowCount),
+    [props.resources, fixedRowCount]
+  );
+  const scrollableResources = useMemo(
+    () => props.resources.slice(fixedRowCount),
+    [props.resources, fixedRowCount]
+  );
+
+  const headerScrollRef = useRef<ScrollViewRef>(null);
+  const bodyScrollRef = useRef<ScrollViewRef>(null);
+  const syncingCount = useRef(0);
   const isMomentumScrolling = useRef(false);
+  const isMomentumScrollingForFixed = useRef(false);
+  const isScrolling = useRef(false);
+  const isScrollingForFixed = useRef(false);
   const [scrollOffset, setScrollOffset] = useState(0);
+
+  const syncScrollTo = useCallback(
+    (x: number, exclude: React.RefObject<ScrollViewRef | null>) => {
+      const targets = [headerScrollRef, bodyScrollRef];
+      for (const ref of targets) {
+        if (ref === exclude) continue;
+        if (ref.current == null) continue;
+        syncingCount.current++;
+        ref.current.scrollTo({ x, animated: false });
+      }
+    },
+    []
+  );
 
   const handleHeaderScroll = useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-      if (isSyncing.current) {
-        isSyncing.current = false;
+      if (isScrolling.current) {
         return;
       }
-      isSyncing.current = true;
-      bodyScrollRef.current?.scrollTo({
-        x: event.nativeEvent.contentOffset.x,
-        animated: false,
-      });
+
+      isScrollingForFixed.current = true;
+
+      if (syncingCount.current > 0) {
+        syncingCount.current--;
+        return;
+      }
+      syncScrollTo(event.nativeEvent.contentOffset.x, headerScrollRef);
     },
-    []
+    [syncScrollTo]
   );
 
   const handleBodyScroll = useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-      if (isSyncing.current) {
-        isSyncing.current = false;
+      if (isScrollingForFixed.current) {
         return;
       }
-      isSyncing.current = true;
-      headerScrollRef.current?.scrollTo({
-        x: event.nativeEvent.contentOffset.x,
-        animated: false,
-      });
+
+      isScrolling.current = true;
+
+      if (syncingCount.current > 0) {
+        syncingCount.current--;
+        return;
+      }
+      syncScrollTo(event.nativeEvent.contentOffset.x, bodyScrollRef);
     },
-    []
+    [syncScrollTo]
   );
 
   const handleScrollEndDrag = useCallback(
     (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+      if (isMomentumScrollingForFixed.current) {
+        return;
+      }
+
       const x = e.nativeEvent.contentOffset.x;
       // onMomentumScrollBegin が先に発火するか確認するため setTimeout で遅延
       setTimeout(() => {
@@ -115,16 +325,69 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
   );
 
   const handleMomentumScrollBegin = useCallback(() => {
+    if (isMomentumScrollingForFixed.current) {
+      return;
+    }
+
     isMomentumScrolling.current = true;
   }, []);
 
   const handleMomentumScrollEnd = useCallback(
     (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+      if (isMomentumScrollingForFixed.current) {
+        return;
+      }
+
       isMomentumScrolling.current = false;
       setScrollOffset(e.nativeEvent.contentOffset.x);
     },
     []
   );
+
+  const handleScrollEndDragForFixed = useCallback(
+    (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+      if (isMomentumScrolling.current) {
+        return;
+      }
+
+      const x = e.nativeEvent.contentOffset.x;
+      // onMomentumScrollBegin が先に発火するか確認するため setTimeout で遅延
+      setTimeout(() => {
+        if (!isMomentumScrollingForFixed.current) {
+          setScrollOffset(x);
+        }
+      }, 0);
+    },
+    []
+  );
+
+  const handleMomentumScrollBeginForFixed = useCallback(() => {
+    if (isMomentumScrolling.current) {
+      return;
+    }
+
+    isMomentumScrollingForFixed.current = true;
+  }, []);
+
+  const handleMomentumScrollEndForFixed = useCallback(
+    (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+      if (isMomentumScrolling.current) {
+        return;
+      }
+
+      isMomentumScrollingForFixed.current = false;
+      setScrollOffset(e.nativeEvent.contentOffset.x);
+    },
+    []
+  );
+
+  const commonRowProps = {
+    dates,
+    dateColumnWidth,
+    scrollOffset,
+    eventsByResourceId,
+    renderResourceNameLabel: props.renderResourceNameLabel,
+  };
 
   return (
     <ScrollView
@@ -145,9 +408,11 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
         onScroll={handleHeaderScroll}
         scrollEventThrottle={16}
         data-component-name="resources-calendar-header-row"
+        onScrollEndDrag={handleScrollEndDragForFixed}
+        onMomentumScrollBegin={handleMomentumScrollBeginForFixed}
+        onMomentumScrollEnd={handleMomentumScrollEndForFixed}
       >
         <View>
-          {/* Month row */}
           <View style={styles.monthHeaderRow}>
             {monthGroups.map(({ year, month }, index) => {
               const { start: cellStart, width: cellWidth } =
@@ -173,7 +438,7 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
               );
             })}
           </View>
-          {/* Day row */}
+
           <View style={styles.headerRow}>
             {dates.map((date) => (
               <View
@@ -189,6 +454,16 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
                   </View>
                 )}
               </View>
+            ))}
+          </View>
+
+          <View>
+            {fixedResources.map((resource) => (
+              <ResourceRow
+                key={resource.id}
+                resource={resource}
+                {...commonRowProps}
+              />
             ))}
           </View>
         </View>
@@ -208,169 +483,13 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
         onMomentumScrollEnd={handleMomentumScrollEnd}
       >
         <View>
-          {props.resources.map((resource) => {
-            const resourceEvents = eventsByResourceId.get(resource.id) ?? [];
-            const eventPosition = new ResourcesCalendarEventPosition();
-
-            return (
-              <View key={resource.id} style={styles.resourceRow}>
-                <View style={[styles.resourceNameFixedLabel]}>
-                  <View style={{ marginLeft: scrollOffset + 4 }}>
-                    {props.renderResourceNameLabel ? (
-                      props.renderResourceNameLabel(resource)
-                    ) : (
-                      <View>
-                        <Text style={styles.resourceNameFixedLabelText}>
-                          {resource.name}
-                        </Text>
-                      </View>
-                    )}
-                  </View>
-                </View>
-                <View style={styles.resourceRowContentArea}>
-                  {dates.map((date, dateIndex) => {
-                    const djs = dayjs(date);
-
-                    // この日付が開始日のイベント、または行の先頭で前日から続くイベントを抽出
-                    const filteredEvents = resourceEvents
-                      .filter((event) => {
-                        const startDjs = dayjs(event.start);
-                        return (
-                          startDjs.format('YYYY-MM-DD') ===
-                            djs.format('YYYY-MM-DD') ||
-                          (dateIndex === 0 && startDjs.isBefore(djs))
-                        );
-                      })
-                      .sort((a, b) => {
-                        const aStartDjs =
-                          dateIndex === 0 ? djs : dayjs(a.start);
-                        const bStartDjs =
-                          dateIndex === 0 ? djs : dayjs(b.start);
-                        const aDiffDays = dayjs(a.end)
-                          .startOf('day')
-                          .diff(aStartDjs.startOf('day'), 'day');
-                        const bDiffDays = dayjs(b.end)
-                          .startOf('day')
-                          .diff(bStartDjs.startOf('day'), 'day');
-                        if (aDiffDays !== bDiffDays) {
-                          return bDiffDays - aDiffDays;
-                        }
-                        return dayjs(a.start).diff(dayjs(b.start));
-                      });
-
-                    // 行番号を考慮してイベントを配置（重複回避）
-                    const rowNums = eventPosition.getRowNums({
-                      resourceId: resource.id,
-                      date,
-                    });
-                    const cellEvents: (CalendarEvent | number)[] = [];
-                    const rowsLength = rowNums.length + filteredEvents.length;
-                    let eventIndex = 0;
-                    for (let ii = 1; ii <= rowsLength; ii++) {
-                      if (rowNums.includes(ii)) {
-                        cellEvents.push(ii);
-                      } else {
-                        const event = filteredEvents[eventIndex];
-                        if (event) {
-                          cellEvents.push(event);
-                        }
-                        eventIndex++;
-                      }
-                    }
-
-                    return (
-                      <View
-                        key={date.getTime()}
-                        style={[
-                          styles.contentCellContainer,
-                          { width: dateColumnWidth },
-                          { zIndex: dates.length - dateIndex },
-                        ]}
-                      >
-                        {cellEvents.map((event, rowIndex) => {
-                          if (typeof event === 'number') {
-                            return (
-                              <View
-                                key={event}
-                                style={{
-                                  height: EVENT_HEIGHT,
-                                  marginBottom: EVENT_GAP,
-                                }}
-                              />
-                            );
-                          }
-
-                          const rawStartDjs = dayjs(event.start);
-                          const startDjs =
-                            dateIndex === 0 ? djs : dayjs(event.start);
-                          const endDjs = dayjs(event.end);
-                          const diffDays = endDjs
-                            .startOf('day')
-                            .diff(startDjs.startOf('day'), 'day');
-                          const isPrevDateEvent =
-                            dateIndex === 0 && rawStartDjs.isBefore(djs);
-
-                          // イベントの幅を日数に応じて計算
-                          let width =
-                            (diffDays + 1) * dateColumnWidth -
-                            EVENT_GAP * 2 -
-                            CELL_BORDER_WIDTH * 2;
-                          if (isPrevDateEvent) {
-                            width += EVENT_GAP + 1;
-                          }
-
-                          // 位置情報を記録
-                          eventPosition.push({
-                            resourceId: resource.id,
-                            startDate: startDjs.toDate(),
-                            days: diffDays + 1,
-                            rowNum: rowIndex + 1,
-                          });
-
-                          return (
-                            <TouchableOpacity
-                              data-component-name="resources-calendar-event"
-                              key={event.id}
-                              style={[
-                                styles.event,
-                                {
-                                  backgroundColor: event.backgroundColor,
-                                  borderColor: event.borderColor,
-                                  width,
-                                  height: EVENT_HEIGHT,
-                                  ...(event.borderStyle !== undefined && {
-                                    borderStyle: event.borderStyle,
-                                  }),
-                                  ...(event.borderWidth !== undefined && {
-                                    borderWidth: event.borderWidth,
-                                  }),
-                                  ...(event.borderRadius !== undefined && {
-                                    borderRadius: event.borderRadius,
-                                  }),
-                                },
-                                isPrevDateEvent ? styles.prevDateEvent : {},
-                              ]}
-                            >
-                              <Text
-                                numberOfLines={1}
-                                ellipsizeMode="tail"
-                                style={[
-                                  styles.eventTitle,
-                                  { color: event.color },
-                                ]}
-                              >
-                                {event.title}
-                              </Text>
-                            </TouchableOpacity>
-                          );
-                        })}
-                      </View>
-                    );
-                  })}
-                </View>
-              </View>
-            );
-          })}
+          {scrollableResources.map((resource) => (
+            <ResourceRow
+              key={resource.id}
+              resource={resource}
+              {...commonRowProps}
+            />
+          ))}
         </View>
       </ScrollView>
     </ScrollView>
@@ -419,6 +538,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: CELL_BORDER_WIDTH,
     borderRightWidth: CELL_BORDER_WIDTH,
     borderBottomColor: 'lightslategrey',
+    backgroundColor: 'white',
   },
   resourceRowContentArea: {
     flexDirection: 'row',
@@ -427,7 +547,6 @@ const styles = StyleSheet.create({
   contentCellContainer: {
     paddingBottom: EVENT_GAP,
     width: 60,
-    borderTopWidth: CELL_BORDER_WIDTH,
     borderRightWidth: CELL_BORDER_WIDTH,
     borderColor: 'lightslategrey',
   },
