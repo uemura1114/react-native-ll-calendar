@@ -253,56 +253,54 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
 
   const headerScrollRef = useRef<ScrollViewRef>(null);
   const bodyScrollRef = useRef<ScrollViewRef>(null);
-  const syncingCount = useRef(0);
-  const isScrolling = useRef(false);
-  const isScrollingForFixed = useRef(false);
+  const activeScroller = useRef<'header' | 'body' | null>(null);
+  const activeScrollerTimer = useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  );
   const [scrollOffset] = useState(0);
 
-  const syncScrollTo = useCallback(
-    (x: number, exclude: React.RefObject<ScrollViewRef | null>) => {
-      const targets = [headerScrollRef, bodyScrollRef];
-      for (const ref of targets) {
-        if (ref === exclude) continue;
-        if (ref.current == null) continue;
-        syncingCount.current++;
-        ref.current.scrollTo({ x, animated: false });
-      }
-    },
-    []
-  );
+  const releaseActiveScroller = useCallback(() => {
+    activeScroller.current = null;
+  }, []);
 
   const handleHeaderScroll = useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-      if (isScrolling.current) {
+      if (activeScroller.current === 'body') {
         return;
       }
+      activeScroller.current = 'header';
 
-      isScrollingForFixed.current = true;
-
-      if (syncingCount.current > 0) {
-        syncingCount.current--;
-        return;
+      if (activeScrollerTimer.current != null) {
+        clearTimeout(activeScrollerTimer.current);
       }
-      syncScrollTo(event.nativeEvent.contentOffset.x, headerScrollRef);
+      activeScrollerTimer.current = setTimeout(releaseActiveScroller, 100);
+
+      bodyScrollRef.current?.scrollTo({
+        x: event.nativeEvent.contentOffset.x,
+        animated: false,
+      });
     },
-    [syncScrollTo]
+    [releaseActiveScroller]
   );
 
   const handleBodyScroll = useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-      if (isScrollingForFixed.current) {
+      if (activeScroller.current === 'header') {
         return;
       }
+      activeScroller.current = 'body';
 
-      isScrolling.current = true;
-
-      if (syncingCount.current > 0) {
-        syncingCount.current--;
-        return;
+      if (activeScrollerTimer.current != null) {
+        clearTimeout(activeScrollerTimer.current);
       }
-      syncScrollTo(event.nativeEvent.contentOffset.x, bodyScrollRef);
+      activeScrollerTimer.current = setTimeout(releaseActiveScroller, 100);
+
+      headerScrollRef.current?.scrollTo({
+        x: event.nativeEvent.contentOffset.x,
+        animated: false,
+      });
     },
-    [syncScrollTo]
+    [releaseActiveScroller]
   );
 
   const commonRowProps = {
