@@ -592,6 +592,20 @@ export default function App() {
     []
   );
 
+  const handleResourcesPressEvent = useCallback(
+    (event: ResourcesCalendarEvent) => {
+      console.log('onPressEvent', event.id, event.title);
+    },
+    []
+  );
+
+  const handleResourcesLongPressEvent = useCallback(
+    (event: ResourcesCalendarEvent) => {
+      console.log('onLongPressEvent', event.id, event.title);
+    },
+    []
+  );
+
   const [refreshing, setRefreshing] = useState(false);
   const handleRefresh = useCallback(() => {
     setRefreshing(true);
@@ -788,6 +802,9 @@ export default function App() {
           onPressCell={handleResourcesPressCell}
           onLongPressCell={handleResourcesLongPressCell}
           delayLongPressCell={1000}
+          onPressEvent={handleResourcesPressEvent}
+          onLongPressEvent={handleResourcesLongPressEvent}
+          delayLongPressEvent={1000}
         />
       )}
     </View>

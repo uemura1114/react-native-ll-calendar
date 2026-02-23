@@ -34,6 +34,9 @@ type ResourcesCalendarProps = {
   onPressCell?: (resource: CalendarResource, date: Date) => void;
   onLongPressCell?: (resource: CalendarResource, date: Date) => void;
   delayLongPressCell?: number;
+  onPressEvent?: (event: CalendarEvent) => void;
+  onLongPressEvent?: (event: CalendarEvent) => void;
+  delayLongPressEvent?: number;
 };
 
 const DEFAULT_DATE_COLUMN_WIDTH = 60;
@@ -50,6 +53,9 @@ type ResourceRowProps = {
   onPressCell?: (resource: CalendarResource, date: Date) => void;
   onLongPressCell?: (resource: CalendarResource, date: Date) => void;
   delayLongPressCell?: number;
+  onPressEvent?: (event: CalendarEvent) => void;
+  onLongPressEvent?: (event: CalendarEvent) => void;
+  delayLongPressEvent?: number;
 };
 
 function ResourceRow({
@@ -62,6 +68,9 @@ function ResourceRow({
   onPressCell,
   onLongPressCell,
   delayLongPressCell,
+  onPressEvent,
+  onLongPressEvent,
+  delayLongPressEvent,
 }: ResourceRowProps) {
   const resourceEvents = eventsByResourceId.get(resource.id) ?? [];
   const eventPosition = new ResourcesCalendarEventPosition();
@@ -204,6 +213,9 @@ function ResourceRow({
                       },
                       isPrevDateEvent ? styles.prevDateEvent : {},
                     ]}
+                    onPress={() => onPressEvent?.(event)}
+                    onLongPress={() => onLongPressEvent?.(event)}
+                    delayLongPress={delayLongPressEvent}
                   >
                     <Text
                       numberOfLines={1}
@@ -328,6 +340,9 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
     onPressCell: props.onPressCell,
     onLongPressCell: props.onLongPressCell,
     delayLongPressCell: props.delayLongPressCell,
+    onPressEvent: props.onPressEvent,
+    onLongPressEvent: props.onLongPressEvent,
+    delayLongPressEvent: props.delayLongPressEvent,
   };
 
   return (
