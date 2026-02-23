@@ -6,6 +6,8 @@ import type {
 import {
   type NativeScrollEvent,
   type NativeSyntheticEvent,
+  type TextStyle,
+  type ViewStyle,
   RefreshControl,
   ScrollView,
   StyleSheet,
@@ -37,10 +39,15 @@ type ResourcesCalendarProps = {
   onPressEvent?: (event: CalendarEvent) => void;
   onLongPressEvent?: (event: CalendarEvent) => void;
   delayLongPressEvent?: number;
+  eventHeight?: number;
+  bottomSpacing?: number;
+  eventTextStyle?: (event: CalendarEvent) => TextStyle;
+  eventEllipsizeMode?: 'head' | 'middle' | 'tail' | 'clip';
+  dayCellContainerStyle?: (resource: CalendarResource, date: Date) => ViewStyle;
 };
 
 const DEFAULT_DATE_COLUMN_WIDTH = 60;
-const EVENT_HEIGHT = 22;
+const DEFAULT_EVENT_HEIGHT = 22;
 const CELL_BORDER_WIDTH = 0.5;
 
 type ResourceRowProps = {
@@ -56,6 +63,10 @@ type ResourceRowProps = {
   onPressEvent?: (event: CalendarEvent) => void;
   onLongPressEvent?: (event: CalendarEvent) => void;
   delayLongPressEvent?: number;
+  eventHeight: number;
+  eventTextStyle?: (event: CalendarEvent) => TextStyle;
+  eventEllipsizeMode?: 'head' | 'middle' | 'tail' | 'clip';
+  dayCellContainerStyle?: (resource: CalendarResource, date: Date) => ViewStyle;
 };
 
 function ResourceRow({
@@ -71,6 +82,10 @@ function ResourceRow({
   onPressEvent,
   onLongPressEvent,
   delayLongPressEvent,
+  eventHeight,
+  eventTextStyle,
+  eventEllipsizeMode,
+  dayCellContainerStyle,
 }: ResourceRowProps) {
   const resourceEvents = eventsByResourceId.get(resource.id) ?? [];
   const eventPosition = new ResourcesCalendarEventPosition();
@@ -145,6 +160,7 @@ function ResourceRow({
                 styles.contentCellContainer,
                 { width: dateColumnWidth },
                 { zIndex: dates.length - dateIndex },
+                dayCellContainerStyle?.(resource, date),
               ]}
               onPress={() => onPressCell?.(resource, date)}
               onLongPress={() => onLongPressCell?.(resource, date)}
@@ -157,7 +173,7 @@ function ResourceRow({
                     <View
                       key={event}
                       style={{
-                        height: EVENT_HEIGHT,
+                        height: eventHeight,
                         marginBottom: EVENT_GAP,
                       }}
                     />
@@ -200,7 +216,7 @@ function ResourceRow({
                         backgroundColor: event.backgroundColor,
                         borderColor: event.borderColor,
                         width,
-                        height: EVENT_HEIGHT,
+                        height: eventHeight,
                         ...(event.borderStyle !== undefined && {
                           borderStyle: event.borderStyle,
                         }),
@@ -219,8 +235,12 @@ function ResourceRow({
                   >
                     <Text
                       numberOfLines={1}
-                      ellipsizeMode="tail"
-                      style={[styles.eventTitle, { color: event.color }]}
+                      ellipsizeMode={eventEllipsizeMode ?? 'tail'}
+                      style={[
+                        styles.eventTitle,
+                        { color: event.color },
+                        eventTextStyle?.(event),
+                      ]}
                     >
                       {event.title}
                     </Text>
@@ -343,6 +363,10 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
     onPressEvent: props.onPressEvent,
     onLongPressEvent: props.onLongPressEvent,
     delayLongPressEvent: props.delayLongPressEvent,
+    eventHeight: props.eventHeight ?? DEFAULT_EVENT_HEIGHT,
+    eventTextStyle: props.eventTextStyle,
+    eventEllipsizeMode: props.eventEllipsizeMode,
+    dayCellContainerStyle: props.dayCellContainerStyle,
   };
 
   return (
@@ -442,6 +466,7 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
           ))}
         </View>
       </ScrollView>
+      <View style={{ height: props.bottomSpacing }} />
     </ScrollView>
   );
 }

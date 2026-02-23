@@ -805,6 +805,15 @@ export default function App() {
           onPressEvent={handleResourcesPressEvent}
           onLongPressEvent={handleResourcesLongPressEvent}
           delayLongPressEvent={1000}
+          eventHeight={22}
+          bottomSpacing={200}
+          eventTextStyle={(_event) => ({ fontSize: 12 })}
+          eventEllipsizeMode={'clip'}
+          dayCellContainerStyle={(_resource, d) =>
+            d.getDay() === 0 || d.getDay() === 6
+              ? { backgroundColor: '#f5f5f5' }
+              : {}
+          }
         />
       )}
     </View>
