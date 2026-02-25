@@ -8,6 +8,7 @@ import {
   type NativeSyntheticEvent,
   type TextStyle,
   type ViewStyle,
+  RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
@@ -499,7 +500,15 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
         onMomentumScrollEnd={handleOuterScrollEnd}
         scrollEventThrottle={16}
         overScrollMode="never"
-        bounces={false}
+        bounces={props.onRefresh != null}
+        refreshControl={
+          props.onRefresh != null ? (
+            <RefreshControl
+              refreshing={props.refreshing ?? false}
+              onRefresh={props.onRefresh}
+            />
+          ) : undefined
+        }
       >
         <ScrollView
           ref={headerScrollRef}
