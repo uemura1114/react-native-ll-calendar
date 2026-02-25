@@ -345,6 +345,13 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
   const [scrollOffset, setScrollOffset] = useState(0);
 
   const activeVerticalScroller = useRef<'outer' | 'resourceName' | null>(null);
+  const activeVerticalScrollerTimer = useRef<ReturnType<
+    typeof setTimeout
+  > | null>(null);
+
+  const releaseActiveVerticalScroller = useCallback(() => {
+    activeVerticalScroller.current = null;
+  }, []);
 
   // Sync the label position after scrolling stops.
   // When the activeScroller timeout fires, treat it as scroll end
@@ -392,10 +399,23 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
     [releaseActiveScroller]
   );
 
+  const handleOuterScrollBeginDrag = useCallback(() => {
+    if (activeVerticalScrollerTimer.current != null) {
+      clearTimeout(activeVerticalScrollerTimer.current);
+    }
+    activeVerticalScroller.current = 'outer';
+  }, []);
+
+  const handleResourceNameScrollBeginDrag = useCallback(() => {
+    if (activeVerticalScrollerTimer.current != null) {
+      clearTimeout(activeVerticalScrollerTimer.current);
+    }
+    activeVerticalScroller.current = 'resourceName';
+  }, []);
+
   const handleOuterScroll = useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
       if (activeVerticalScroller.current === 'resourceName') return;
-      activeVerticalScroller.current = 'outer';
       const y = event.nativeEvent.contentOffset.y;
       resourceNameScrollRef.current?.scrollTo({ y, animated: false });
     },
@@ -405,7 +425,6 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
   const handleResourceNameScroll = useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
       if (activeVerticalScroller.current === 'outer') return;
-      activeVerticalScroller.current = 'resourceName';
       const y = event.nativeEvent.contentOffset.y;
       outerScrollRef.current?.scrollTo({ y, animated: false });
     },
@@ -413,12 +432,24 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
   );
 
   const handleOuterScrollEnd = useCallback(() => {
-    activeVerticalScroller.current = null;
-  }, []);
+    if (activeVerticalScrollerTimer.current != null) {
+      clearTimeout(activeVerticalScrollerTimer.current);
+    }
+    activeVerticalScrollerTimer.current = setTimeout(
+      releaseActiveVerticalScroller,
+      100
+    );
+  }, [releaseActiveVerticalScroller]);
 
   const handleResourceNameScrollEnd = useCallback(() => {
-    activeVerticalScroller.current = null;
-  }, []);
+    if (activeVerticalScrollerTimer.current != null) {
+      clearTimeout(activeVerticalScrollerTimer.current);
+    }
+    activeVerticalScrollerTimer.current = setTimeout(
+      releaseActiveVerticalScroller,
+      100
+    );
+  }, [releaseActiveVerticalScroller]);
 
   const commonRowProps = {
     dates,
@@ -452,6 +483,7 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
       showsVerticalScrollIndicator={false}
       bounces={false}
       overScrollMode="never"
+      onScrollBeginDrag={handleResourceNameScrollBeginDrag}
       onScroll={handleResourceNameScroll}
       onScrollEndDrag={handleResourceNameScrollEnd}
       onMomentumScrollEnd={handleResourceNameScrollEnd}
@@ -526,6 +558,7 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
         ref={outerScrollRef}
         style={styles.calendarBody}
         stickyHeaderIndices={[0]}
+        onScrollBeginDrag={handleOuterScrollBeginDrag}
         onScroll={handleOuterScroll}
         onScrollEndDrag={handleOuterScrollEnd}
         onMomentumScrollEnd={handleOuterScrollEnd}
