@@ -8,7 +8,6 @@ import {
   type NativeSyntheticEvent,
   type TextStyle,
   type ViewStyle,
-  PanResponder,
   RefreshControl,
   ScrollView,
   StyleSheet,
@@ -49,15 +48,12 @@ type ResourcesCalendarProps = {
   hiddenMonth?: boolean;
   allowFontScaling?: boolean;
   resourceNameLayout?: 'fixed-column' | 'inline-band';
-  onResourceColumnWidthChange?: (width: number) => void;
 };
 
 const DEFAULT_DATE_COLUMN_WIDTH = 60;
 const DEFAULT_RESOURCE_COLUMN_WIDTH = 80;
 const DEFAULT_EVENT_HEIGHT = 22;
 const CELL_BORDER_WIDTH = 0.5;
-const MIN_RESOURCE_COLUMN_WIDTH = 40;
-const MAX_RESOURCE_COLUMN_WIDTH = 300;
 
 type ResourceRowProps = {
   resource: CalendarResource;
@@ -322,43 +318,8 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
     [props.resources, fixedRowCount]
   );
 
-  const [resourceColumnWidth, setResourceColumnWidth] = useState(
-    props.resourceColumnWidth ?? DEFAULT_RESOURCE_COLUMN_WIDTH
-  );
-  const dragStartWidth = useRef(resourceColumnWidth);
-
-  const panResponder = useMemo(
-    () =>
-      PanResponder.create({
-        onStartShouldSetPanResponder: () => true,
-        onMoveShouldSetPanResponder: () => true,
-        onPanResponderGrant: () => {
-          dragStartWidth.current = resourceColumnWidth;
-        },
-        onPanResponderMove: (_, gestureState) => {
-          const newWidth = Math.max(
-            MIN_RESOURCE_COLUMN_WIDTH,
-            Math.min(
-              MAX_RESOURCE_COLUMN_WIDTH,
-              dragStartWidth.current + gestureState.dx
-            )
-          );
-          setResourceColumnWidth(newWidth);
-        },
-        onPanResponderRelease: (_, gestureState) => {
-          const newWidth = Math.max(
-            MIN_RESOURCE_COLUMN_WIDTH,
-            Math.min(
-              MAX_RESOURCE_COLUMN_WIDTH,
-              dragStartWidth.current + gestureState.dx
-            )
-          );
-          props.onResourceColumnWidthChange?.(newWidth);
-        },
-      }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  );
+  const resourceColumnWidth =
+    props.resourceColumnWidth ?? DEFAULT_RESOURCE_COLUMN_WIDTH;
 
   const [rowHeights, setRowHeights] = useState<Map<string, number>>(new Map());
   const handleRowLayout = useCallback((resourceId: string, height: number) => {
@@ -501,12 +462,6 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
         <View
           style={[styles.resourceNameHeaderSpacer, { height: headerHeight }]}
         />
-        <View
-          style={styles.resizeHandleContainer}
-          {...panResponder.panHandlers}
-        >
-          <Text style={styles.resizeHandleIcon}>{'←'}</Text>
-        </View>
         {fixedResources.map((resource) => (
           <View
             key={resource.id}
@@ -803,25 +758,5 @@ const styles = StyleSheet.create({
   },
   eventTitle: {
     fontSize: 12,
-  },
-  resizeHandleContainer: {
-    position: 'absolute',
-    right: -2,
-    top: 0,
-    width: 18,
-    height: 24,
-    justifyContent: 'center',
-    alignItems: 'flex-start',
-    borderTopLeftRadius: 4,
-    borderBottomLeftRadius: 4,
-    borderWidth: 0.5,
-    borderRightWidth: 0,
-    borderColor: 'lightslategrey',
-    zIndex: 10,
-    paddingLeft: 3,
-  },
-  resizeHandleIcon: {
-    fontSize: 12,
-    color: '#666',
   },
 });
