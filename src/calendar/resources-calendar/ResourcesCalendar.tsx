@@ -47,9 +47,11 @@ type ResourcesCalendarProps = {
   cellContainerStyle?: (resource: CalendarResource, date: Date) => ViewStyle;
   hiddenMonth?: boolean;
   allowFontScaling?: boolean;
+  resourceNameLayout?: 'fixed-column' | 'inline-band';
 };
 
 const DEFAULT_DATE_COLUMN_WIDTH = 60;
+const DEFAULT_RESOURCE_COLUMN_WIDTH = 80;
 const DEFAULT_EVENT_HEIGHT = 22;
 const CELL_BORDER_WIDTH = 0.5;
 
@@ -57,9 +59,7 @@ type ResourceRowProps = {
   resource: CalendarResource;
   dates: Date[];
   dateColumnWidth: number;
-  scrollOffset: number;
   eventsByResourceId: Map<string, CalendarEvent[]>;
-  renderResourceNameLabel?: (resource: CalendarResource) => React.JSX.Element;
   onPressCell?: (resource: CalendarResource, date: Date) => void;
   onLongPressCell?: (resource: CalendarResource, date: Date) => void;
   delayLongPressCell?: number;
@@ -71,15 +71,18 @@ type ResourceRowProps = {
   eventEllipsizeMode?: 'head' | 'middle' | 'tail' | 'clip';
   cellContainerStyle?: (resource: CalendarResource, date: Date) => ViewStyle;
   allowFontScaling?: boolean;
+  onLayout?: (height: number) => void;
+  inlineBand?: {
+    scrollOffset: number;
+    renderResourceNameLabel?: (resource: CalendarResource) => React.JSX.Element;
+  };
 };
 
 function ResourceRow({
   resource,
   dates,
   dateColumnWidth,
-  scrollOffset,
   eventsByResourceId,
-  renderResourceNameLabel,
   onPressCell,
   onLongPressCell,
   delayLongPressCell,
@@ -91,33 +94,38 @@ function ResourceRow({
   eventEllipsizeMode,
   cellContainerStyle,
   allowFontScaling,
+  onLayout,
+  inlineBand,
 }: ResourceRowProps) {
   const resourceEvents = eventsByResourceId.get(resource.id) ?? [];
   const eventPosition = new ResourcesCalendarEventPosition();
 
   return (
-    <View style={styles.resourceRow}>
-      <View style={[styles.resourceNameFixedLabel]}>
-        <View style={{ marginLeft: scrollOffset + 4 }}>
-          {renderResourceNameLabel ? (
-            renderResourceNameLabel(resource)
-          ) : (
-            <View>
+    <View
+      style={styles.resourceRow}
+      onLayout={(e) => onLayout?.(e.nativeEvent.layout.height)}
+    >
+      {inlineBand != null && (
+        <View style={styles.resourceNameInlineBand}>
+          <View style={{ marginLeft: inlineBand.scrollOffset + 4 }}>
+            {inlineBand.renderResourceNameLabel ? (
+              inlineBand.renderResourceNameLabel(resource)
+            ) : (
               <Text
                 allowFontScaling={allowFontScaling}
-                style={styles.resourceNameFixedLabelText}
+                style={styles.resourceNameInlineBandText}
               >
                 {resource.name}
               </Text>
-            </View>
-          )}
+            )}
+          </View>
         </View>
-      </View>
+      )}
       <View style={styles.resourceRowContentArea}>
         {dates.map((date, dateIndex) => {
           const djs = dayjs(date);
 
-          // この日付が開始日のイベント、または行の先頭で前日から続くイベントを抽出
+          // Filter events that start on this date, or events that started before this date and continue into the first cell
           const filteredEvents = resourceEvents
             .filter((event) => {
               const startDjs = dayjs(event.start);
@@ -141,7 +149,7 @@ function ResourceRow({
               return dayjs(a.start).diff(dayjs(b.start));
             });
 
-          // 行番号を考慮してイベントを配置（重複回避）
+          // Place events considering occupied row numbers to avoid overlap
           const rowNums = eventPosition.getRowNums({
             resourceId: resource.id,
             date,
@@ -197,7 +205,7 @@ function ResourceRow({
                 const isPrevDateEvent =
                   dateIndex === 0 && rawStartDjs.isBefore(djs);
 
-                // イベントの幅を日数に応じて計算
+                // Calculate event width based on the number of days it spans
                 let width =
                   (diffDays + 1) * dateColumnWidth -
                   EVENT_GAP * 2 -
@@ -206,7 +214,7 @@ function ResourceRow({
                   width += EVENT_GAP + 1;
                 }
 
-                // 位置情報を記録
+                // Record position info
                 eventPosition.push({
                   resourceId: resource.id,
                   startDate: startDjs.toDate(),
@@ -268,7 +276,8 @@ type ScrollViewRef = React.ComponentRef<typeof ScrollView>;
 
 export function ResourcesCalendar(props: ResourcesCalendarProps) {
   const dateColumnWidth = props.dateColumnWidth ?? DEFAULT_DATE_COLUMN_WIDTH;
-  const fixedRowCount = props.fixedRowCount ?? 0;
+  const isInlineBand = props.resourceNameLayout === 'inline-band';
+  const fixedRowCount = isInlineBand ? 0 : (props.fixedRowCount ?? 0);
 
   const dates = useMemo(
     () => generateDates(props.fromDate, props.toDate),
@@ -309,8 +318,25 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
     [props.resources, fixedRowCount]
   );
 
+  const resourceColumnWidth =
+    props.resourceColumnWidth ?? DEFAULT_RESOURCE_COLUMN_WIDTH;
+
+  const [rowHeights, setRowHeights] = useState<Map<string, number>>(new Map());
+  const handleRowLayout = useCallback((resourceId: string, height: number) => {
+    setRowHeights((prev) => {
+      if (prev.get(resourceId) === height) return prev;
+      const next = new Map(prev);
+      next.set(resourceId, height);
+      return next;
+    });
+  }, []);
+
+  const [headerHeight, setHeaderHeight] = useState(0);
+
   const headerScrollRef = useRef<ScrollViewRef>(null);
   const bodyScrollRef = useRef<ScrollViewRef>(null);
+  const outerScrollRef = useRef<ScrollViewRef>(null);
+  const resourceNameScrollRef = useRef<ScrollViewRef>(null);
   const activeScroller = useRef<'header' | 'body' | null>(null);
   const activeScrollerTimer = useRef<ReturnType<typeof setTimeout> | null>(
     null
@@ -318,9 +344,11 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
   const lastScrollX = useRef(0);
   const [scrollOffset, setScrollOffset] = useState(0);
 
-  // スクロール停止後にラベルを追従させる。
-  // activeScroller のタイムアウトが切れた = スクロール停止とみなし、
-  // その時点の lastScrollX を state に反映する。
+  const activeVerticalScroller = useRef<'outer' | 'resourceName' | null>(null);
+
+  // Sync the label position after scrolling stops.
+  // When the activeScroller timeout fires, treat it as scroll end
+  // and commit the current lastScrollX value to state.
   const releaseActiveScroller = useCallback(() => {
     activeScroller.current = null;
     setScrollOffset(lastScrollX.current);
@@ -364,12 +392,38 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
     [releaseActiveScroller]
   );
 
+  const handleOuterScroll = useCallback(
+    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      if (activeVerticalScroller.current === 'resourceName') return;
+      activeVerticalScroller.current = 'outer';
+      const y = event.nativeEvent.contentOffset.y;
+      resourceNameScrollRef.current?.scrollTo({ y, animated: false });
+    },
+    []
+  );
+
+  const handleResourceNameScroll = useCallback(
+    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      if (activeVerticalScroller.current === 'outer') return;
+      activeVerticalScroller.current = 'resourceName';
+      const y = event.nativeEvent.contentOffset.y;
+      outerScrollRef.current?.scrollTo({ y, animated: false });
+    },
+    []
+  );
+
+  const handleOuterScrollEnd = useCallback(() => {
+    activeVerticalScroller.current = null;
+  }, []);
+
+  const handleResourceNameScrollEnd = useCallback(() => {
+    activeVerticalScroller.current = null;
+  }, []);
+
   const commonRowProps = {
     dates,
     dateColumnWidth,
-    scrollOffset,
     eventsByResourceId,
-    renderResourceNameLabel: props.renderResourceNameLabel,
     onPressCell: props.onPressCell,
     onLongPressCell: props.onLongPressCell,
     delayLongPressCell: props.delayLongPressCell,
@@ -381,119 +435,220 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
     eventEllipsizeMode: props.eventEllipsizeMode,
     cellContainerStyle: props.cellContainerStyle,
     allowFontScaling: props.allowFontScaling,
+    inlineBand: isInlineBand
+      ? {
+          scrollOffset,
+          renderResourceNameLabel: props.renderResourceNameLabel,
+        }
+      : undefined,
   };
 
-  return (
+  const resourceNameColumn = !isInlineBand ? (
     <ScrollView
+      ref={resourceNameScrollRef}
+      style={[styles.resourceNameColumn, { width: resourceColumnWidth }]}
+      contentContainerStyle={{ width: resourceColumnWidth }}
       stickyHeaderIndices={[0]}
-      refreshControl={
-        <RefreshControl
-          refreshing={!!props.refreshing}
-          onRefresh={props.onRefresh}
-        />
-      }
+      showsVerticalScrollIndicator={false}
+      bounces={false}
+      overScrollMode="never"
+      onScroll={handleResourceNameScroll}
+      onScrollEndDrag={handleResourceNameScrollEnd}
+      onMomentumScrollEnd={handleResourceNameScrollEnd}
+      scrollEventThrottle={16}
     >
-      <ScrollView
-        ref={headerScrollRef}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        bounces={false}
-        overScrollMode="never"
-        onScroll={handleHeaderScroll}
-        scrollEventThrottle={16}
-        data-component-name="resources-calendar-header-row"
-      >
-        <View>
-          {!props.hiddenMonth && (
-            <View style={styles.monthHeaderRow}>
-              {monthGroups.map(({ year, month }, index) => {
-                const { start: cellStart, width: cellWidth } =
-                  monthGroupOffsets[index]!;
-                const textLeft = Math.max(8, scrollOffset - cellStart + 8);
-                return (
-                  <View
-                    key={`${year}-${month}`}
-                    style={[styles.monthHeaderCell, { width: cellWidth }]}
-                  >
-                    <View style={{ marginLeft: textLeft }}>
-                      {props.renderMonthLabel ? (
-                        props.renderMonthLabel(year, month)
-                      ) : (
-                        <View>
-                          <Text
-                            numberOfLines={1}
-                            allowFontScaling={props.allowFontScaling}
-                            style={styles.monthHeaderText}
-                          >
-                            {dayjs(`${year}-${month}-01`).format('YYYY/MM')}
-                          </Text>
-                        </View>
-                      )}
-                    </View>
-                  </View>
-                );
-              })}
-            </View>
-          )}
-
-          <View style={styles.headerRow}>
-            {dates.map((date) => (
-              <View
-                key={date.getTime()}
-                data-component-name="resources-calendar-date-cell"
-                style={[
-                  styles.dateCellContainer,
-                  { width: dateColumnWidth },
-                  props.dateCellContainerStyle?.(date),
-                ]}
-              >
-                {props.renderDateLabel ? (
-                  props.renderDateLabel(date)
-                ) : (
-                  <View>
-                    <Text allowFontScaling={props.allowFontScaling}>
-                      {dayjs(date).format('D(ddd)')}
-                    </Text>
-                  </View>
-                )}
+      {/* [0] sticky: header height spacer + fixed resource name rows */}
+      <View style={[styles.resourceNameColumn, styles.resourceNameColumnFixed]}>
+        <View
+          style={[styles.resourceNameHeaderSpacer, { height: headerHeight }]}
+        />
+        {fixedResources.map((resource) => (
+          <View
+            key={resource.id}
+            style={[
+              styles.resourceNameCell,
+              { height: rowHeights.get(resource.id) },
+            ]}
+          >
+            {props.renderResourceNameLabel ? (
+              props.renderResourceNameLabel(resource)
+            ) : (
+              <View>
+                <Text
+                  allowFontScaling={props.allowFontScaling}
+                  style={styles.resourceNameFixedLabelText}
+                  numberOfLines={1}
+                >
+                  {resource.name}
+                </Text>
               </View>
-            ))}
+            )}
           </View>
+        ))}
+      </View>
+      <View>
+        {/* Scrollable resource name rows */}
+        {scrollableResources.map((resource) => (
+          <View
+            key={resource.id}
+            style={[
+              styles.resourceNameCell,
+              { height: rowHeights.get(resource.id) },
+            ]}
+          >
+            {props.renderResourceNameLabel ? (
+              props.renderResourceNameLabel(resource)
+            ) : (
+              <View>
+                <Text
+                  allowFontScaling={props.allowFontScaling}
+                  style={styles.resourceNameFixedLabelText}
+                  numberOfLines={1}
+                >
+                  {resource.name}
+                </Text>
+              </View>
+            )}
+          </View>
+        ))}
+        <View style={{ height: props.bottomSpacing }} />
+      </View>
+    </ScrollView>
+  ) : null;
 
+  return (
+    <View style={styles.container}>
+      {/* Left: fixed resource name column (fixed-column mode only) */}
+      {resourceNameColumn}
+
+      {/* Right: calendar body */}
+      <ScrollView
+        ref={outerScrollRef}
+        style={styles.calendarBody}
+        stickyHeaderIndices={[0]}
+        onScroll={handleOuterScroll}
+        onScrollEndDrag={handleOuterScrollEnd}
+        onMomentumScrollEnd={handleOuterScrollEnd}
+        scrollEventThrottle={16}
+        overScrollMode="never"
+        bounces={props.onRefresh != null}
+        refreshControl={
+          props.onRefresh != null ? (
+            <RefreshControl
+              refreshing={props.refreshing ?? false}
+              onRefresh={props.onRefresh}
+            />
+          ) : undefined
+        }
+      >
+        <ScrollView
+          ref={headerScrollRef}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          bounces={false}
+          overScrollMode="never"
+          onScroll={handleHeaderScroll}
+          scrollEventThrottle={16}
+          data-component-name="resources-calendar-header-row"
+        >
           <View>
-            {fixedResources.map((resource) => (
+            <View
+              onLayout={(e) => setHeaderHeight(e.nativeEvent.layout.height)}
+            >
+              {!props.hiddenMonth && (
+                <View style={styles.monthHeaderRow}>
+                  {monthGroups.map(({ year, month }, index) => {
+                    const { start: cellStart, width: cellWidth } =
+                      monthGroupOffsets[index]!;
+                    const textLeft = Math.max(8, scrollOffset - cellStart + 8);
+                    return (
+                      <View
+                        key={`${year}-${month}`}
+                        style={[styles.monthHeaderCell, { width: cellWidth }]}
+                      >
+                        <View style={{ marginLeft: textLeft }}>
+                          {props.renderMonthLabel ? (
+                            props.renderMonthLabel(year, month)
+                          ) : (
+                            <View>
+                              <Text
+                                numberOfLines={1}
+                                allowFontScaling={props.allowFontScaling}
+                                style={styles.monthHeaderText}
+                              >
+                                {dayjs(`${year}-${month}-01`).format('YYYY/MM')}
+                              </Text>
+                            </View>
+                          )}
+                        </View>
+                      </View>
+                    );
+                  })}
+                </View>
+              )}
+
+              <View style={styles.headerRow}>
+                {dates.map((date) => (
+                  <View
+                    key={date.getTime()}
+                    data-component-name="resources-calendar-date-cell"
+                    style={[
+                      styles.dateCellContainer,
+                      { width: dateColumnWidth },
+                      props.dateCellContainerStyle?.(date),
+                    ]}
+                  >
+                    {props.renderDateLabel ? (
+                      props.renderDateLabel(date)
+                    ) : (
+                      <View>
+                        <Text allowFontScaling={props.allowFontScaling}>
+                          {dayjs(date).format('D(ddd)')}
+                        </Text>
+                      </View>
+                    )}
+                  </View>
+                ))}
+              </View>
+            </View>
+
+            <View>
+              {fixedResources.map((resource) => (
+                <ResourceRow
+                  key={resource.id}
+                  resource={resource}
+                  {...commonRowProps}
+                  onLayout={(height) => handleRowLayout(resource.id, height)}
+                />
+              ))}
+            </View>
+          </View>
+        </ScrollView>
+
+        <ScrollView
+          ref={bodyScrollRef}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          bounces={false}
+          overScrollMode="never"
+          onScroll={handleBodyScroll}
+          scrollEventThrottle={16}
+          data-component-name="resources-calendar-body-row"
+        >
+          <View>
+            {scrollableResources.map((resource) => (
               <ResourceRow
                 key={resource.id}
                 resource={resource}
                 {...commonRowProps}
+                onLayout={(height) => handleRowLayout(resource.id, height)}
               />
             ))}
           </View>
-        </View>
+        </ScrollView>
+        <View style={{ height: props.bottomSpacing }} />
       </ScrollView>
-
-      <ScrollView
-        ref={bodyScrollRef}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        bounces={false}
-        overScrollMode="never"
-        onScroll={handleBodyScroll}
-        scrollEventThrottle={16}
-        data-component-name="resources-calendar-body-row"
-      >
-        <View>
-          {scrollableResources.map((resource) => (
-            <ResourceRow
-              key={resource.id}
-              resource={resource}
-              {...commonRowProps}
-            />
-          ))}
-        </View>
-      </ScrollView>
-      <View style={{ height: props.bottomSpacing }} />
-    </ScrollView>
+    </View>
   );
 }
 
@@ -529,11 +684,6 @@ const styles = StyleSheet.create({
     borderRightWidth: CELL_BORDER_WIDTH,
     borderColor: 'lightslategrey',
   },
-  resourceNameCellContainer: {
-    width: 80,
-    borderRightWidth: CELL_BORDER_WIDTH,
-    borderColor: 'lightslategrey',
-  },
   resourceRow: {
     flexDirection: 'column',
     borderBottomWidth: CELL_BORDER_WIDTH,
@@ -551,16 +701,44 @@ const styles = StyleSheet.create({
     borderRightWidth: CELL_BORDER_WIDTH,
     borderColor: 'lightslategrey',
   },
-  resourceNameColumn: {
-    width: 80,
+  container: {
+    flexDirection: 'row',
+    flex: 1,
   },
-  resourceNameFixedLabel: {
+  calendarBody: {
+    flex: 1,
+  },
+  resourceNameColumn: {
+    borderRightWidth: CELL_BORDER_WIDTH,
+    borderRightColor: 'lightslategrey',
+    flexGrow: 0,
+    flexShrink: 0,
+  },
+  resourceNameColumnFixed: {
+    backgroundColor: 'white',
+  },
+  resourceNameHeaderSpacer: {
+    borderBottomWidth: CELL_BORDER_WIDTH,
+    borderBottomColor: 'lightslategrey',
+  },
+  resourceNameCell: {
+    borderBottomWidth: CELL_BORDER_WIDTH,
+    borderBottomColor: 'lightslategrey',
+    justifyContent: 'center',
+    paddingHorizontal: 4,
+    minHeight: 30,
+  },
+  resourceNameFixedLabelText: {
+    fontSize: 12,
+    color: 'black',
+  },
+  resourceNameInlineBand: {
     width: '100%',
     borderBottomWidth: CELL_BORDER_WIDTH,
     borderColor: 'lightslategrey',
     backgroundColor: '#EEEEEE',
   },
-  resourceNameFixedLabelText: {
+  resourceNameInlineBandText: {
     fontSize: 12,
     color: 'black',
   },
