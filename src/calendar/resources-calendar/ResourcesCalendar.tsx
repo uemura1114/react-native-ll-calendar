@@ -129,7 +129,7 @@ function ResourceRow({
         {dates.map((date, dateIndex) => {
           const djs = dayjs(date);
 
-          // この日付が開始日のイベント、または行の先頭で前日から続くイベントを抽出
+          // Filter events that start on this date, or events that started before this date and continue into the first cell
           const filteredEvents = resourceEvents
             .filter((event) => {
               const startDjs = dayjs(event.start);
@@ -153,7 +153,7 @@ function ResourceRow({
               return dayjs(a.start).diff(dayjs(b.start));
             });
 
-          // 行番号を考慮してイベントを配置（重複回避）
+          // Place events considering occupied row numbers to avoid overlap
           const rowNums = eventPosition.getRowNums({
             resourceId: resource.id,
             date,
@@ -209,7 +209,7 @@ function ResourceRow({
                 const isPrevDateEvent =
                   dateIndex === 0 && rawStartDjs.isBefore(djs);
 
-                // イベントの幅を日数に応じて計算
+                // Calculate event width based on the number of days it spans
                 let width =
                   (diffDays + 1) * dateColumnWidth -
                   EVENT_GAP * 2 -
@@ -218,7 +218,7 @@ function ResourceRow({
                   width += EVENT_GAP + 1;
                 }
 
-                // 位置情報を記録
+                // Record position info
                 eventPosition.push({
                   resourceId: resource.id,
                   startDate: startDjs.toDate(),
@@ -385,9 +385,9 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
 
   const activeVerticalScroller = useRef<'outer' | 'resourceName' | null>(null);
 
-  // スクロール停止後にラベルを追従させる。
-  // activeScroller のタイムアウトが切れた = スクロール停止とみなし、
-  // その時点の lastScrollX を state に反映する。
+  // Sync the label position after scrolling stops.
+  // When the activeScroller timeout fires, treat it as scroll end
+  // and commit the current lastScrollX value to state.
   const releaseActiveScroller = useCallback(() => {
     activeScroller.current = null;
     setScrollOffset(lastScrollX.current);
@@ -496,7 +496,7 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
       onMomentumScrollEnd={handleResourceNameScrollEnd}
       scrollEventThrottle={16}
     >
-      {/* [0] sticky: ヘッダー高さ分のスペーサー + Fixed行のリソース名 */}
+      {/* [0] sticky: header height spacer + fixed resource name rows */}
       <View style={[styles.resourceNameColumn, styles.resourceNameColumnFixed]}>
         <View
           style={[styles.resourceNameHeaderSpacer, { height: headerHeight }]}
@@ -532,7 +532,7 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
         ))}
       </View>
       <View>
-        {/* Scrollable行のリソース名 */}
+        {/* Scrollable resource name rows */}
         {scrollableResources.map((resource) => (
           <View
             key={resource.id}
@@ -563,10 +563,10 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
 
   return (
     <View style={styles.container}>
-      {/* 左: リソース名固定列 (fixed-column モードのみ) */}
+      {/* Left: fixed resource name column (fixed-column mode only) */}
       {resourceNameColumn}
 
-      {/* 右: 既存のカレンダー本体 */}
+      {/* Right: calendar body */}
       <ScrollView
         ref={outerScrollRef}
         style={styles.calendarBody}
