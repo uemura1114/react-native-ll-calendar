@@ -14,7 +14,7 @@ import type { WeekdayNum } from '../../src/types/month-calendar';
 import type { TextStyle } from 'react-native';
 import type { MonthCalendarRef } from '../../src/calendar/month-calendar/MonthCalendar';
 
-type TabType = 'month' | 'resources';
+type TabType = 'month' | 'resources-fixed-column' | 'resources-inline-band';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<TabType>('month');
@@ -701,16 +701,35 @@ export default function App() {
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.tab, activeTab === 'resources' && styles.activeTab]}
-          onPress={() => setActiveTab('resources')}
+          style={[
+            styles.tab,
+            activeTab === 'resources-fixed-column' && styles.activeTab,
+          ]}
+          onPress={() => setActiveTab('resources-fixed-column')}
         >
           <Text
             style={[
               styles.tabText,
-              activeTab === 'resources' && styles.activeTabText,
+              activeTab === 'resources-fixed-column' && styles.activeTabText,
             ]}
           >
-            Resources
+            Fixed Column
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[
+            styles.tab,
+            activeTab === 'resources-inline-band' && styles.activeTab,
+          ]}
+          onPress={() => setActiveTab('resources-inline-band')}
+        >
+          <Text
+            style={[
+              styles.tabText,
+              activeTab === 'resources-inline-band' && styles.activeTabText,
+            ]}
+          >
+            Inline Band
           </Text>
         </TouchableOpacity>
       </View>
@@ -755,6 +774,11 @@ export default function App() {
           events={resourceEvents}
           onRefresh={handleRefresh}
           refreshing={refreshing}
+          resourceNameLayout={
+            activeTab === 'resources-inline-band'
+              ? 'inline-band'
+              : 'fixed-column'
+          }
           renderDateLabel={(d) => {
             const todayStyle = {
               backgroundColor: 'green',

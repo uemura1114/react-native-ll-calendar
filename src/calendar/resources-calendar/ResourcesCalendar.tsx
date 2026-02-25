@@ -47,6 +47,7 @@ type ResourcesCalendarProps = {
   cellContainerStyle?: (resource: CalendarResource, date: Date) => ViewStyle;
   hiddenMonth?: boolean;
   allowFontScaling?: boolean;
+  resourceNameLayout?: 'fixed-column' | 'inline-band';
 };
 
 const DEFAULT_DATE_COLUMN_WIDTH = 60;
@@ -71,6 +72,10 @@ type ResourceRowProps = {
   cellContainerStyle?: (resource: CalendarResource, date: Date) => ViewStyle;
   allowFontScaling?: boolean;
   onLayout?: (height: number) => void;
+  inlineBand?: {
+    scrollOffset: number;
+    renderResourceNameLabel?: (resource: CalendarResource) => React.JSX.Element;
+  };
 };
 
 function ResourceRow({
@@ -90,6 +95,7 @@ function ResourceRow({
   cellContainerStyle,
   allowFontScaling,
   onLayout,
+  inlineBand,
 }: ResourceRowProps) {
   const resourceEvents = eventsByResourceId.get(resource.id) ?? [];
   const eventPosition = new ResourcesCalendarEventPosition();
@@ -99,6 +105,22 @@ function ResourceRow({
       style={styles.resourceRow}
       onLayout={(e) => onLayout?.(e.nativeEvent.layout.height)}
     >
+      {inlineBand != null && (
+        <View style={styles.resourceNameInlineBand}>
+          <View style={{ marginLeft: inlineBand.scrollOffset + 4 }}>
+            {inlineBand.renderResourceNameLabel ? (
+              inlineBand.renderResourceNameLabel(resource)
+            ) : (
+              <Text
+                allowFontScaling={allowFontScaling}
+                style={styles.resourceNameInlineBandText}
+              >
+                {resource.name}
+              </Text>
+            )}
+          </View>
+        </View>
+      )}
       <View style={styles.resourceRowContentArea}>
         {dates.map((date, dateIndex) => {
           const djs = dayjs(date);
@@ -254,7 +276,8 @@ type ScrollViewRef = React.ComponentRef<typeof ScrollView>;
 
 export function ResourcesCalendar(props: ResourcesCalendarProps) {
   const dateColumnWidth = props.dateColumnWidth ?? DEFAULT_DATE_COLUMN_WIDTH;
-  const fixedRowCount = props.fixedRowCount ?? 0;
+  const isInlineBand = props.resourceNameLayout === 'inline-band';
+  const fixedRowCount = isInlineBand ? 0 : (props.fixedRowCount ?? 0);
 
   const dates = useMemo(
     () => generateDates(props.fromDate, props.toDate),
@@ -412,83 +435,91 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
     eventEllipsizeMode: props.eventEllipsizeMode,
     cellContainerStyle: props.cellContainerStyle,
     allowFontScaling: props.allowFontScaling,
+    inlineBand: isInlineBand
+      ? {
+          scrollOffset,
+          renderResourceNameLabel: props.renderResourceNameLabel,
+        }
+      : undefined,
   };
+
+  const resourceNameColumn = !isInlineBand ? (
+    <ScrollView
+      ref={resourceNameScrollRef}
+      style={[styles.resourceNameColumn, { width: resourceColumnWidth }]}
+      contentContainerStyle={{ width: resourceColumnWidth }}
+      stickyHeaderIndices={[0]}
+      showsVerticalScrollIndicator={false}
+      bounces={false}
+      overScrollMode="never"
+      onScroll={handleResourceNameScroll}
+      onScrollEndDrag={handleResourceNameScrollEnd}
+      onMomentumScrollEnd={handleResourceNameScrollEnd}
+      scrollEventThrottle={16}
+    >
+      {/* [0] sticky: ヘッダー高さ分のスペーサー + Fixed行のリソース名 */}
+      <View style={[styles.resourceNameColumn, styles.resourceNameColumnFixed]}>
+        <View
+          style={[styles.resourceNameHeaderSpacer, { height: headerHeight }]}
+        />
+        {fixedResources.map((resource) => (
+          <View
+            key={resource.id}
+            style={[
+              styles.resourceNameCell,
+              { height: rowHeights.get(resource.id) },
+            ]}
+          >
+            {props.renderResourceNameLabel ? (
+              props.renderResourceNameLabel(resource)
+            ) : (
+              <View>
+                <Text
+                  allowFontScaling={props.allowFontScaling}
+                  style={styles.resourceNameFixedLabelText}
+                  numberOfLines={1}
+                >
+                  {resource.name}
+                </Text>
+              </View>
+            )}
+          </View>
+        ))}
+      </View>
+      <View>
+        {/* Scrollable行のリソース名 */}
+        {scrollableResources.map((resource) => (
+          <View
+            key={resource.id}
+            style={[
+              styles.resourceNameCell,
+              { height: rowHeights.get(resource.id) },
+            ]}
+          >
+            {props.renderResourceNameLabel ? (
+              props.renderResourceNameLabel(resource)
+            ) : (
+              <View>
+                <Text
+                  allowFontScaling={props.allowFontScaling}
+                  style={styles.resourceNameFixedLabelText}
+                  numberOfLines={1}
+                >
+                  {resource.name}
+                </Text>
+              </View>
+            )}
+          </View>
+        ))}
+        <View style={{ height: props.bottomSpacing }} />
+      </View>
+    </ScrollView>
+  ) : null;
 
   return (
     <View style={styles.container}>
-      {/* 左: リソース名固定列 */}
-      <ScrollView
-        ref={resourceNameScrollRef}
-        style={[styles.resourceNameColumn, { width: resourceColumnWidth }]}
-        contentContainerStyle={{ width: resourceColumnWidth }}
-        stickyHeaderIndices={[0]}
-        showsVerticalScrollIndicator={false}
-        bounces={false}
-        overScrollMode="never"
-        onScroll={handleResourceNameScroll}
-        onScrollEndDrag={handleResourceNameScrollEnd}
-        onMomentumScrollEnd={handleResourceNameScrollEnd}
-        scrollEventThrottle={16}
-      >
-        {/* [0] sticky: ヘッダー高さ分のスペーサー + Fixed行のリソース名 */}
-        <View
-          style={[styles.resourceNameColumn, styles.resourceNameColumnFixed]}
-        >
-          <View
-            style={[styles.resourceNameHeaderSpacer, { height: headerHeight }]}
-          />
-          {fixedResources.map((resource) => (
-            <View
-              key={resource.id}
-              style={[
-                styles.resourceNameCell,
-                { height: rowHeights.get(resource.id) },
-              ]}
-            >
-              {props.renderResourceNameLabel ? (
-                props.renderResourceNameLabel(resource)
-              ) : (
-                <View>
-                  <Text
-                    allowFontScaling={props.allowFontScaling}
-                    style={styles.resourceNameFixedLabelText}
-                    numberOfLines={1}
-                  >
-                    {resource.name}
-                  </Text>
-                </View>
-              )}
-            </View>
-          ))}
-        </View>
-        <View>
-          {/* Scrollable行のリソース名 */}
-          {scrollableResources.map((resource) => (
-            <View
-              key={resource.id}
-              style={[
-                styles.resourceNameCell,
-                { height: rowHeights.get(resource.id) },
-              ]}
-            >
-              {props.renderResourceNameLabel ? (
-                props.renderResourceNameLabel(resource)
-              ) : (
-                <View>
-                  <Text
-                    allowFontScaling={props.allowFontScaling}
-                    style={styles.resourceNameFixedLabelText}
-                    numberOfLines={1}
-                  >
-                    {resource.name}
-                  </Text>
-                </View>
-              )}
-            </View>
-          ))}
-          <View style={{ height: props.bottomSpacing }} />
-        </View>
-      </ScrollView>
+      {/* 左: リソース名固定列 (fixed-column モードのみ) */}
+      {resourceNameColumn}
 
       {/* 右: 既存のカレンダー本体 */}
       <ScrollView
@@ -698,6 +729,16 @@ const styles = StyleSheet.create({
     minHeight: 30,
   },
   resourceNameFixedLabelText: {
+    fontSize: 12,
+    color: 'black',
+  },
+  resourceNameInlineBand: {
+    width: '100%',
+    borderBottomWidth: CELL_BORDER_WIDTH,
+    borderColor: 'lightslategrey',
+    backgroundColor: '#EEEEEE',
+  },
+  resourceNameInlineBandText: {
     fontSize: 12,
     color: 'black',
   },
