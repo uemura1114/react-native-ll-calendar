@@ -49,6 +49,7 @@ type ResourcesCalendarProps = {
   hiddenMonth?: boolean;
   allowFontScaling?: boolean;
   resourceNameLayout?: 'fixed-column' | 'inline-band';
+  onResourceColumnWidthChange?: (width: number) => void;
 };
 
 const DEFAULT_DATE_COLUMN_WIDTH = 60;
@@ -343,6 +344,16 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
             )
           );
           setResourceColumnWidth(newWidth);
+        },
+        onPanResponderRelease: (_, gestureState) => {
+          const newWidth = Math.max(
+            MIN_RESOURCE_COLUMN_WIDTH,
+            Math.min(
+              MAX_RESOURCE_COLUMN_WIDTH,
+              dragStartWidth.current + gestureState.dx
+            )
+          );
+          props.onResourceColumnWidthChange?.(newWidth);
         },
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
