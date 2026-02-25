@@ -1,6 +1,6 @@
 {
   "name": "react-native-ll-calendar",
-  "version": "0.12.0",
+  "version": "0.12.1",
   "description": "ReactNative Calendar Library",
   "main": "./lib/module/index.js",
   "types": "./lib/typescript/src/index.d.ts",
