@@ -8,7 +8,6 @@ import {
   type NativeSyntheticEvent,
   type TextStyle,
   type ViewStyle,
-  RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
@@ -417,46 +416,52 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
   return (
     <View style={styles.container}>
       {/* 左: リソース名固定列 */}
-      <View style={[styles.resourceNameColumn, { width: resourceColumnWidth }]}>
-        {/* ヘッダー高さ分のスペーサー（日付ヘッダー + 月ヘッダー + fixed行と揃える） */}
+      <ScrollView
+        ref={resourceNameScrollRef}
+        style={[styles.resourceNameColumn, { width: resourceColumnWidth }]}
+        contentContainerStyle={{ width: resourceColumnWidth }}
+        stickyHeaderIndices={[0]}
+        showsVerticalScrollIndicator={false}
+        bounces={false}
+        overScrollMode="never"
+        onScroll={handleResourceNameScroll}
+        onScrollEndDrag={handleResourceNameScrollEnd}
+        onMomentumScrollEnd={handleResourceNameScrollEnd}
+        scrollEventThrottle={16}
+      >
+        {/* [0] sticky: ヘッダー高さ分のスペーサー + Fixed行のリソース名 */}
         <View
-          style={[styles.resourceNameHeaderSpacer, { height: headerHeight }]}
-        />
-        {/* Fixed行のリソース名（縦スクロールしない） */}
-        {fixedResources.map((resource) => (
-          <View
-            key={resource.id}
-            style={[
-              styles.resourceNameCell,
-              { height: rowHeights.get(resource.id) },
-            ]}
-          >
-            {props.renderResourceNameLabel ? (
-              props.renderResourceNameLabel(resource)
-            ) : (
-              <View>
-                <Text
-                  allowFontScaling={props.allowFontScaling}
-                  style={styles.resourceNameFixedLabelText}
-                  numberOfLines={1}
-                >
-                  {resource.name}
-                </Text>
-              </View>
-            )}
-          </View>
-        ))}
-        {/* Scrollable行のリソース名（縦スクロールを外側と同期） */}
-        <ScrollView
-          ref={resourceNameScrollRef}
-          showsVerticalScrollIndicator={false}
-          bounces={false}
-          overScrollMode="never"
-          onScroll={handleResourceNameScroll}
-          onScrollEndDrag={handleResourceNameScrollEnd}
-          onMomentumScrollEnd={handleResourceNameScrollEnd}
-          scrollEventThrottle={16}
+          style={[styles.resourceNameColumn, styles.resourceNameColumnFixed]}
         >
+          <View
+            style={[styles.resourceNameHeaderSpacer, { height: headerHeight }]}
+          />
+          {fixedResources.map((resource) => (
+            <View
+              key={resource.id}
+              style={[
+                styles.resourceNameCell,
+                { height: rowHeights.get(resource.id) },
+              ]}
+            >
+              {props.renderResourceNameLabel ? (
+                props.renderResourceNameLabel(resource)
+              ) : (
+                <View>
+                  <Text
+                    allowFontScaling={props.allowFontScaling}
+                    style={styles.resourceNameFixedLabelText}
+                    numberOfLines={1}
+                  >
+                    {resource.name}
+                  </Text>
+                </View>
+              )}
+            </View>
+          ))}
+        </View>
+        <View>
+          {/* Scrollable行のリソース名 */}
           {scrollableResources.map((resource) => (
             <View
               key={resource.id}
@@ -481,8 +486,8 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
             </View>
           ))}
           <View style={{ height: props.bottomSpacing }} />
-        </ScrollView>
-      </View>
+        </View>
+      </ScrollView>
 
       {/* 右: 既存のカレンダー本体 */}
       <ScrollView
@@ -493,12 +498,8 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
         onScrollEndDrag={handleOuterScrollEnd}
         onMomentumScrollEnd={handleOuterScrollEnd}
         scrollEventThrottle={16}
-        refreshControl={
-          <RefreshControl
-            refreshing={!!props.refreshing}
-            onRefresh={props.onRefresh}
-          />
-        }
+        overScrollMode="never"
+        bounces={false}
       >
         <ScrollView
           ref={headerScrollRef}
@@ -643,11 +644,6 @@ const styles = StyleSheet.create({
     borderRightWidth: CELL_BORDER_WIDTH,
     borderColor: 'lightslategrey',
   },
-  resourceNameCellContainer: {
-    width: 80,
-    borderRightWidth: CELL_BORDER_WIDTH,
-    borderColor: 'lightslategrey',
-  },
   resourceRow: {
     flexDirection: 'column',
     borderBottomWidth: CELL_BORDER_WIDTH,
@@ -675,6 +671,11 @@ const styles = StyleSheet.create({
   resourceNameColumn: {
     borderRightWidth: CELL_BORDER_WIDTH,
     borderRightColor: 'lightslategrey',
+    flexGrow: 0,
+    flexShrink: 0,
+  },
+  resourceNameColumnFixed: {
+    backgroundColor: 'white',
   },
   resourceNameHeaderSpacer: {
     borderBottomWidth: CELL_BORDER_WIDTH,
