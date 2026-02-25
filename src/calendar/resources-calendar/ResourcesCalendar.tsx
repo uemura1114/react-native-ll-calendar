@@ -375,7 +375,6 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
       activeVerticalScroller.current = 'outer';
       const y = event.nativeEvent.contentOffset.y;
       resourceNameScrollRef.current?.scrollTo({ y, animated: false });
-      activeVerticalScroller.current = null;
     },
     []
   );
@@ -386,10 +385,17 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
       activeVerticalScroller.current = 'resourceName';
       const y = event.nativeEvent.contentOffset.y;
       outerScrollRef.current?.scrollTo({ y, animated: false });
-      activeVerticalScroller.current = null;
     },
     []
   );
+
+  const handleOuterScrollEnd = useCallback(() => {
+    activeVerticalScroller.current = null;
+  }, []);
+
+  const handleResourceNameScrollEnd = useCallback(() => {
+    activeVerticalScroller.current = null;
+  }, []);
 
   const commonRowProps = {
     dates,
@@ -443,11 +449,12 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
         {/* Scrollable行のリソース名（縦スクロールを外側と同期） */}
         <ScrollView
           ref={resourceNameScrollRef}
-          scrollEnabled={false}
           showsVerticalScrollIndicator={false}
           bounces={false}
           overScrollMode="never"
           onScroll={handleResourceNameScroll}
+          onScrollEndDrag={handleResourceNameScrollEnd}
+          onMomentumScrollEnd={handleResourceNameScrollEnd}
           scrollEventThrottle={16}
         >
           {scrollableResources.map((resource) => (
@@ -483,6 +490,8 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
         style={styles.calendarBody}
         stickyHeaderIndices={[0]}
         onScroll={handleOuterScroll}
+        onScrollEndDrag={handleOuterScrollEnd}
+        onMomentumScrollEnd={handleOuterScrollEnd}
         scrollEventThrottle={16}
         refreshControl={
           <RefreshControl
