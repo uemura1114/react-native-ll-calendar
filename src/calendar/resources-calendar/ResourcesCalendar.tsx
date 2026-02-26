@@ -347,12 +347,6 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
   const lastScrollX = useRef(0);
   const [scrollOffset, setScrollOffset] = useState(0);
 
-  // Pending scroll targets: when we programmatically scroll the other view,
-  // we record the target Y so that the resulting onScroll event can be ignored,
-  // preventing the two ScrollViews from endlessly chasing each other.
-  const pendingOuterScrollY = useRef<number | null>(null);
-  const pendingResourceNameScrollY = useRef<number | null>(null);
-
   // Sync the label position after scrolling stops.
   // When the activeScroller timeout fires, treat it as scroll end
   // and commit the current lastScrollX value to state.
@@ -399,42 +393,17 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
     [releaseActiveScroller]
   );
 
+  // The resource-name column ScrollView is scroll-disabled for the user;
+  // only programmatic scrollTo is used to keep it in sync with the calendar body.
+  // This prevents the two ScrollViews from triggering each other's onScroll
+  // and causing an oscillating feedback loop.
   const handleOuterScroll = useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
       const y = event.nativeEvent.contentOffset.y;
-      // Ignore events that we triggered ourselves via scrollTo
-      if (
-        pendingOuterScrollY.current !== null &&
-        Math.abs(pendingOuterScrollY.current - y) < 1
-      ) {
-        pendingOuterScrollY.current = null;
-        return;
-      }
       const scrollingUp = y < innerScrollY.current;
       innerScrollY.current = y;
       setOuterScrollEnabled(y === 0 && scrollingUp);
-      pendingResourceNameScrollY.current = y;
       resourceNameScrollRef.current?.scrollTo({ y, animated: false });
-    },
-    []
-  );
-
-  const handleResourceNameScroll = useCallback(
-    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-      const y = event.nativeEvent.contentOffset.y;
-      // Ignore events that we triggered ourselves via scrollTo
-      if (
-        pendingResourceNameScrollY.current !== null &&
-        Math.abs(pendingResourceNameScrollY.current - y) < 1
-      ) {
-        pendingResourceNameScrollY.current = null;
-        return;
-      }
-      const scrollingUp = y < innerScrollY.current;
-      innerScrollY.current = y;
-      setOuterScrollEnabled(y === 0 && scrollingUp);
-      pendingOuterScrollY.current = y;
-      outerScrollRef.current?.scrollTo({ y, animated: false });
     },
     []
   );
@@ -469,10 +438,7 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
       contentContainerStyle={{ width: resourceColumnWidth }}
       stickyHeaderIndices={[0]}
       showsVerticalScrollIndicator={false}
-      bounces={false}
-      overScrollMode="never"
-      onScroll={handleResourceNameScroll}
-      scrollEventThrottle={16}
+      scrollEnabled={false}
     >
       {/* [0] sticky: header height spacer + fixed resource name rows */}
       <View style={[styles.resourceNameColumn, styles.resourceNameColumnFixed]}>
