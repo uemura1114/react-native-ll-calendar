@@ -765,6 +765,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
   },
   resourceNameHeaderSpacer: {
+    borderTopWidth: CELL_BORDER_WIDTH,
+    borderTopColor: 'lightslategrey',
     borderBottomWidth: CELL_BORDER_WIDTH,
     borderBottomColor: 'lightslategrey',
   },
