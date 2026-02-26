@@ -347,14 +347,11 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
   const lastScrollX = useRef(0);
   const [scrollOffset, setScrollOffset] = useState(0);
 
-  const activeVerticalScroller = useRef<'outer' | 'resourceName' | null>(null);
-  const activeVerticalScrollerTimer = useRef<ReturnType<
-    typeof setTimeout
-  > | null>(null);
-
-  const releaseActiveVerticalScroller = useCallback(() => {
-    activeVerticalScroller.current = null;
-  }, []);
+  // Pending scroll targets: when we programmatically scroll the other view,
+  // we record the target Y so that the resulting onScroll event can be ignored,
+  // preventing the two ScrollViews from endlessly chasing each other.
+  const pendingOuterScrollY = useRef<number | null>(null);
+  const pendingResourceNameScrollY = useRef<number | null>(null);
 
   // Sync the label position after scrolling stops.
   // When the activeScroller timeout fires, treat it as scroll end
@@ -402,27 +399,21 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
     [releaseActiveScroller]
   );
 
-  const handleOuterScrollBeginDrag = useCallback(() => {
-    if (activeVerticalScrollerTimer.current != null) {
-      clearTimeout(activeVerticalScrollerTimer.current);
-    }
-    activeVerticalScroller.current = 'outer';
-  }, []);
-
-  const handleResourceNameScrollBeginDrag = useCallback(() => {
-    if (activeVerticalScrollerTimer.current != null) {
-      clearTimeout(activeVerticalScrollerTimer.current);
-    }
-    activeVerticalScroller.current = 'resourceName';
-  }, []);
-
   const handleOuterScroll = useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-      if (activeVerticalScroller.current === 'resourceName') return;
       const y = event.nativeEvent.contentOffset.y;
+      // Ignore events that we triggered ourselves via scrollTo
+      if (
+        pendingOuterScrollY.current !== null &&
+        Math.abs(pendingOuterScrollY.current - y) < 1
+      ) {
+        pendingOuterScrollY.current = null;
+        return;
+      }
       const scrollingUp = y < innerScrollY.current;
       innerScrollY.current = y;
       setOuterScrollEnabled(y === 0 && scrollingUp);
+      pendingResourceNameScrollY.current = y;
       resourceNameScrollRef.current?.scrollTo({ y, animated: false });
     },
     []
@@ -430,35 +421,23 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
 
   const handleResourceNameScroll = useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-      if (activeVerticalScroller.current === 'outer') return;
       const y = event.nativeEvent.contentOffset.y;
+      // Ignore events that we triggered ourselves via scrollTo
+      if (
+        pendingResourceNameScrollY.current !== null &&
+        Math.abs(pendingResourceNameScrollY.current - y) < 1
+      ) {
+        pendingResourceNameScrollY.current = null;
+        return;
+      }
       const scrollingUp = y < innerScrollY.current;
       innerScrollY.current = y;
       setOuterScrollEnabled(y === 0 && scrollingUp);
+      pendingOuterScrollY.current = y;
       outerScrollRef.current?.scrollTo({ y, animated: false });
     },
     []
   );
-
-  const handleOuterScrollEnd = useCallback(() => {
-    if (activeVerticalScrollerTimer.current != null) {
-      clearTimeout(activeVerticalScrollerTimer.current);
-    }
-    activeVerticalScrollerTimer.current = setTimeout(
-      releaseActiveVerticalScroller,
-      100
-    );
-  }, [releaseActiveVerticalScroller]);
-
-  const handleResourceNameScrollEnd = useCallback(() => {
-    if (activeVerticalScrollerTimer.current != null) {
-      clearTimeout(activeVerticalScrollerTimer.current);
-    }
-    activeVerticalScrollerTimer.current = setTimeout(
-      releaseActiveVerticalScroller,
-      100
-    );
-  }, [releaseActiveVerticalScroller]);
 
   const commonRowProps = {
     dates,
@@ -492,10 +471,7 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
       showsVerticalScrollIndicator={false}
       bounces={false}
       overScrollMode="never"
-      onScrollBeginDrag={handleResourceNameScrollBeginDrag}
       onScroll={handleResourceNameScroll}
-      onScrollEndDrag={handleResourceNameScrollEnd}
-      onMomentumScrollEnd={handleResourceNameScrollEnd}
       scrollEventThrottle={16}
     >
       {/* [0] sticky: header height spacer + fixed resource name rows */}
@@ -585,10 +561,7 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
           outerHeight != null ? { height: outerHeight } : undefined,
         ]}
         stickyHeaderIndices={[0]}
-        onScrollBeginDrag={handleOuterScrollBeginDrag}
         onScroll={handleOuterScroll}
-        onScrollEndDrag={handleOuterScrollEnd}
-        onMomentumScrollEnd={handleOuterScrollEnd}
         scrollEventThrottle={16}
         overScrollMode="never"
         bounces={false}
@@ -772,12 +745,7 @@ const styles = StyleSheet.create({
   resourceNameColumnFixed: {
     backgroundColor: 'white',
   },
-  resourceNameHeaderSpacer: {
-    borderTopWidth: CELL_BORDER_WIDTH,
-    borderTopColor: 'lightslategrey',
-    borderBottomWidth: CELL_BORDER_WIDTH,
-    borderBottomColor: 'lightslategrey',
-  },
+  resourceNameHeaderSpacer: {},
   resourceNameCell: {
     borderBottomWidth: CELL_BORDER_WIDTH,
     borderBottomColor: 'lightslategrey',
