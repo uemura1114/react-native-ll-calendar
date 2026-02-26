@@ -745,7 +745,12 @@ const styles = StyleSheet.create({
   resourceNameColumnFixed: {
     backgroundColor: 'white',
   },
-  resourceNameHeaderSpacer: {},
+  resourceNameHeaderSpacer: {
+    borderTopWidth: CELL_BORDER_WIDTH,
+    borderTopColor: 'lightslategrey',
+    borderBottomWidth: CELL_BORDER_WIDTH,
+    borderBottomColor: 'lightslategrey',
+  },
   resourceNameCell: {
     borderBottomWidth: CELL_BORDER_WIDTH,
     borderBottomColor: 'lightslategrey',
