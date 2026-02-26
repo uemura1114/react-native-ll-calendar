@@ -332,6 +332,7 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
   }, []);
 
   const [headerHeight, setHeaderHeight] = useState(0);
+  const [outerHeight, setOuterHeight] = useState<number | undefined>(undefined);
 
   const headerScrollRef = useRef<ScrollViewRef>(null);
   const bodyScrollRef = useRef<ScrollViewRef>(null);
@@ -549,14 +550,32 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
   ) : null;
 
   return (
-    <View style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.containerContent}
+      scrollEnabled={true}
+      bounces={props.onRefresh != null}
+      overScrollMode={props.onRefresh != null ? 'always' : 'never'}
+      refreshControl={
+        props.onRefresh != null ? (
+          <RefreshControl
+            refreshing={props.refreshing ?? false}
+            onRefresh={props.onRefresh}
+          />
+        ) : undefined
+      }
+      onLayout={(e) => setOuterHeight(e.nativeEvent.layout.height)}
+    >
       {/* Left: fixed resource name column (fixed-column mode only) */}
       {resourceNameColumn}
 
       {/* Right: calendar body */}
       <ScrollView
         ref={outerScrollRef}
-        style={styles.calendarBody}
+        style={[
+          styles.calendarBody,
+          outerHeight != null ? { height: outerHeight } : undefined,
+        ]}
         stickyHeaderIndices={[0]}
         onScrollBeginDrag={handleOuterScrollBeginDrag}
         onScroll={handleOuterScroll}
@@ -564,15 +583,7 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
         onMomentumScrollEnd={handleOuterScrollEnd}
         scrollEventThrottle={16}
         overScrollMode="never"
-        bounces={props.onRefresh != null}
-        refreshControl={
-          props.onRefresh != null ? (
-            <RefreshControl
-              refreshing={props.refreshing ?? false}
-              onRefresh={props.onRefresh}
-            />
-          ) : undefined
-        }
+        bounces={false}
       >
         <ScrollView
           ref={headerScrollRef}
@@ -681,7 +692,7 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
         </ScrollView>
         <View style={{ height: props.bottomSpacing }} />
       </ScrollView>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -735,6 +746,9 @@ const styles = StyleSheet.create({
     borderColor: 'lightslategrey',
   },
   container: {
+    flex: 1,
+  },
+  containerContent: {
     flexDirection: 'row',
     flex: 1,
   },
