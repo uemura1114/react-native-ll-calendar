@@ -333,6 +333,8 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
 
   const [headerHeight, setHeaderHeight] = useState(0);
   const [outerHeight, setOuterHeight] = useState<number | undefined>(undefined);
+  const [outerScrollEnabled, setOuterScrollEnabled] = useState(false);
+  const innerScrollY = useRef(0);
 
   const headerScrollRef = useRef<ScrollViewRef>(null);
   const bodyScrollRef = useRef<ScrollViewRef>(null);
@@ -418,6 +420,9 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
       if (activeVerticalScroller.current === 'resourceName') return;
       const y = event.nativeEvent.contentOffset.y;
+      const scrollingUp = y < innerScrollY.current;
+      innerScrollY.current = y;
+      setOuterScrollEnabled(y === 0 && scrollingUp);
       resourceNameScrollRef.current?.scrollTo({ y, animated: false });
     },
     []
@@ -427,6 +432,9 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
       if (activeVerticalScroller.current === 'outer') return;
       const y = event.nativeEvent.contentOffset.y;
+      const scrollingUp = y < innerScrollY.current;
+      innerScrollY.current = y;
+      setOuterScrollEnabled(y === 0 && scrollingUp);
       outerScrollRef.current?.scrollTo({ y, animated: false });
     },
     []
@@ -553,7 +561,7 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
     <ScrollView
       style={styles.container}
       contentContainerStyle={styles.containerContent}
-      scrollEnabled={true}
+      scrollEnabled={outerScrollEnabled}
       bounces={props.onRefresh != null}
       overScrollMode={props.onRefresh != null ? 'always' : 'never'}
       refreshControl={
