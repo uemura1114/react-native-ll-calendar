@@ -333,8 +333,6 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
 
   const [headerHeight, setHeaderHeight] = useState(0);
   const [outerHeight, setOuterHeight] = useState<number | undefined>(undefined);
-  const [outerScrollEnabled, setOuterScrollEnabled] = useState(false);
-  const innerScrollY = useRef(0);
 
   const headerScrollRef = useRef<ScrollViewRef>(null);
   const bodyScrollRef = useRef<ScrollViewRef>(null);
@@ -400,9 +398,6 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
   const handleOuterScroll = useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
       const y = event.nativeEvent.contentOffset.y;
-      const scrollingUp = y < innerScrollY.current;
-      innerScrollY.current = y;
-      setOuterScrollEnabled(y === 0 && scrollingUp);
       resourceNameScrollRef.current?.scrollTo({ y, animated: false });
     },
     []
@@ -500,20 +495,8 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
   ) : null;
 
   return (
-    <ScrollView
+    <View
       style={styles.container}
-      contentContainerStyle={styles.containerContent}
-      scrollEnabled={outerScrollEnabled}
-      bounces={props.onRefresh != null}
-      overScrollMode={props.onRefresh != null ? 'always' : 'never'}
-      refreshControl={
-        props.onRefresh != null ? (
-          <RefreshControl
-            refreshing={props.refreshing ?? false}
-            onRefresh={props.onRefresh}
-          />
-        ) : undefined
-      }
       onLayout={(e) => setOuterHeight(e.nativeEvent.layout.height)}
     >
       {/* Left: fixed resource name column (fixed-column mode only) */}
@@ -529,8 +512,16 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
         stickyHeaderIndices={[0]}
         onScroll={handleOuterScroll}
         scrollEventThrottle={16}
-        overScrollMode="never"
-        bounces={false}
+        overScrollMode={props.onRefresh != null ? 'always' : 'never'}
+        bounces={props.onRefresh != null}
+        refreshControl={
+          props.onRefresh != null ? (
+            <RefreshControl
+              refreshing={props.refreshing ?? false}
+              onRefresh={props.onRefresh}
+            />
+          ) : undefined
+        }
       >
         <ScrollView
           ref={headerScrollRef}
@@ -639,7 +630,7 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
         </ScrollView>
         <View style={{ height: props.bottomSpacing }} />
       </ScrollView>
-    </ScrollView>
+    </View>
   );
 }
 
@@ -694,10 +685,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-  },
-  containerContent: {
     flexDirection: 'row',
-    flex: 1,
   },
   calendarBody: {
     flex: 1,
