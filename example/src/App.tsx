@@ -829,13 +829,19 @@ export default function App() {
               return { ...commonStyle, backgroundColor: '#fff' };
             }
           }}
-          cellContainerStyle={(_resource, d) => {
+          cellContainerStyle={(resource, d) => {
             const commonStyle: ViewStyle = { paddingBottom: 8 };
-            if (d.getDay() === 0 || d.getDay() === 6) {
-              return { ...commonStyle, backgroundColor: '#f5f5f5' };
-            } else {
-              return { ...commonStyle, backgroundColor: '#fff' };
-            }
+            const isWeekend = d.getDay() === 0 || d.getDay() === 6;
+            const isToday = dayjs(d).isSame(dayjs(), 'day');
+            const isHighlighted = resource.id === 'r1' && isToday;
+            return {
+              ...commonStyle,
+              backgroundColor: isWeekend ? '#f5f5f5' : '#fff',
+              ...(isHighlighted && {
+                borderWidth: 3,
+                borderColor: '#ff0000',
+              }),
+            };
           }}
         />
       )}

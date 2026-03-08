@@ -176,13 +176,18 @@ function ResourceRow({
                 styles.contentCellContainer,
                 { width: dateColumnWidth },
                 { zIndex: dates.length - dateIndex },
-                cellContainerStyle?.(resource, date),
               ]}
               onPress={() => onPressCell?.(resource, date)}
               onLongPress={() => onLongPressCell?.(resource, date)}
               delayLongPress={delayLongPressCell}
               activeOpacity={1}
             >
+              <View
+                style={[
+                  styles.contentCellContainerInner,
+                  cellContainerStyle?.(resource, date),
+                ]}
+              />
               {cellEvents.map((event, rowIndex) => {
                 if (typeof event === 'number') {
                   return (
@@ -682,6 +687,14 @@ const styles = StyleSheet.create({
     width: 60,
     borderRightWidth: CELL_BORDER_WIDTH,
     borderColor: 'lightslategrey',
+    position: 'relative',
+  },
+  contentCellContainerInner: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
   },
   container: {
     flex: 1,
