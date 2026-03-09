@@ -47,7 +47,7 @@ export default function App() {
         id: '1-2',
         title: '😃Meeting',
         start: new Date(currentYear, currentMonth, 9, 22, 0),
-        end: new Date(currentYear, currentMonth, 10, 1, 0),
+        end: new Date(currentYear, currentMonth, 10, 0, 0),
         backgroundColor: '#ff6b6b',
         borderColor: '#e55353',
         color: '#0e0e0e',
