@@ -2,7 +2,7 @@ import dayjs from 'dayjs';
 import ja from 'dayjs/locale/ja';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { type ViewStyle } from 'react-native';
-import { View, StyleSheet, TouchableOpacity, Text } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Text, Switch } from 'react-native';
 import {
   MonthCalendar,
   MonthCalendarEventOverlay,
@@ -19,6 +19,10 @@ type TabType = 'month' | 'resources-fixed-column' | 'resources-inline-band';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<TabType>('month');
+  const [
+    prioritizeResourcesCellInteraction,
+    setPrioritizeResourcesCellInteraction,
+  ] = useState(false);
   const [date, setDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
@@ -791,6 +795,18 @@ export default function App() {
         </TouchableOpacity>
       </View>
 
+      {activeTab !== 'month' ? (
+        <View style={styles.resourcesOptionRow}>
+          <Text style={styles.resourcesOptionLabel}>
+            セルタップ優先（イベントの上でもセル反応）
+          </Text>
+          <Switch
+            value={prioritizeResourcesCellInteraction}
+            onValueChange={setPrioritizeResourcesCellInteraction}
+          />
+        </View>
+      ) : null}
+
       {/* Content */}
       {activeTab === 'month' ? (
         <MonthCalendar
@@ -902,6 +918,7 @@ export default function App() {
               }),
             };
           }}
+          prioritizeCellInteraction={prioritizeResourcesCellInteraction}
         />
       )}
     </View>
@@ -913,6 +930,22 @@ const styles = StyleSheet.create({
     flex: 1,
     marginTop: 60,
     width: '100%',
+  },
+  resourcesOptionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
+    backgroundColor: '#fafafa',
+  },
+  resourcesOptionLabel: {
+    flex: 1,
+    fontSize: 13,
+    color: '#333',
+    marginRight: 8,
   },
   tabBar: {
     flexDirection: 'row',
