@@ -66,6 +66,7 @@ type MonthCalendarViewItemProps = {
   eventEllipsizeMode?: 'head' | 'middle' | 'tail' | 'clip';
   renderEventOverlay?: (event: CalendarEvent) => ReactNode;
   bottomSpacing?: number;
+  prioritizeCellInteraction?: boolean;
 };
 
 export const MonthCalendarViewItem = forwardRef<
@@ -231,6 +232,7 @@ export const MonthCalendarViewItem = forwardRef<
               eventTextStyle={props.eventTextStyle}
               eventEllipsizeMode={props.eventEllipsizeMode}
               renderEventOverlay={props.renderEventOverlay}
+              prioritizeCellInteraction={props.prioritizeCellInteraction}
               onLayout={(e) => {
                 weekHeights.current.set(weekId, e.nativeEvent.layout.height);
               }}

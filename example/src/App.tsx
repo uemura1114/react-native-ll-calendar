@@ -2,7 +2,7 @@ import dayjs from 'dayjs';
 import ja from 'dayjs/locale/ja';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { type ViewStyle } from 'react-native';
-import { View, StyleSheet, TouchableOpacity, Text } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Text, Switch } from 'react-native';
 import {
   MonthCalendar,
   MonthCalendarEventOverlay,
@@ -19,6 +19,8 @@ type TabType = 'month' | 'resources-fixed-column' | 'resources-inline-band';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<TabType>('month');
+  const [prioritizeCellInteraction, setPrioritizeCellInteraction] =
+    useState(false);
   const [date, setDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
@@ -791,6 +793,16 @@ export default function App() {
         </TouchableOpacity>
       </View>
 
+      <View style={styles.resourcesOptionRow}>
+        <Text style={styles.resourcesOptionLabel}>
+          Prioritize cell taps (cells receive presses on top of events)
+        </Text>
+        <Switch
+          value={prioritizeCellInteraction}
+          onValueChange={setPrioritizeCellInteraction}
+        />
+      </View>
+
       {/* Content */}
       {activeTab === 'month' ? (
         <MonthCalendar
@@ -823,6 +835,7 @@ export default function App() {
           eventEllipsizeMode={'clip'}
           renderEventOverlay={renderMonthEventOverlay}
           bottomSpacing={200}
+          prioritizeCellInteraction={prioritizeCellInteraction}
         />
       ) : (
         <ResourcesCalendar
@@ -902,6 +915,7 @@ export default function App() {
               }),
             };
           }}
+          prioritizeCellInteraction={prioritizeCellInteraction}
         />
       )}
     </View>
@@ -913,6 +927,22 @@ const styles = StyleSheet.create({
     flex: 1,
     marginTop: 60,
     width: '100%',
+  },
+  resourcesOptionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
+    backgroundColor: '#fafafa',
+  },
+  resourcesOptionLabel: {
+    flex: 1,
+    fontSize: 13,
+    color: '#333',
+    marginRight: 8,
   },
   tabBar: {
     flexDirection: 'row',

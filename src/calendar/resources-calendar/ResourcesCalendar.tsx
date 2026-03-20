@@ -14,6 +14,7 @@ import {
   type NativeSyntheticEvent,
   type TextStyle,
   type ViewStyle,
+  Platform,
   RefreshControl,
   ScrollView,
   StyleSheet,
@@ -55,6 +56,12 @@ type ResourcesCalendarProps = {
   hiddenMonth?: boolean;
   allowFontScaling?: boolean;
   resourceNameLayout?: 'fixed-column' | 'inline-band';
+  /**
+   * When true, a transparent layer is placed above events in each cell so
+   * `onPressCell` / `onLongPressCell` receive touches for the full cell area.
+   * Event taps are disabled while this is on (overlay captures the gesture).
+   */
+  prioritizeCellInteraction?: boolean;
 };
 
 const DEFAULT_DATE_COLUMN_WIDTH = 60;
@@ -84,6 +91,7 @@ type ResourceRowProps = {
     scrollOffset: number;
     renderResourceNameLabel?: (resource: CalendarResource) => React.JSX.Element;
   };
+  prioritizeCellInteraction?: boolean;
 };
 
 function ResourceRow({
@@ -105,6 +113,7 @@ function ResourceRow({
   allowFontScaling,
   onLayout,
   inlineBand,
+  prioritizeCellInteraction,
 }: ResourceRowProps) {
   const resourceEvents = eventsByResourceId.get(resource.id) ?? [];
   const eventPosition = new ResourcesCalendarEventPosition();
@@ -178,125 +187,152 @@ function ResourceRow({
             }
           }
 
-          return (
-            <TouchableOpacity
-              key={date.getTime()}
-              style={[
-                styles.contentCellContainer,
-                { width: dateColumnWidth },
-                { zIndex: dates.length - dateIndex },
-              ]}
-              onPress={() => onPressCell?.(resource, date)}
-              onLongPress={() => onLongPressCell?.(resource, date)}
-              delayLongPress={delayLongPressCell}
-              activeOpacity={1}
-            >
+          const showPrioritizedCellOverlay =
+            prioritizeCellInteraction === true &&
+            (onPressCell != null || onLongPressCell != null);
+
+          const cellWrapperStyle = [
+            styles.contentCellContainer,
+            { width: dateColumnWidth },
+            { zIndex: dates.length - dateIndex },
+          ];
+
+          const eventRows = cellEvents.map((event, rowIndex) => {
+            if (typeof event === 'number') {
+              return (
+                <View
+                  key={`spacer-${rowIndex}`}
+                  style={{
+                    height: eventHeight,
+                    marginBottom: EVENT_GAP,
+                  }}
+                />
+              );
+            }
+
+            const rawStartDjs = dayjs(event.start);
+            const startDjs = dateIndex === 0 ? djs : dayjs(event.start);
+            const endDjs = dayjs(event.end);
+            const diffDays = endDjs
+              .startOf('day')
+              .diff(startDjs.startOf('day'), 'day');
+            const isPrevDateEvent =
+              dateIndex === 0 && rawStartDjs.isBefore(djs);
+
+            // Calculate event width based on the number of days it spans
+            let width =
+              (diffDays + 1) * dateColumnWidth -
+              EVENT_GAP * 2 -
+              CELL_BORDER_WIDTH * 2;
+            if (isPrevDateEvent) {
+              width += EVENT_GAP + 1;
+            }
+
+            // Record position info
+            eventPosition.push({
+              resourceId: resource.id,
+              startDate: startDjs.toDate(),
+              days: diffDays + 1,
+              rowNum: rowIndex + 1,
+            });
+
+            const eventOverlayNode = renderEventOverlay?.(event);
+            const showEventOverlay =
+              renderEventOverlay != null &&
+              eventOverlayNode != null &&
+              eventOverlayNode !== false;
+
+            return (
+              <View
+                key={event.id}
+                pointerEvents={showPrioritizedCellOverlay ? 'none' : 'auto'}
+                style={[
+                  styles.eventOuter,
+                  { width, height: eventHeight },
+                  isPrevDateEvent ? styles.prevDateEvent : {},
+                ]}
+              >
+                <TouchableOpacity
+                  data-component-name="resources-calendar-event"
+                  style={[
+                    styles.event,
+                    {
+                      backgroundColor: event.backgroundColor,
+                      borderColor: event.borderColor,
+                      ...(event.borderStyle !== undefined && {
+                        borderStyle: event.borderStyle,
+                      }),
+                      ...(event.borderWidth !== undefined && {
+                        borderWidth: event.borderWidth,
+                      }),
+                      ...(event.borderRadius !== undefined && {
+                        borderRadius: event.borderRadius,
+                      }),
+                    },
+                  ]}
+                  onPress={() => onPressEvent?.(event)}
+                  onLongPress={() => onLongPressEvent?.(event)}
+                  delayLongPress={delayLongPressEvent}
+                >
+                  <Text
+                    numberOfLines={1}
+                    ellipsizeMode={eventEllipsizeMode ?? 'tail'}
+                    allowFontScaling={allowFontScaling}
+                    style={[
+                      styles.eventTitle,
+                      { color: event.color },
+                      eventTextStyle?.(event),
+                    ]}
+                  >
+                    {event.title}
+                  </Text>
+                </TouchableOpacity>
+                {showEventOverlay ? (
+                  <View
+                    style={styles.eventOverlayHost}
+                    pointerEvents="box-none"
+                  >
+                    {eventOverlayNode}
+                  </View>
+                ) : null}
+              </View>
+            );
+          });
+
+          const cellInner = (
+            <>
               <View
                 style={[
                   styles.contentCellContainerInner,
                   cellContainerStyle?.(resource, date),
                 ]}
               />
-              {cellEvents.map((event, rowIndex) => {
-                if (typeof event === 'number') {
-                  return (
-                    <View
-                      key={`spacer-${rowIndex}`}
-                      style={{
-                        height: eventHeight,
-                        marginBottom: EVENT_GAP,
-                      }}
-                    />
-                  );
-                }
+              {eventRows}
+            </>
+          );
 
-                const rawStartDjs = dayjs(event.start);
-                const startDjs = dateIndex === 0 ? djs : dayjs(event.start);
-                const endDjs = dayjs(event.end);
-                const diffDays = endDjs
-                  .startOf('day')
-                  .diff(startDjs.startOf('day'), 'day');
-                const isPrevDateEvent =
-                  dateIndex === 0 && rawStartDjs.isBefore(djs);
-
-                // Calculate event width based on the number of days it spans
-                let width =
-                  (diffDays + 1) * dateColumnWidth -
-                  EVENT_GAP * 2 -
-                  CELL_BORDER_WIDTH * 2;
-                if (isPrevDateEvent) {
-                  width += EVENT_GAP + 1;
-                }
-
-                // Record position info
-                eventPosition.push({
-                  resourceId: resource.id,
-                  startDate: startDjs.toDate(),
-                  days: diffDays + 1,
-                  rowNum: rowIndex + 1,
-                });
-
-                const eventOverlayNode = renderEventOverlay?.(event);
-                const showEventOverlay =
-                  renderEventOverlay != null &&
-                  eventOverlayNode != null &&
-                  eventOverlayNode !== false;
-
-                return (
-                  <View
-                    key={event.id}
-                    style={[
-                      styles.eventOuter,
-                      { width, height: eventHeight },
-                      isPrevDateEvent ? styles.prevDateEvent : {},
-                    ]}
-                  >
-                    <TouchableOpacity
-                      data-component-name="resources-calendar-event"
-                      style={[
-                        styles.event,
-                        {
-                          backgroundColor: event.backgroundColor,
-                          borderColor: event.borderColor,
-                          ...(event.borderStyle !== undefined && {
-                            borderStyle: event.borderStyle,
-                          }),
-                          ...(event.borderWidth !== undefined && {
-                            borderWidth: event.borderWidth,
-                          }),
-                          ...(event.borderRadius !== undefined && {
-                            borderRadius: event.borderRadius,
-                          }),
-                        },
-                      ]}
-                      onPress={() => onPressEvent?.(event)}
-                      onLongPress={() => onLongPressEvent?.(event)}
-                      delayLongPress={delayLongPressEvent}
-                    >
-                      <Text
-                        numberOfLines={1}
-                        ellipsizeMode={eventEllipsizeMode ?? 'tail'}
-                        allowFontScaling={allowFontScaling}
-                        style={[
-                          styles.eventTitle,
-                          { color: event.color },
-                          eventTextStyle?.(event),
-                        ]}
-                      >
-                        {event.title}
-                      </Text>
-                    </TouchableOpacity>
-                    {showEventOverlay ? (
-                      <View
-                        style={styles.eventOverlayHost}
-                        pointerEvents="box-none"
-                      >
-                        {eventOverlayNode}
-                      </View>
-                    ) : null}
-                  </View>
-                );
-              })}
+          return showPrioritizedCellOverlay ? (
+            <View key={date.getTime()} style={cellWrapperStyle}>
+              {cellInner}
+              <TouchableOpacity
+                accessible={false}
+                style={styles.cellInteractionOverlay}
+                activeOpacity={1}
+                onPress={() => onPressCell?.(resource, date)}
+                onLongPress={() => onLongPressCell?.(resource, date)}
+                delayLongPress={delayLongPressCell}
+              />
+            </View>
+          ) : (
+            <TouchableOpacity
+              key={date.getTime()}
+              style={cellWrapperStyle}
+              onPress={() => onPressCell?.(resource, date)}
+              onLongPress={() => onLongPressCell?.(resource, date)}
+              delayLongPress={delayLongPressCell}
+              activeOpacity={1}
+            >
+              {cellInner}
             </TouchableOpacity>
           );
         })}
@@ -458,6 +494,7 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
           renderResourceNameLabel: props.renderResourceNameLabel,
         }
       : undefined,
+    prioritizeCellInteraction: props.prioritizeCellInteraction,
   };
 
   const resourceNameColumn = !isInlineBand ? (
@@ -724,6 +761,15 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
+  },
+  cellInteractionOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 1000,
+    backgroundColor: 'transparent',
+    ...Platform.select({
+      android: { elevation: 12 },
+      default: {},
+    }),
   },
   container: {
     flex: 1,
