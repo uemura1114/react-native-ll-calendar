@@ -1,4 +1,10 @@
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, {
+  useCallback,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react';
 import type {
   CalendarEvent,
   CalendarResource,
@@ -43,6 +49,7 @@ type ResourcesCalendarProps = {
   bottomSpacing?: number;
   eventTextStyle?: (event: CalendarEvent) => TextStyle;
   eventEllipsizeMode?: 'head' | 'middle' | 'tail' | 'clip';
+  renderEventOverlay?: (event: CalendarEvent) => ReactNode;
   dateCellContainerStyle?: (date: Date) => ViewStyle;
   cellContainerStyle?: (resource: CalendarResource, date: Date) => ViewStyle;
   hiddenMonth?: boolean;
@@ -69,6 +76,7 @@ type ResourceRowProps = {
   eventHeight: number;
   eventTextStyle?: (event: CalendarEvent) => TextStyle;
   eventEllipsizeMode?: 'head' | 'middle' | 'tail' | 'clip';
+  renderEventOverlay?: (event: CalendarEvent) => ReactNode;
   cellContainerStyle?: (resource: CalendarResource, date: Date) => ViewStyle;
   allowFontScaling?: boolean;
   onLayout?: (height: number) => void;
@@ -92,6 +100,7 @@ function ResourceRow({
   eventHeight,
   eventTextStyle,
   eventEllipsizeMode,
+  renderEventOverlay,
   cellContainerStyle,
   allowFontScaling,
   onLayout,
@@ -227,46 +236,65 @@ function ResourceRow({
                   rowNum: rowIndex + 1,
                 });
 
+                const eventOverlayNode = renderEventOverlay?.(event);
+                const showEventOverlay =
+                  renderEventOverlay != null &&
+                  eventOverlayNode != null &&
+                  eventOverlayNode !== false;
+
                 return (
-                  <TouchableOpacity
-                    data-component-name="resources-calendar-event"
+                  <View
                     key={event.id}
                     style={[
-                      styles.event,
-                      {
-                        backgroundColor: event.backgroundColor,
-                        borderColor: event.borderColor,
-                        width,
-                        height: eventHeight,
-                        ...(event.borderStyle !== undefined && {
-                          borderStyle: event.borderStyle,
-                        }),
-                        ...(event.borderWidth !== undefined && {
-                          borderWidth: event.borderWidth,
-                        }),
-                        ...(event.borderRadius !== undefined && {
-                          borderRadius: event.borderRadius,
-                        }),
-                      },
+                      styles.eventOuter,
+                      { width, height: eventHeight },
                       isPrevDateEvent ? styles.prevDateEvent : {},
                     ]}
-                    onPress={() => onPressEvent?.(event)}
-                    onLongPress={() => onLongPressEvent?.(event)}
-                    delayLongPress={delayLongPressEvent}
                   >
-                    <Text
-                      numberOfLines={1}
-                      ellipsizeMode={eventEllipsizeMode ?? 'tail'}
-                      allowFontScaling={allowFontScaling}
+                    <TouchableOpacity
+                      data-component-name="resources-calendar-event"
                       style={[
-                        styles.eventTitle,
-                        { color: event.color },
-                        eventTextStyle?.(event),
+                        styles.event,
+                        {
+                          backgroundColor: event.backgroundColor,
+                          borderColor: event.borderColor,
+                          ...(event.borderStyle !== undefined && {
+                            borderStyle: event.borderStyle,
+                          }),
+                          ...(event.borderWidth !== undefined && {
+                            borderWidth: event.borderWidth,
+                          }),
+                          ...(event.borderRadius !== undefined && {
+                            borderRadius: event.borderRadius,
+                          }),
+                        },
                       ]}
+                      onPress={() => onPressEvent?.(event)}
+                      onLongPress={() => onLongPressEvent?.(event)}
+                      delayLongPress={delayLongPressEvent}
                     >
-                      {event.title}
-                    </Text>
-                  </TouchableOpacity>
+                      <Text
+                        numberOfLines={1}
+                        ellipsizeMode={eventEllipsizeMode ?? 'tail'}
+                        allowFontScaling={allowFontScaling}
+                        style={[
+                          styles.eventTitle,
+                          { color: event.color },
+                          eventTextStyle?.(event),
+                        ]}
+                      >
+                        {event.title}
+                      </Text>
+                    </TouchableOpacity>
+                    {showEventOverlay ? (
+                      <View
+                        style={styles.eventOverlayHost}
+                        pointerEvents="box-none"
+                      >
+                        {eventOverlayNode}
+                      </View>
+                    ) : null}
+                  </View>
                 );
               })}
             </TouchableOpacity>
@@ -421,6 +449,7 @@ export function ResourcesCalendar(props: ResourcesCalendarProps) {
     eventHeight: props.eventHeight ?? DEFAULT_EVENT_HEIGHT,
     eventTextStyle: props.eventTextStyle,
     eventEllipsizeMode: props.eventEllipsizeMode,
+    renderEventOverlay: props.renderEventOverlay,
     cellContainerStyle: props.cellContainerStyle,
     allowFontScaling: props.allowFontScaling,
     inlineBand: isInlineBand
@@ -739,14 +768,24 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: 'black',
   },
+  eventOuter: {
+    position: 'relative',
+    marginTop: EVENT_GAP,
+    marginLeft: EVENT_GAP,
+  },
   event: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
     borderWidth: 0.5,
     borderRadius: 4,
     paddingHorizontal: 4,
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: EVENT_GAP,
-    marginLeft: EVENT_GAP,
+  },
+  eventOverlayHost: {
+    ...StyleSheet.absoluteFillObject,
+    pointerEvents: 'box-none',
   },
   prevDateEvent: {
     marginLeft: -1,

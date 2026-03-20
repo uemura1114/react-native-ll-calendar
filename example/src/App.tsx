@@ -555,6 +555,33 @@ export default function App() {
     [monthEventBadgeCountById]
   );
 
+  const resourcesEventBadgeCountById = useMemo(() => {
+    return new Map<string, number>([
+      ['re-r1-a', 3],
+      ['re-r1-b', 8],
+      ['re-r2-b', 12],
+      ['re-r3-c', 99],
+    ]);
+  }, []);
+
+  const renderResourcesEventOverlay = useCallback(
+    (event: ResourcesCalendarEvent) => {
+      const count = resourcesEventBadgeCountById.get(event.id);
+      if (count == null || count <= 0) {
+        return null;
+      }
+      const label = count > 99 ? '99+' : String(count);
+      return (
+        <MonthCalendarEventOverlay position={{ top: -3, right: -3 }}>
+          <View style={styles.eventBadge}>
+            <Text style={styles.eventBadgeText}>{label}</Text>
+          </View>
+        </MonthCalendarEventOverlay>
+      );
+    },
+    [resourcesEventBadgeCountById]
+  );
+
   const handleScrollToTop = useCallback(() => {
     calendarRef.current?.scrollMonthViewToOffset(
       dayjs(date).format('YYYY-MM'),
@@ -852,6 +879,7 @@ export default function App() {
           bottomSpacing={200}
           eventTextStyle={(_event) => ({ fontSize: 12 })}
           eventEllipsizeMode={'clip'}
+          renderEventOverlay={renderResourcesEventOverlay}
           dateCellContainerStyle={(d) => {
             const commonStyle: ViewStyle = {};
             if (d.getDay() === 0 || d.getDay() === 6) {
