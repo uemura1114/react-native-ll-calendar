@@ -1,6 +1,7 @@
 import dayjs from 'dayjs';
 import type { ReactNode } from 'react';
 import {
+  Platform,
   StyleSheet,
   useWindowDimensions,
   type LayoutChangeEvent,
@@ -161,6 +162,7 @@ export const MonthCalendarWeekRow = (props: {
           return (
             <View
               key={event.id}
+              pointerEvents={showPrioritizedCellOverlay ? 'none' : 'auto'}
               style={[
                 styles.eventOuter,
                 {
@@ -345,5 +347,10 @@ const styles = StyleSheet.create({
   cellInteractionOverlay: {
     ...StyleSheet.absoluteFillObject,
     zIndex: 1000,
+    backgroundColor: 'transparent',
+    ...Platform.select({
+      android: { elevation: 12 },
+      default: {},
+    }),
   },
 });

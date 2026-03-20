@@ -14,6 +14,7 @@ import {
   type NativeSyntheticEvent,
   type TextStyle,
   type ViewStyle,
+  Platform,
   RefreshControl,
   ScrollView,
   StyleSheet,
@@ -244,6 +245,7 @@ function ResourceRow({
             return (
               <View
                 key={event.id}
+                pointerEvents={showPrioritizedCellOverlay ? 'none' : 'auto'}
                 style={[
                   styles.eventOuter,
                   { width, height: eventHeight },
@@ -763,6 +765,11 @@ const styles = StyleSheet.create({
   cellInteractionOverlay: {
     ...StyleSheet.absoluteFillObject,
     zIndex: 1000,
+    backgroundColor: 'transparent',
+    ...Platform.select({
+      android: { elevation: 12 },
+      default: {},
+    }),
   },
   container: {
     flex: 1,
