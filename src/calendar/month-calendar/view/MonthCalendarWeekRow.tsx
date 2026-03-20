@@ -1,4 +1,5 @@
 import dayjs from 'dayjs';
+import type { ReactNode } from 'react';
 import {
   StyleSheet,
   useWindowDimensions,
@@ -31,6 +32,7 @@ export const MonthCalendarWeekRow = (props: {
   eventHeight?: number;
   eventTextStyle?: (event: CalendarEvent) => TextStyle;
   eventEllipsizeMode?: 'head' | 'middle' | 'tail' | 'clip';
+  renderEventOverlay?: (event: CalendarEvent) => ReactNode;
   onLayout?: (event: LayoutChangeEvent) => void;
 }) => {
   const eventHeight = props.eventHeight || 26;
@@ -175,50 +177,72 @@ export const MonthCalendarWeekRow = (props: {
                 });
               }
 
+              const eventOverlayNode = props.renderEventOverlay?.(event);
+              const showEventOverlay =
+                props.renderEventOverlay != null &&
+                eventOverlayNode != null &&
+                eventOverlayNode !== false;
+
               return (
-                <TouchableOpacity
+                <View
                   key={event.id}
                   style={[
-                    styles.event,
+                    styles.eventOuter,
                     {
-                      backgroundColor: event.backgroundColor,
-                      borderColor: event.borderColor,
-                      width: width,
+                      width,
                       height: eventHeight,
-                      ...(event.borderStyle !== undefined && {
-                        borderStyle: event.borderStyle,
-                      }),
-                      ...(event.borderWidth !== undefined && {
-                        borderWidth: event.borderWidth,
-                      }),
-                      ...(event.borderRadius !== undefined && {
-                        borderRadius: event.borderRadius,
-                      }),
                     },
                     isPrevDateEvent ? styles.prevDateEvent : {},
                     isLastRow ? styles.lastRowEvent : {},
                   ]}
-                  onPress={() => {
-                    props.onPressEvent?.(event);
-                  }}
-                  onLongPress={() => {
-                    props.onLongPressEvent?.(event);
-                  }}
-                  delayLongPress={props.delayLongPressEvent}
                 >
-                  <Text
-                    numberOfLines={1}
-                    ellipsizeMode={props.eventEllipsizeMode ?? 'tail'}
+                  <TouchableOpacity
                     style={[
-                      styles.eventTitle,
-                      { color: event.color },
-                      props.eventTextStyle?.(event),
+                      styles.event,
+                      {
+                        backgroundColor: event.backgroundColor,
+                        borderColor: event.borderColor,
+                        ...(event.borderStyle !== undefined && {
+                          borderStyle: event.borderStyle,
+                        }),
+                        ...(event.borderWidth !== undefined && {
+                          borderWidth: event.borderWidth,
+                        }),
+                        ...(event.borderRadius !== undefined && {
+                          borderRadius: event.borderRadius,
+                        }),
+                      },
                     ]}
-                    allowFontScaling={props.allowFontScaling}
+                    onPress={() => {
+                      props.onPressEvent?.(event);
+                    }}
+                    onLongPress={() => {
+                      props.onLongPressEvent?.(event);
+                    }}
+                    delayLongPress={props.delayLongPressEvent}
                   >
-                    {event.title}
-                  </Text>
-                </TouchableOpacity>
+                    <Text
+                      numberOfLines={1}
+                      ellipsizeMode={props.eventEllipsizeMode ?? 'tail'}
+                      style={[
+                        styles.eventTitle,
+                        { color: event.color },
+                        props.eventTextStyle?.(event),
+                      ]}
+                      allowFontScaling={props.allowFontScaling}
+                    >
+                      {event.title}
+                    </Text>
+                  </TouchableOpacity>
+                  {showEventOverlay ? (
+                    <View
+                      style={styles.eventOverlayHost}
+                      pointerEvents="box-none"
+                    >
+                      {eventOverlayNode}
+                    </View>
+                  ) : null}
+                </View>
               );
             })}
           </TouchableOpacity>
@@ -259,15 +283,25 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 14,
   },
+  eventOuter: {
+    position: 'relative',
+    marginTop: EVENT_GAP,
+    marginLeft: EVENT_GAP,
+  },
   event: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
     borderWidth: 0.5,
     borderRadius: 4,
     paddingHorizontal: 4,
     flexDirection: 'row',
     alignItems: 'center',
     boxShadow: '0 0 2px 0 rgba(0, 0, 0, 0.1)',
-    marginTop: EVENT_GAP,
-    marginLeft: EVENT_GAP,
+  },
+  eventOverlayHost: {
+    ...StyleSheet.absoluteFillObject,
+    pointerEvents: 'box-none',
   },
   prevDateEvent: {
     marginLeft: -1,

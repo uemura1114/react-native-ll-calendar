@@ -111,6 +111,7 @@ function App() {
 | `eventHeight`               | `number`                                | No       | `26`    | Height of event items in pixels            |
 | `eventTextStyle`            | `(event: CalendarEvent) => TextStyle`   | No       | -       | Style function for event text              |
 | `eventEllipsizeMode`       | `'head' \| 'middle' \| 'tail' \| 'clip'` | No       | `'tail'` | Ellipsize mode for event text              |
+| `renderEventOverlay`       | `(event: CalendarEvent) => React.ReactNode` | No    | -       | Optional overlay above each event (use `position: 'absolute'` with `top` / `right` / `bottom` / `left`, or `MonthCalendarEventOverlay`) |
 | `bottomSpacing`            | `number`                                | No       | -       | Bottom spacing in pixels for scrollable content |
 
 ### MonthCalendarRef Methods

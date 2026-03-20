@@ -5,6 +5,7 @@ import { type ViewStyle } from 'react-native';
 import { View, StyleSheet, TouchableOpacity, Text } from 'react-native';
 import {
   MonthCalendar,
+  MonthCalendarEventOverlay,
   ResourcesCalendar,
   type CalendarEvent,
   type ResourcesCalendarEvent,
@@ -525,6 +526,35 @@ export default function App() {
 
   const calendarRef = useRef<MonthCalendarRef>(null);
 
+  /** Demo: badge count per event id (month tab overlay) */
+  const monthEventBadgeCountById = useMemo(() => {
+    return new Map<string, number>([
+      ['1-2', 5],
+      ['2', 12],
+      ['3', 3],
+      ['4', 99],
+      ['5', 1],
+    ]);
+  }, []);
+
+  const renderMonthEventOverlay = useCallback(
+    (event: CalendarEvent) => {
+      const count = monthEventBadgeCountById.get(event.id);
+      if (count == null || count <= 0) {
+        return null;
+      }
+      const label = count > 99 ? '99+' : String(count);
+      return (
+        <MonthCalendarEventOverlay position={{ top: -4, right: -4 }}>
+          <View style={styles.eventBadge}>
+            <Text style={styles.eventBadgeText}>{label}</Text>
+          </View>
+        </MonthCalendarEventOverlay>
+      );
+    },
+    [monthEventBadgeCountById]
+  );
+
   const handleScrollToTop = useCallback(() => {
     calendarRef.current?.scrollMonthViewToOffset(
       dayjs(date).format('YYYY-MM'),
@@ -764,6 +794,7 @@ export default function App() {
           eventHeight={32}
           eventTextStyle={eventTextStyle}
           eventEllipsizeMode={'clip'}
+          renderEventOverlay={renderMonthEventOverlay}
           bottomSpacing={200}
         />
       ) : (
@@ -891,5 +922,19 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#333',
     fontWeight: '600',
+  },
+  eventBadge: {
+    minWidth: 18,
+    height: 18,
+    paddingHorizontal: 5,
+    borderRadius: 9,
+    backgroundColor: '#FF3B30',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  eventBadgeText: {
+    color: '#fff',
+    fontSize: 11,
+    fontWeight: '700',
   },
 });
