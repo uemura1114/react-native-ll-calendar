@@ -27,6 +27,7 @@ import {
   forwardRef,
   useImperativeHandle,
   useRef,
+  type ReactNode,
 } from 'react';
 import { MonthCalendarWeekDayRow } from './MonthCalendarWeekDayRow';
 
@@ -63,6 +64,7 @@ type MonthCalendarViewItemProps = {
   eventHeight?: number;
   eventTextStyle?: (event: CalendarEvent) => TextStyle;
   eventEllipsizeMode?: 'head' | 'middle' | 'tail' | 'clip';
+  renderEventOverlay?: (event: CalendarEvent) => ReactNode;
   bottomSpacing?: number;
 };
 
@@ -228,6 +230,7 @@ export const MonthCalendarViewItem = forwardRef<
               eventHeight={props.eventHeight}
               eventTextStyle={props.eventTextStyle}
               eventEllipsizeMode={props.eventEllipsizeMode}
+              renderEventOverlay={props.renderEventOverlay}
               onLayout={(e) => {
                 weekHeights.current.set(weekId, e.nativeEvent.layout.height);
               }}

@@ -5,7 +5,13 @@ import {
   type TextStyle,
 } from 'react-native';
 import dayjs from 'dayjs';
-import { useState, useRef, useImperativeHandle, forwardRef } from 'react';
+import {
+  useState,
+  useRef,
+  useImperativeHandle,
+  forwardRef,
+  type ReactNode,
+} from 'react';
 import type {
   CalendarEvent,
   WeekdayNum,
@@ -54,6 +60,7 @@ type MonthCalendarProps = {
   eventHeight?: number;
   eventTextStyle?: (event: CalendarEvent) => TextStyle;
   eventEllipsizeMode?: 'head' | 'middle' | 'tail' | 'clip';
+  renderEventOverlay?: (event: CalendarEvent) => ReactNode;
   bottomSpacing?: number;
 };
 
@@ -173,6 +180,7 @@ export const MonthCalendar = forwardRef<MonthCalendarRef, MonthCalendarProps>(
               eventHeight={props.eventHeight}
               eventTextStyle={props.eventTextStyle}
               eventEllipsizeMode={props.eventEllipsizeMode}
+              renderEventOverlay={props.renderEventOverlay}
               bottomSpacing={props.bottomSpacing}
             />
           );
