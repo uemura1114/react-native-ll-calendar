@@ -19,10 +19,8 @@ type TabType = 'month' | 'resources-fixed-column' | 'resources-inline-band';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<TabType>('month');
-  const [
-    prioritizeResourcesCellInteraction,
-    setPrioritizeResourcesCellInteraction,
-  ] = useState(false);
+  const [prioritizeCellInteraction, setPrioritizeCellInteraction] =
+    useState(false);
   const [date, setDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
@@ -795,17 +793,15 @@ export default function App() {
         </TouchableOpacity>
       </View>
 
-      {activeTab !== 'month' ? (
-        <View style={styles.resourcesOptionRow}>
-          <Text style={styles.resourcesOptionLabel}>
-            セルタップ優先（イベントの上でもセル反応）
-          </Text>
-          <Switch
-            value={prioritizeResourcesCellInteraction}
-            onValueChange={setPrioritizeResourcesCellInteraction}
-          />
-        </View>
-      ) : null}
+      <View style={styles.resourcesOptionRow}>
+        <Text style={styles.resourcesOptionLabel}>
+          セルタップ優先（イベントの上でもセル反応）
+        </Text>
+        <Switch
+          value={prioritizeCellInteraction}
+          onValueChange={setPrioritizeCellInteraction}
+        />
+      </View>
 
       {/* Content */}
       {activeTab === 'month' ? (
@@ -839,6 +835,7 @@ export default function App() {
           eventEllipsizeMode={'clip'}
           renderEventOverlay={renderMonthEventOverlay}
           bottomSpacing={200}
+          prioritizeCellInteraction={prioritizeCellInteraction}
         />
       ) : (
         <ResourcesCalendar
@@ -918,7 +915,7 @@ export default function App() {
               }),
             };
           }}
-          prioritizeCellInteraction={prioritizeResourcesCellInteraction}
+          prioritizeCellInteraction={prioritizeCellInteraction}
         />
       )}
     </View>

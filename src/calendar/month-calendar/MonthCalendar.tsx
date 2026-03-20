@@ -62,6 +62,12 @@ type MonthCalendarProps = {
   eventEllipsizeMode?: 'head' | 'middle' | 'tail' | 'clip';
   renderEventOverlay?: (event: CalendarEvent) => ReactNode;
   bottomSpacing?: number;
+  /**
+   * When true, a transparent layer is placed above events in each day cell so
+   * `onPressCell` / `onLongPressCell` receive touches for the full cell area.
+   * Event taps are disabled while this is on (overlay captures the gesture).
+   */
+  prioritizeCellInteraction?: boolean;
 };
 
 export const MonthCalendar = forwardRef<MonthCalendarRef, MonthCalendarProps>(
@@ -182,6 +188,7 @@ export const MonthCalendar = forwardRef<MonthCalendarRef, MonthCalendarProps>(
               eventEllipsizeMode={props.eventEllipsizeMode}
               renderEventOverlay={props.renderEventOverlay}
               bottomSpacing={props.bottomSpacing}
+              prioritizeCellInteraction={props.prioritizeCellInteraction}
             />
           );
         }}

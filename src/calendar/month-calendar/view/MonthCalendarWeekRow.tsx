@@ -34,6 +34,7 @@ export const MonthCalendarWeekRow = (props: {
   eventEllipsizeMode?: 'head' | 'middle' | 'tail' | 'clip';
   renderEventOverlay?: (event: CalendarEvent) => ReactNode;
   onLayout?: (event: LayoutChangeEvent) => void;
+  prioritizeCellInteraction?: boolean;
 }) => {
   const eventHeight = props.eventHeight || 26;
   const { width: screenWidth } = useWindowDimensions();
@@ -74,7 +75,7 @@ export const MonthCalendarWeekRow = (props: {
             return dayjs(a.start).diff(dayjs(b.start));
           });
 
-        const events: (CalendarEvent | number)[] = [];
+        const cellEvents: (CalendarEvent | number)[] = [];
         if (weekId && props.eventPosition) {
           const rowNums = props.eventPosition.getRowNums({
             weekId,
@@ -84,33 +85,141 @@ export const MonthCalendarWeekRow = (props: {
           let eventIndex = 0;
           for (let ii = 1; ii <= rowsLength; ii++) {
             if (rowNums.includes(ii)) {
-              events.push(ii);
+              cellEvents.push(ii);
             } else {
               const event = filteredEvents[eventIndex];
               if (event) {
-                events.push(event);
+                cellEvents.push(event);
               }
               eventIndex++;
             }
           }
         }
-        return (
-          <TouchableOpacity
-            key={djs.get('date')}
-            style={[
-              styles.dayCellCountainer,
-              { minHeight: props.weekRowMinHeight },
-              { zIndex: 7 - dateIndex },
-              { borderColor: props.cellBorderColor ?? 'lightslategrey' },
-            ]}
-            onPress={() => {
-              props.onPressCell?.(djs.toDate());
-            }}
-            onLongPress={() => {
-              props.onLongPressCell?.(djs.toDate());
-            }}
-            delayLongPress={props.delayLongPressCell}
-          >
+
+        const showPrioritizedCellOverlay =
+          props.prioritizeCellInteraction === true &&
+          (props.onPressCell != null || props.onLongPressCell != null);
+
+        const cellWrapperStyle = [
+          styles.dayCellCountainer,
+          { minHeight: props.weekRowMinHeight },
+          { zIndex: 7 - dateIndex },
+          { borderColor: props.cellBorderColor ?? 'lightslategrey' },
+        ];
+
+        const eventRows = cellEvents.map((event, rowIndex) => {
+          if (typeof event === 'number') {
+            return (
+              <View
+                key={`spacer-${rowIndex}`}
+                style={{ height: eventHeight, marginBottom: EVENT_GAP }}
+              />
+            );
+          }
+
+          const rawStartDjs = dayjs(event.start);
+          const startDjs = dateIndex === 0 ? djs : dayjs(event.start);
+          const endDjs = dayjs(event.end);
+          const isEndOnDayBoundary =
+            endDjs.hour() === 0 &&
+            endDjs.minute() === 0 &&
+            endDjs.second() === 0 &&
+            endDjs.millisecond() === 0;
+          const diffDays = Math.max(
+            0,
+            endDjs.startOf('day').diff(startDjs.startOf('day'), 'day') -
+              (isEndOnDayBoundary ? 1 : 0)
+          );
+
+          const isPrevDateEvent = dateIndex === 0 && rawStartDjs.isBefore(djs);
+          let width =
+            (diffDays + 1) * dateColumnWidth -
+            EVENT_GAP * 2 -
+            CELL_BORDER_WIDTH * 2;
+
+          if (isPrevDateEvent) {
+            width += EVENT_GAP + 1;
+          }
+
+          const isLastRow = rowIndex === cellEvents.length - 1;
+
+          if (props.eventPosition && weekId) {
+            props.eventPosition.push({
+              weekId,
+              startDate: startDjs.toDate(),
+              days: diffDays + 1,
+              rowNum: rowIndex + 1,
+            });
+          }
+
+          const eventOverlayNode = props.renderEventOverlay?.(event);
+          const showEventOverlay =
+            props.renderEventOverlay != null &&
+            eventOverlayNode != null &&
+            eventOverlayNode !== false;
+
+          return (
+            <View
+              key={event.id}
+              style={[
+                styles.eventOuter,
+                {
+                  width,
+                  height: eventHeight,
+                },
+                isPrevDateEvent ? styles.prevDateEvent : {},
+                isLastRow ? styles.lastRowEvent : {},
+              ]}
+            >
+              <TouchableOpacity
+                style={[
+                  styles.event,
+                  {
+                    backgroundColor: event.backgroundColor,
+                    borderColor: event.borderColor,
+                    ...(event.borderStyle !== undefined && {
+                      borderStyle: event.borderStyle,
+                    }),
+                    ...(event.borderWidth !== undefined && {
+                      borderWidth: event.borderWidth,
+                    }),
+                    ...(event.borderRadius !== undefined && {
+                      borderRadius: event.borderRadius,
+                    }),
+                  },
+                ]}
+                onPress={() => {
+                  props.onPressEvent?.(event);
+                }}
+                onLongPress={() => {
+                  props.onLongPressEvent?.(event);
+                }}
+                delayLongPress={props.delayLongPressEvent}
+              >
+                <Text
+                  numberOfLines={1}
+                  ellipsizeMode={props.eventEllipsizeMode ?? 'tail'}
+                  style={[
+                    styles.eventTitle,
+                    { color: event.color },
+                    props.eventTextStyle?.(event),
+                  ]}
+                  allowFontScaling={props.allowFontScaling}
+                >
+                  {event.title}
+                </Text>
+              </TouchableOpacity>
+              {showEventOverlay ? (
+                <View style={styles.eventOverlayHost} pointerEvents="box-none">
+                  {eventOverlayNode}
+                </View>
+              ) : null}
+            </View>
+          );
+        });
+
+        const cellInner = (
+          <>
             <View
               style={[
                 styles.dayCellInner,
@@ -131,120 +240,39 @@ export const MonthCalendarWeekRow = (props: {
                 {text}
               </Text>
             </View>
-            {events.map((event, rowIndex) => {
-              if (typeof event === 'number') {
-                return (
-                  <View
-                    key={event}
-                    style={{ height: eventHeight, marginBottom: EVENT_GAP }}
-                  />
-                );
-              }
+            {eventRows}
+          </>
+        );
 
-              const rawStartDjs = dayjs(event.start);
-              const startDjs = dateIndex === 0 ? djs : dayjs(event.start);
-              const endDjs = dayjs(event.end);
-              const isEndOnDayBoundary =
-                endDjs.hour() === 0 &&
-                endDjs.minute() === 0 &&
-                endDjs.second() === 0 &&
-                endDjs.millisecond() === 0;
-              const diffDays = Math.max(
-                0,
-                endDjs.startOf('day').diff(startDjs.startOf('day'), 'day') -
-                  (isEndOnDayBoundary ? 1 : 0)
-              );
-
-              const isPrevDateEvent =
-                dateIndex === 0 && rawStartDjs.isBefore(djs);
-              let width =
-                (diffDays + 1) * dateColumnWidth -
-                EVENT_GAP * 2 -
-                CELL_BORDER_WIDTH * 2;
-
-              if (isPrevDateEvent) {
-                width += EVENT_GAP + 1;
-              }
-
-              const isLastRow = rowIndex === events.length - 1;
-
-              if (props.eventPosition && weekId) {
-                props.eventPosition.push({
-                  weekId,
-                  startDate: startDjs.toDate(),
-                  days: diffDays + 1,
-                  rowNum: rowIndex + 1,
-                });
-              }
-
-              const eventOverlayNode = props.renderEventOverlay?.(event);
-              const showEventOverlay =
-                props.renderEventOverlay != null &&
-                eventOverlayNode != null &&
-                eventOverlayNode !== false;
-
-              return (
-                <View
-                  key={event.id}
-                  style={[
-                    styles.eventOuter,
-                    {
-                      width,
-                      height: eventHeight,
-                    },
-                    isPrevDateEvent ? styles.prevDateEvent : {},
-                    isLastRow ? styles.lastRowEvent : {},
-                  ]}
-                >
-                  <TouchableOpacity
-                    style={[
-                      styles.event,
-                      {
-                        backgroundColor: event.backgroundColor,
-                        borderColor: event.borderColor,
-                        ...(event.borderStyle !== undefined && {
-                          borderStyle: event.borderStyle,
-                        }),
-                        ...(event.borderWidth !== undefined && {
-                          borderWidth: event.borderWidth,
-                        }),
-                        ...(event.borderRadius !== undefined && {
-                          borderRadius: event.borderRadius,
-                        }),
-                      },
-                    ]}
-                    onPress={() => {
-                      props.onPressEvent?.(event);
-                    }}
-                    onLongPress={() => {
-                      props.onLongPressEvent?.(event);
-                    }}
-                    delayLongPress={props.delayLongPressEvent}
-                  >
-                    <Text
-                      numberOfLines={1}
-                      ellipsizeMode={props.eventEllipsizeMode ?? 'tail'}
-                      style={[
-                        styles.eventTitle,
-                        { color: event.color },
-                        props.eventTextStyle?.(event),
-                      ]}
-                      allowFontScaling={props.allowFontScaling}
-                    >
-                      {event.title}
-                    </Text>
-                  </TouchableOpacity>
-                  {showEventOverlay ? (
-                    <View
-                      style={styles.eventOverlayHost}
-                      pointerEvents="box-none"
-                    >
-                      {eventOverlayNode}
-                    </View>
-                  ) : null}
-                </View>
-              );
-            })}
+        return showPrioritizedCellOverlay ? (
+          <View key={djs.valueOf()} style={cellWrapperStyle}>
+            {cellInner}
+            <TouchableOpacity
+              accessible={false}
+              style={styles.cellInteractionOverlay}
+              activeOpacity={1}
+              onPress={() => {
+                props.onPressCell?.(djs.toDate());
+              }}
+              onLongPress={() => {
+                props.onLongPressCell?.(djs.toDate());
+              }}
+              delayLongPress={props.delayLongPressCell}
+            />
+          </View>
+        ) : (
+          <TouchableOpacity
+            key={djs.valueOf()}
+            style={cellWrapperStyle}
+            onPress={() => {
+              props.onPressCell?.(djs.toDate());
+            }}
+            onLongPress={() => {
+              props.onLongPressCell?.(djs.toDate());
+            }}
+            delayLongPress={props.delayLongPressCell}
+          >
+            {cellInner}
           </TouchableOpacity>
         );
       })}
@@ -313,5 +341,9 @@ const styles = StyleSheet.create({
   },
   eventTitle: {
     fontSize: 12,
+  },
+  cellInteractionOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 1000,
   },
 });
