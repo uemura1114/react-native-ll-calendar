@@ -795,7 +795,7 @@ export default function App() {
 
       <View style={styles.resourcesOptionRow}>
         <Text style={styles.resourcesOptionLabel}>
-          セルタップ優先（イベントの上でもセル反応）
+          Prioritize cell taps (cells receive presses on top of events)
         </Text>
         <Switch
           value={prioritizeCellInteraction}
