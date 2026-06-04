@@ -452,6 +452,7 @@ export function WeekPanel({
 const styles = StyleSheet.create({
   panel: {
     flex: 1,
+    overflow: 'hidden',
   },
   headerRow: {
     flexDirection: 'row',
