@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   View,
   type TextStyle,
+  type ViewStyle,
 } from 'react-native';
 import dayjs from 'dayjs';
 import { useMemo, type ReactNode } from 'react';
@@ -37,6 +38,8 @@ export type WeekPanelProps = {
   eventEllipsizeMode?: 'head' | 'middle' | 'tail' | 'clip';
   allowFontScaling?: boolean;
   renderEventOverlay?: (event: CalendarEvent) => ReactNode;
+  dateCellContainerStyle?: (date: Date) => ViewStyle;
+  cellContainerStyle?: (resource: CalendarResource, date: Date) => ViewStyle;
 };
 
 type DayCellProps = {
@@ -58,6 +61,7 @@ type DayCellProps = {
   eventEllipsizeMode?: 'head' | 'middle' | 'tail' | 'clip';
   allowFontScaling?: boolean;
   renderEventOverlay?: (event: CalendarEvent) => ReactNode;
+  cellContainerStyle?: (resource: CalendarResource, date: Date) => ViewStyle;
 };
 
 function DayCell({
@@ -79,6 +83,7 @@ function DayCell({
   eventEllipsizeMode,
   allowFontScaling,
   renderEventOverlay,
+  cellContainerStyle,
 }: DayCellProps) {
   const resourceEvents = eventsByResourceId.get(resource.id) ?? [];
 
@@ -138,7 +143,12 @@ function DayCell({
 
   const cellInner = (
     <>
-      <View style={styles.dayCellBackground} />
+      <View
+        style={[
+          styles.dayCellBackground,
+          cellContainerStyle?.(resource, date.toDate()),
+        ]}
+      />
       {cellEvents.map((event, rowIndex) => {
         if (typeof event === 'number') {
           return (
@@ -275,6 +285,8 @@ export function WeekPanel({
   eventEllipsizeMode,
   allowFontScaling,
   renderEventOverlay,
+  dateCellContainerStyle,
+  cellContainerStyle,
 }: WeekPanelProps) {
   const columnWidth = width / 8;
   const startDjs = dayjs(weekKey);
@@ -312,7 +324,11 @@ export function WeekPanel({
         {days.map((day) => (
           <View
             key={day.format('YYYY-MM-DD')}
-            style={[styles.headerCell, { width: columnWidth }]}
+            style={[
+              styles.headerCell,
+              { width: columnWidth },
+              dateCellContainerStyle?.(day.toDate()),
+            ]}
           >
             <Text style={styles.headerDayOfWeekText}>{day.format('ddd')}</Text>
             <Text style={styles.headerDateText}>{day.format('M/D')}</Text>
@@ -359,6 +375,7 @@ export function WeekPanel({
                 eventEllipsizeMode={eventEllipsizeMode}
                 allowFontScaling={allowFontScaling}
                 renderEventOverlay={renderEventOverlay}
+                cellContainerStyle={cellContainerStyle}
               />
             ))}
           </View>

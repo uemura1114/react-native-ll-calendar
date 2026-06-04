@@ -860,6 +860,24 @@ export default function App() {
           eventEllipsizeMode={'clip'}
           allowFontScaling={false}
           renderEventOverlay={renderResourcesEventOverlay}
+          dateCellContainerStyle={(d) => {
+            if (d.getDay() === 0 || d.getDay() === 6) {
+              return { backgroundColor: '#f5f5f5' };
+            }
+            return { backgroundColor: '#fff' };
+          }}
+          cellContainerStyle={(resource, d) => {
+            const isWeekend = d.getDay() === 0 || d.getDay() === 6;
+            const isToday = dayjs(d).isSame(dayjs(), 'day');
+            const isHighlighted = resource.id === 'r1' && isToday;
+            return {
+              backgroundColor: isWeekend ? '#f5f5f5' : '#fff',
+              ...(isHighlighted && {
+                borderWidth: 3,
+                borderColor: '#ff0000',
+              }),
+            };
+          }}
         />
       ) : activeTab === 'month' ? (
         <MonthCalendar
