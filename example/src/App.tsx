@@ -855,6 +855,7 @@ export default function App() {
           onLongPressEvent={(event) => {
             console.log('week onLongPressEvent', event.id, event.title);
           }}
+          prioritizeCellInteraction={prioritizeCellInteraction}
         />
       ) : activeTab === 'month' ? (
         <MonthCalendar

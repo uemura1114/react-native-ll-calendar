@@ -31,6 +31,7 @@ export type WeekPanelProps = {
   onPressEvent?: (event: CalendarEvent) => void;
   onLongPressEvent?: (event: CalendarEvent) => void;
   delayLongPressEvent?: number;
+  prioritizeCellInteraction?: boolean;
 };
 
 type DayCellProps = {
@@ -47,6 +48,7 @@ type DayCellProps = {
   onPressEvent?: (event: CalendarEvent) => void;
   onLongPressEvent?: (event: CalendarEvent) => void;
   delayLongPressEvent?: number;
+  prioritizeCellInteraction?: boolean;
 };
 
 function DayCell({
@@ -63,6 +65,7 @@ function DayCell({
   onPressEvent,
   onLongPressEvent,
   delayLongPressEvent,
+  prioritizeCellInteraction,
 }: DayCellProps) {
   const resourceEvents = eventsByResourceId.get(resource.id) ?? [];
 
@@ -111,14 +114,17 @@ function DayCell({
     }
   }
 
-  return (
-    <TouchableOpacity
-      activeOpacity={1}
-      style={[styles.dayCell, { width: columnWidth, zIndex: 7 - dateIndex }]}
-      onPress={() => onPressCell?.(resource, date.toDate())}
-      onLongPress={() => onLongPressCell?.(resource, date.toDate())}
-      delayLongPress={delayLongPressCell}
-    >
+  const showPrioritizedCellOverlay =
+    prioritizeCellInteraction === true &&
+    (onPressCell != null || onLongPressCell != null);
+
+  const cellWrapperStyle = [
+    styles.dayCell,
+    { width: columnWidth, zIndex: 7 - dateIndex },
+  ];
+
+  const cellInner = (
+    <>
       <View style={styles.dayCellBackground} />
       {cellEvents.map((event, rowIndex) => {
         if (typeof event === 'number') {
@@ -154,6 +160,7 @@ function DayCell({
         return (
           <View
             key={event.id}
+            pointerEvents={showPrioritizedCellOverlay ? 'none' : 'auto'}
             style={[
               styles.eventOuter,
               { width, height: eventHeight },
@@ -193,6 +200,30 @@ function DayCell({
           </View>
         );
       })}
+    </>
+  );
+
+  return showPrioritizedCellOverlay ? (
+    <View style={cellWrapperStyle}>
+      {cellInner}
+      <TouchableOpacity
+        accessible={false}
+        style={styles.cellInteractionOverlay}
+        activeOpacity={1}
+        onPress={() => onPressCell?.(resource, date.toDate())}
+        onLongPress={() => onLongPressCell?.(resource, date.toDate())}
+        delayLongPress={delayLongPressCell}
+      />
+    </View>
+  ) : (
+    <TouchableOpacity
+      activeOpacity={1}
+      style={cellWrapperStyle}
+      onPress={() => onPressCell?.(resource, date.toDate())}
+      onLongPress={() => onLongPressCell?.(resource, date.toDate())}
+      delayLongPress={delayLongPressCell}
+    >
+      {cellInner}
     </TouchableOpacity>
   );
 }
@@ -209,6 +240,7 @@ export function WeekPanel({
   onPressEvent,
   onLongPressEvent,
   delayLongPressEvent,
+  prioritizeCellInteraction,
 }: WeekPanelProps) {
   const columnWidth = width / 8;
   const startDjs = dayjs(weekKey);
@@ -284,6 +316,7 @@ export function WeekPanel({
                 onPressEvent={onPressEvent}
                 onLongPressEvent={onLongPressEvent}
                 delayLongPressEvent={delayLongPressEvent}
+                prioritizeCellInteraction={prioritizeCellInteraction}
               />
             ))}
           </View>
@@ -354,6 +387,15 @@ const styles = StyleSheet.create({
   },
   dayCellBackground: {
     ...StyleSheet.absoluteFillObject,
+  },
+  cellInteractionOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 1000,
+    backgroundColor: 'transparent',
+    ...Platform.select({
+      android: { elevation: 12 },
+      default: {},
+    }),
   },
   eventOuter: {
     position: 'relative',

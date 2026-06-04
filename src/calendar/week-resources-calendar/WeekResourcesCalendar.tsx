@@ -23,6 +23,12 @@ type WeekResourcesCalendarProps = {
   onPressEvent?: (event: CalendarEvent) => void;
   onLongPressEvent?: (event: CalendarEvent) => void;
   delayLongPressEvent?: number;
+  /**
+   * When true, a transparent layer is placed above events in each cell so
+   * `onPressCell` / `onLongPressCell` receive touches for the full cell area.
+   * Event taps are disabled while this is on (overlay captures the gesture).
+   */
+  prioritizeCellInteraction?: boolean;
 };
 
 function getWeekStart(date: Date, weekStartsOn: WeekStartsOn): dayjs.Dayjs {
@@ -50,6 +56,7 @@ export const WeekResourcesCalendar = ({
   onPressEvent,
   onLongPressEvent,
   delayLongPressEvent,
+  prioritizeCellInteraction,
 }: WeekResourcesCalendarProps) => {
   const [_activeIndex, setActiveIndex] = useState(HALF_PANEL_LENGTH);
   const { width } = useWindowDimensions();
@@ -103,6 +110,7 @@ export const WeekResourcesCalendar = ({
           onPressEvent={onPressEvent}
           onLongPressEvent={onLongPressEvent}
           delayLongPressEvent={delayLongPressEvent}
+          prioritizeCellInteraction={prioritizeCellInteraction}
         />
       )}
       onMomentumScrollEnd={(e) => {
