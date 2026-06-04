@@ -883,7 +883,6 @@ export default function App() {
           )}
           bottomSpacing={200}
           fixedRowCount={2}
-          panelWindowSize={10}
         />
       ) : activeTab === 'month' ? (
         <MonthCalendar
