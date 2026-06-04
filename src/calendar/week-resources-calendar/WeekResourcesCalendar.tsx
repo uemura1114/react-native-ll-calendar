@@ -1,5 +1,6 @@
 import {
   FlatList,
+  ScrollView,
   StyleSheet,
   Text,
   View,
@@ -8,13 +9,17 @@ import {
 import dayjs from 'dayjs';
 import { useState } from 'react';
 import type { WeekStartsOn } from '../../types/month-calendar';
+import type { CalendarResource } from '../../types/resources-calendar';
 
 const HALF_PANEL_LENGTH = 120;
+const CELL_BORDER_WIDTH = 0.5;
+const BORDER_COLOR = 'lightslategrey';
 
 type WeekResourcesCalendarProps = {
   defaultDate: Date;
   weekStartsOn?: WeekStartsOn;
   onChangeDate?: (date: Date) => void;
+  resources: CalendarResource[];
 };
 
 function getWeekStart(date: Date, weekStartsOn: WeekStartsOn): dayjs.Dayjs {
@@ -32,17 +37,54 @@ function getWeekStart(date: Date, weekStartsOn: WeekStartsOn): dayjs.Dayjs {
 type WeekPanelProps = {
   weekKey: string;
   width: number;
+  resources: CalendarResource[];
 };
 
-function WeekPanel({ weekKey, width }: WeekPanelProps) {
+function WeekPanel({ weekKey, width, resources }: WeekPanelProps) {
+  const columnWidth = width / 8;
   const startDjs = dayjs(weekKey);
-  const endDjs = startDjs.add(6, 'day');
+  const days = Array.from({ length: 7 }, (_, i) => startDjs.add(i, 'day'));
 
   return (
     <View style={[styles.panel, { width }]}>
-      <Text style={styles.dateText}>{startDjs.format('YYYY/MM/DD')}</Text>
-      <Text style={styles.separator}>〜</Text>
-      <Text style={styles.dateText}>{endDjs.format('YYYY/MM/DD')}</Text>
+      {/* ヘッダー行（固定） */}
+      <View style={styles.headerRow}>
+        <View
+          style={[
+            styles.headerCell,
+            styles.resourceNameHeaderCell,
+            { width: columnWidth },
+          ]}
+        />
+        {days.map((day) => (
+          <View
+            key={day.format('YYYY-MM-DD')}
+            style={[styles.headerCell, { width: columnWidth }]}
+          >
+            <Text style={styles.headerDayOfWeekText}>{day.format('ddd')}</Text>
+            <Text style={styles.headerDateText}>{day.format('M/D')}</Text>
+          </View>
+        ))}
+      </View>
+
+      {/* リソース行（縦スクロール） */}
+      <ScrollView showsVerticalScrollIndicator={false}>
+        {resources.map((resource) => (
+          <View key={resource.id} style={styles.resourceRow}>
+            <View style={[styles.resourceNameCell, { width: columnWidth }]}>
+              <Text style={styles.resourceNameText} numberOfLines={2}>
+                {resource.name}
+              </Text>
+            </View>
+            {days.map((day) => (
+              <View
+                key={day.format('YYYY-MM-DD')}
+                style={[styles.dayCell, { width: columnWidth }]}
+              />
+            ))}
+          </View>
+        ))}
+      </ScrollView>
     </View>
   );
 }
@@ -51,6 +93,7 @@ export const WeekResourcesCalendar = ({
   defaultDate,
   weekStartsOn = 0,
   onChangeDate,
+  resources,
 }: WeekResourcesCalendarProps) => {
   const [_activeIndex, setActiveIndex] = useState(HALF_PANEL_LENGTH);
   const { width } = useWindowDimensions();
@@ -91,7 +134,9 @@ export const WeekResourcesCalendar = ({
         offset: width * index,
         index,
       })}
-      renderItem={({ item }) => <WeekPanel weekKey={item} width={width} />}
+      renderItem={({ item }) => (
+        <WeekPanel weekKey={item} width={width} resources={resources} />
+      )}
       onMomentumScrollEnd={(e) => {
         const scrollX = e.nativeEvent.contentOffset.x;
         const newIndex = Math.round(scrollX / width);
@@ -112,18 +157,56 @@ export const WeekResourcesCalendar = ({
 };
 
 const styles = StyleSheet.create({
-  panel: {
-    flex: 1,
+  headerRow: {
     flexDirection: 'row',
+    backgroundColor: 'white',
+    borderBottomWidth: CELL_BORDER_WIDTH,
+    borderBottomColor: BORDER_COLOR,
+  },
+  headerCell: {
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
+    paddingVertical: 6,
+    borderRightWidth: CELL_BORDER_WIDTH,
+    borderRightColor: BORDER_COLOR,
   },
-  dateText: {
-    fontSize: 16,
+  resourceNameHeaderCell: {
+    borderRightWidth: CELL_BORDER_WIDTH,
+    borderRightColor: BORDER_COLOR,
   },
-  separator: {
-    fontSize: 14,
-    color: '#888',
+  headerDayOfWeekText: {
+    fontSize: 11,
+    color: '#666',
+  },
+  headerDateText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#222',
+  },
+  resourceRow: {
+    flexDirection: 'row',
+    minHeight: 48,
+    borderBottomWidth: CELL_BORDER_WIDTH,
+    borderBottomColor: BORDER_COLOR,
+    backgroundColor: 'white',
+  },
+  resourceNameCell: {
+    justifyContent: 'center',
+    paddingHorizontal: 4,
+    borderRightWidth: CELL_BORDER_WIDTH,
+    borderRightColor: BORDER_COLOR,
+    backgroundColor: '#fafafa',
+  },
+  resourceNameText: {
+    fontSize: 11,
+    color: '#333',
+  },
+  dayCell: {
+    borderRightWidth: CELL_BORDER_WIDTH,
+    borderRightColor: BORDER_COLOR,
+    minHeight: 48,
+  },
+  panel: {
+    flex: 1,
   },
 });

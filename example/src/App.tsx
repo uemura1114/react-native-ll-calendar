@@ -829,6 +829,7 @@ export default function App() {
         <WeekResourcesCalendar
           defaultDate={new Date()}
           weekStartsOn={1}
+          resources={resources}
           onChangeDate={(d) => {
             console.log('week changed', dayjs(d).format('YYYY-MM-DD'));
           }}
