@@ -111,12 +111,9 @@ function DayCell({
         const rawStartDjs = dayjs(event.start);
         const startDjs = dateIndex === 0 ? date : rawStartDjs;
         const endDjs = dayjs(event.end);
-        const diffDaysRaw = endDjs
+        const diffDays = endDjs
           .startOf('day')
           .diff(startDjs.startOf('day'), 'day');
-        // 週の残り日数に収める
-        const maxDiff = 6 - dateIndex;
-        const diffDays = Math.min(diffDaysRaw, maxDiff);
         const isPrevDateEvent = dateIndex === 0 && rawStartDjs.isBefore(date);
 
         let width =
