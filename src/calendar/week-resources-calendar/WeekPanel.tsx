@@ -483,7 +483,6 @@ const styles = StyleSheet.create({
   headerCell: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 6,
     borderRightWidth: CELL_BORDER_WIDTH,
     borderRightColor: BORDER_COLOR,
   },
