@@ -330,7 +330,6 @@ export function WeekPanel({
     [resources, resolvedFixedRowCount]
   );
 
-  // パネル全体で1インスタンス（resourceIdで区別される）
   const eventPosition = new ResourcesCalendarEventPosition();
 
   const renderResourceRow = (
@@ -341,7 +340,6 @@ export function WeekPanel({
       key={resource.id}
       style={[styles.resourceRow, showTopBorder && styles.resourceRowFirst]}
     >
-      {/* リソース名セル */}
       <View style={[styles.resourceNameCell, { width: columnWidth }]}>
         {renderResourceNameLabel ? (
           renderResourceNameLabel(resource)
@@ -355,7 +353,6 @@ export function WeekPanel({
           </Text>
         )}
       </View>
-      {/* 日付セル */}
       {days.map((day, dateIndex) => (
         <DayCell
           key={day.format('YYYY-MM-DD')}
@@ -385,7 +382,6 @@ export function WeekPanel({
 
   return (
     <View style={[styles.panel, { width }]}>
-      {/* ヘッダー行（固定） */}
       <View style={styles.headerRow}>
         <View
           style={[
@@ -417,12 +413,10 @@ export function WeekPanel({
         ))}
       </View>
 
-      {/* 固定リソース行（ScrollView 外） */}
       {fixedResources.map((resource, index) =>
         renderResourceRow(resource, index === 0)
       )}
 
-      {/* スクロールリソース行 */}
       <ScrollView
         showsVerticalScrollIndicator={false}
         refreshControl={
