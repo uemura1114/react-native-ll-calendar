@@ -1,0 +1,9 @@
+{
+  "format_on_save": "on",
+  "formatter": "prettier",
+  "languages": {
+    "Markdown": {
+      "format_on_save": "off"
+    }
+  }
+}

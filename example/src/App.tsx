@@ -7,6 +7,7 @@ import {
   MonthCalendar,
   MonthCalendarEventOverlay,
   ResourcesCalendar,
+  WeekResourcesCalendar,
   type CalendarEvent,
   type ResourcesCalendarEvent,
   type CalendarResource,
@@ -15,7 +16,11 @@ import type { WeekdayNum } from '../../src/types/month-calendar';
 import type { TextStyle } from 'react-native';
 import type { MonthCalendarRef } from '../../src/calendar/month-calendar/MonthCalendar';
 
-type TabType = 'month' | 'resources-fixed-column' | 'resources-inline-band';
+type TabType =
+  | 'month'
+  | 'resources-fixed-column'
+  | 'resources-inline-band'
+  | 'week-resources';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<TabType>('month');
@@ -791,6 +796,22 @@ export default function App() {
             Inline Band
           </Text>
         </TouchableOpacity>
+        <TouchableOpacity
+          style={[
+            styles.tab,
+            activeTab === 'week-resources' && styles.activeTab,
+          ]}
+          onPress={() => setActiveTab('week-resources')}
+        >
+          <Text
+            style={[
+              styles.tabText,
+              activeTab === 'week-resources' && styles.activeTabText,
+            ]}
+          >
+            Week
+          </Text>
+        </TouchableOpacity>
       </View>
 
       <View style={styles.resourcesOptionRow}>
@@ -804,7 +825,15 @@ export default function App() {
       </View>
 
       {/* Content */}
-      {activeTab === 'month' ? (
+      {activeTab === 'week-resources' ? (
+        <WeekResourcesCalendar
+          defaultDate={new Date()}
+          weekStartsOn={1}
+          onChangeDate={(d) => {
+            console.log('week changed', dayjs(d).format('YYYY-MM-DD'));
+          }}
+        />
+      ) : activeTab === 'month' ? (
         <MonthCalendar
           ref={calendarRef}
           defaultDate={date}
