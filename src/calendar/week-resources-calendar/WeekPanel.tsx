@@ -40,8 +40,11 @@ export function WeekPanel({ weekKey, width, resources }: WeekPanelProps) {
 
       {/* リソース行（縦スクロール） */}
       <ScrollView showsVerticalScrollIndicator={false}>
-        {resources.map((resource) => (
-          <View key={resource.id} style={styles.resourceRow}>
+        {resources.map((resource, index) => (
+          <View
+            key={resource.id}
+            style={[styles.resourceRow, index === 0 && styles.resourceRowFirst]}
+          >
             <View style={[styles.resourceNameCell, { width: columnWidth }]}>
               <Text style={styles.resourceNameText} numberOfLines={2}>
                 {resource.name}
@@ -96,6 +99,10 @@ const styles = StyleSheet.create({
     borderBottomWidth: CELL_BORDER_WIDTH,
     borderBottomColor: BORDER_COLOR,
     backgroundColor: 'white',
+  },
+  resourceRowFirst: {
+    borderTopWidth: CELL_BORDER_WIDTH,
+    borderTopColor: BORDER_COLOR,
   },
   resourceNameCell: {
     justifyContent: 'center',
