@@ -45,6 +45,7 @@ type WeekResourcesCalendarProps = {
   onRefresh?: () => void;
   refreshing?: boolean;
   bottomSpacing?: number;
+  fixedRowCount?: number;
 };
 
 function getWeekStart(date: Date, weekStartsOn: WeekStartsOn): dayjs.Dayjs {
@@ -84,6 +85,7 @@ export const WeekResourcesCalendar = ({
   onRefresh,
   refreshing,
   bottomSpacing,
+  fixedRowCount,
 }: WeekResourcesCalendarProps) => {
   const [_activeIndex, setActiveIndex] = useState(HALF_PANEL_LENGTH);
   const { width } = useWindowDimensions();
@@ -149,6 +151,7 @@ export const WeekResourcesCalendar = ({
           onRefresh={onRefresh}
           refreshing={refreshing}
           bottomSpacing={bottomSpacing}
+          fixedRowCount={fixedRowCount}
         />
       )}
       onMomentumScrollEnd={(e) => {

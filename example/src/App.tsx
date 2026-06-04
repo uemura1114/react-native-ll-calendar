@@ -909,6 +909,7 @@ export default function App() {
             </View>
           )}
           bottomSpacing={200}
+          fixedRowCount={2}
         />
       ) : activeTab === 'month' ? (
         <MonthCalendar

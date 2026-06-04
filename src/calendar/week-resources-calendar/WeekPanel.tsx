@@ -46,6 +46,7 @@ export type WeekPanelProps = {
   onRefresh?: () => void;
   refreshing?: boolean;
   bottomSpacing?: number;
+  fixedRowCount?: number;
 };
 
 type DayCellProps = {
@@ -298,11 +299,13 @@ export function WeekPanel({
   onRefresh,
   refreshing,
   bottomSpacing,
+  fixedRowCount,
 }: WeekPanelProps) {
   const columnWidth = width / 8;
   const startDjs = dayjs(weekKey);
   const days = Array.from({ length: 7 }, (_, i) => startDjs.add(i, 'day'));
   const resolvedEventHeight = eventHeight ?? DEFAULT_EVENT_HEIGHT;
+  const resolvedFixedRowCount = fixedRowCount ?? 0;
 
   const eventsByResourceId = useMemo(() => {
     const deduped = new Map<string, CalendarEvent>();
@@ -318,8 +321,67 @@ export function WeekPanel({
     return map;
   }, [events]);
 
+  const fixedResources = useMemo(
+    () => resources.slice(0, resolvedFixedRowCount),
+    [resources, resolvedFixedRowCount]
+  );
+  const scrollableResources = useMemo(
+    () => resources.slice(resolvedFixedRowCount),
+    [resources, resolvedFixedRowCount]
+  );
+
   // パネル全体で1インスタンス（resourceIdで区別される）
   const eventPosition = new ResourcesCalendarEventPosition();
+
+  const renderResourceRow = (
+    resource: CalendarResource,
+    showTopBorder: boolean
+  ) => (
+    <View
+      key={resource.id}
+      style={[styles.resourceRow, showTopBorder && styles.resourceRowFirst]}
+    >
+      {/* リソース名セル */}
+      <View style={[styles.resourceNameCell, { width: columnWidth }]}>
+        {renderResourceNameLabel ? (
+          renderResourceNameLabel(resource)
+        ) : (
+          <Text
+            style={styles.resourceNameText}
+            numberOfLines={2}
+            allowFontScaling={allowFontScaling}
+          >
+            {resource.name}
+          </Text>
+        )}
+      </View>
+      {/* 日付セル */}
+      {days.map((day, dateIndex) => (
+        <DayCell
+          key={day.format('YYYY-MM-DD')}
+          resource={resource}
+          date={day}
+          dateIndex={dateIndex}
+          columnWidth={columnWidth}
+          eventHeight={resolvedEventHeight}
+          eventPosition={eventPosition}
+          eventsByResourceId={eventsByResourceId}
+          onPressCell={onPressCell}
+          onLongPressCell={onLongPressCell}
+          delayLongPressCell={delayLongPressCell}
+          onPressEvent={onPressEvent}
+          onLongPressEvent={onLongPressEvent}
+          delayLongPressEvent={delayLongPressEvent}
+          prioritizeCellInteraction={prioritizeCellInteraction}
+          eventTextStyle={eventTextStyle}
+          eventEllipsizeMode={eventEllipsizeMode}
+          allowFontScaling={allowFontScaling}
+          renderEventOverlay={renderEventOverlay}
+          cellContainerStyle={cellContainerStyle}
+        />
+      ))}
+    </View>
+  );
 
   return (
     <View style={[styles.panel, { width }]}>
@@ -355,7 +417,12 @@ export function WeekPanel({
         ))}
       </View>
 
-      {/* リソース行（縦スクロール） */}
+      {/* 固定リソース行（ScrollView 外） */}
+      {fixedResources.map((resource, index) =>
+        renderResourceRow(resource, index === 0)
+      )}
+
+      {/* スクロールリソース行 */}
       <ScrollView
         showsVerticalScrollIndicator={false}
         refreshControl={
@@ -365,52 +432,12 @@ export function WeekPanel({
           />
         }
       >
-        {resources.map((resource, index) => (
-          <View
-            key={resource.id}
-            style={[styles.resourceRow, index === 0 && styles.resourceRowFirst]}
-          >
-            {/* リソース名セル */}
-            <View style={[styles.resourceNameCell, { width: columnWidth }]}>
-              {renderResourceNameLabel ? (
-                renderResourceNameLabel(resource)
-              ) : (
-                <Text
-                  style={styles.resourceNameText}
-                  numberOfLines={2}
-                  allowFontScaling={allowFontScaling}
-                >
-                  {resource.name}
-                </Text>
-              )}
-            </View>
-            {/* 日付セル */}
-            {days.map((day, dateIndex) => (
-              <DayCell
-                key={day.format('YYYY-MM-DD')}
-                resource={resource}
-                date={day}
-                dateIndex={dateIndex}
-                columnWidth={columnWidth}
-                eventHeight={resolvedEventHeight}
-                eventPosition={eventPosition}
-                eventsByResourceId={eventsByResourceId}
-                onPressCell={onPressCell}
-                onLongPressCell={onLongPressCell}
-                delayLongPressCell={delayLongPressCell}
-                onPressEvent={onPressEvent}
-                onLongPressEvent={onLongPressEvent}
-                delayLongPressEvent={delayLongPressEvent}
-                prioritizeCellInteraction={prioritizeCellInteraction}
-                eventTextStyle={eventTextStyle}
-                eventEllipsizeMode={eventEllipsizeMode}
-                allowFontScaling={allowFontScaling}
-                renderEventOverlay={renderEventOverlay}
-                cellContainerStyle={cellContainerStyle}
-              />
-            ))}
-          </View>
-        ))}
+        {scrollableResources.map((resource, index) =>
+          renderResourceRow(
+            resource,
+            fixedResources.length === 0 && index === 0
+          )
+        )}
         <View style={{ height: bottomSpacing }} />
       </ScrollView>
     </View>
@@ -430,6 +457,7 @@ const styles = StyleSheet.create({
   headerCell: {
     alignItems: 'center',
     justifyContent: 'center',
+    paddingVertical: 6,
     borderRightWidth: CELL_BORDER_WIDTH,
     borderRightColor: BORDER_COLOR,
   },
