@@ -1,8 +1,8 @@
-import React, { useMemo, type ReactNode } from 'react';
+import React, { memo, useMemo, type ReactNode } from 'react';
 import {
+  FlatList,
   Platform,
   RefreshControl,
-  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -55,8 +55,7 @@ type DayCellProps = {
   dateIndex: number;
   columnWidth: number;
   eventHeight: number;
-  eventPosition: ResourcesCalendarEventPosition;
-  eventsByResourceId: Map<string, CalendarEvent[]>;
+  cellEvents: (CalendarEvent | number)[];
   onPressCell?: (resource: CalendarResource, date: Date) => void;
   onLongPressCell?: (resource: CalendarResource, date: Date) => void;
   delayLongPressCell?: number;
@@ -71,14 +70,13 @@ type DayCellProps = {
   cellContainerStyle?: (resource: CalendarResource, date: Date) => ViewStyle;
 };
 
-function DayCell({
+const DayCell = memo(function DayCell({
   resource,
   date,
   dateIndex,
   columnWidth,
   eventHeight,
-  eventPosition,
-  eventsByResourceId,
+  cellEvents,
   onPressCell,
   onLongPressCell,
   delayLongPressCell,
@@ -92,53 +90,6 @@ function DayCell({
   renderEventOverlay,
   cellContainerStyle,
 }: DayCellProps) {
-  const resourceEvents = eventsByResourceId.get(resource.id) ?? [];
-
-  const filteredEvents = resourceEvents
-    .filter((event) => {
-      const startDjs = dayjs(event.start);
-      const endDjs = dayjs(event.end);
-      return (
-        startDjs.format('YYYY-MM-DD') === date.format('YYYY-MM-DD') ||
-        (dateIndex === 0 &&
-          startDjs.isBefore(date) &&
-          !endDjs.startOf('day').isBefore(date.startOf('day')))
-      );
-    })
-    .sort((a, b) => {
-      const aStartDjs = dateIndex === 0 ? date : dayjs(a.start);
-      const bStartDjs = dateIndex === 0 ? date : dayjs(b.start);
-      const aDiffDays = dayjs(a.end)
-        .startOf('day')
-        .diff(aStartDjs.startOf('day'), 'day');
-      const bDiffDays = dayjs(b.end)
-        .startOf('day')
-        .diff(bStartDjs.startOf('day'), 'day');
-      if (aDiffDays !== bDiffDays) {
-        return bDiffDays - aDiffDays;
-      }
-      return dayjs(a.start).diff(dayjs(b.start));
-    });
-
-  const rowNums = eventPosition.getRowNums({
-    resourceId: resource.id,
-    date: date.toDate(),
-  });
-  const cellEvents: (CalendarEvent | number)[] = [];
-  const rowsLength = rowNums.length + filteredEvents.length;
-  let eventIndex = 0;
-  for (let ii = 1; ii <= rowsLength; ii++) {
-    if (rowNums.includes(ii)) {
-      cellEvents.push(ii);
-    } else {
-      const event = filteredEvents[eventIndex];
-      if (event) {
-        cellEvents.push(event);
-      }
-      eventIndex++;
-    }
-  }
-
   const showPrioritizedCellOverlay =
     prioritizeCellInteraction === true &&
     (onPressCell != null || onLongPressCell != null);
@@ -189,13 +140,6 @@ function DayCell({
         if (isNextWeekEvent) {
           width += EVENT_GAP + CELL_BORDER_WIDTH;
         }
-
-        eventPosition.push({
-          resourceId: resource.id,
-          startDate: startDjs.toDate(),
-          days: effectiveDiffDays + 1,
-          rowNum: rowIndex + 1,
-        });
 
         const eventOverlayNode = renderEventOverlay?.(event);
         const showEventOverlay =
@@ -284,7 +228,7 @@ function DayCell({
       {cellInner}
     </TouchableOpacity>
   );
-}
+});
 
 export function WeekPanel({
   weekKey,
@@ -313,10 +257,13 @@ export function WeekPanel({
   fixedRowCount,
 }: WeekPanelProps) {
   const columnWidth = width / 8;
-  const startDjs = dayjs(weekKey);
-  const days = Array.from({ length: 7 }, (_, i) => startDjs.add(i, 'day'));
   const resolvedEventHeight = eventHeight ?? DEFAULT_EVENT_HEIGHT;
   const resolvedFixedRowCount = fixedRowCount ?? 0;
+
+  const days = useMemo(() => {
+    const start = dayjs(weekKey);
+    return Array.from({ length: 7 }, (_, i) => start.add(i, 'day'));
+  }, [weekKey]);
 
   const eventsByResourceId = useMemo(() => {
     const deduped = new Map<string, CalendarEvent>();
@@ -332,6 +279,88 @@ export function WeekPanel({
     return map;
   }, [events]);
 
+  const cellDataMap = useMemo(() => {
+    const ep = new ResourcesCalendarEventPosition();
+    const map = new Map<string, (CalendarEvent | number)[]>();
+
+    for (const resource of resources) {
+      for (let dateIndex = 0; dateIndex < days.length; dateIndex++) {
+        const date = days[dateIndex]!;
+        const resourceEvents = eventsByResourceId.get(resource.id) ?? [];
+
+        const filteredEvents = resourceEvents
+          .filter((event) => {
+            const startDjs = dayjs(event.start);
+            const endDjs = dayjs(event.end);
+            return (
+              startDjs.format('YYYY-MM-DD') === date.format('YYYY-MM-DD') ||
+              (dateIndex === 0 &&
+                startDjs.isBefore(date) &&
+                !endDjs.startOf('day').isBefore(date.startOf('day')))
+            );
+          })
+          .sort((a, b) => {
+            const aStartDjs = dateIndex === 0 ? date : dayjs(a.start);
+            const bStartDjs = dateIndex === 0 ? date : dayjs(b.start);
+            const aDiffDays = dayjs(a.end)
+              .startOf('day')
+              .diff(aStartDjs.startOf('day'), 'day');
+            const bDiffDays = dayjs(b.end)
+              .startOf('day')
+              .diff(bStartDjs.startOf('day'), 'day');
+            if (aDiffDays !== bDiffDays) return bDiffDays - aDiffDays;
+            return dayjs(a.start).diff(dayjs(b.start));
+          });
+
+        const rowNums = ep.getRowNums({
+          resourceId: resource.id,
+          date: date.toDate(),
+        });
+
+        const cellEvents: (CalendarEvent | number)[] = [];
+        const rowsLength = rowNums.length + filteredEvents.length;
+        let eventIndex = 0;
+        for (let ii = 1; ii <= rowsLength; ii++) {
+          if (rowNums.includes(ii)) {
+            cellEvents.push(ii);
+          } else {
+            const event = filteredEvents[eventIndex];
+            if (event) cellEvents.push(event);
+            eventIndex++;
+          }
+        }
+
+        for (let rowIndex = 0; rowIndex < cellEvents.length; rowIndex++) {
+          const item = cellEvents[rowIndex];
+          if (item !== undefined && typeof item !== 'number') {
+            const rawStartDjs = dayjs(item.start);
+            const startDjs = dateIndex === 0 ? date : rawStartDjs;
+            const endDjs = dayjs(item.end);
+            const diffDays = endDjs
+              .startOf('day')
+              .diff(startDjs.startOf('day'), 'day');
+            const remainingDaysInWeek = 6 - dateIndex;
+            const isNextWeekEvent = diffDays > remainingDaysInWeek;
+            const effectiveDiffDays = isNextWeekEvent
+              ? remainingDaysInWeek
+              : diffDays;
+
+            ep.push({
+              resourceId: resource.id,
+              startDate: startDjs.toDate(),
+              days: effectiveDiffDays + 1,
+              rowNum: rowIndex + 1,
+            });
+          }
+        }
+
+        map.set(`${resource.id}-${date.format('YYYY-MM-DD')}`, cellEvents);
+      }
+    }
+
+    return map;
+  }, [resources, days, eventsByResourceId]);
+
   const fixedResources = useMemo(
     () => resources.slice(0, resolvedFixedRowCount),
     [resources, resolvedFixedRowCount]
@@ -340,8 +369,6 @@ export function WeekPanel({
     () => resources.slice(resolvedFixedRowCount),
     [resources, resolvedFixedRowCount]
   );
-
-  const eventPosition = new ResourcesCalendarEventPosition();
 
   const renderResourceRow = (
     resource: CalendarResource,
@@ -372,8 +399,9 @@ export function WeekPanel({
           dateIndex={dateIndex}
           columnWidth={columnWidth}
           eventHeight={resolvedEventHeight}
-          eventPosition={eventPosition}
-          eventsByResourceId={eventsByResourceId}
+          cellEvents={
+            cellDataMap.get(`${resource.id}-${day.format('YYYY-MM-DD')}`) ?? []
+          }
           onPressCell={onPressCell}
           onLongPressCell={onLongPressCell}
           delayLongPressCell={delayLongPressCell}
@@ -428,23 +456,23 @@ export function WeekPanel({
         renderResourceRow(resource, index === 0)
       )}
 
-      <ScrollView
+      <FlatList
+        data={scrollableResources}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item, index }) =>
+          renderResourceRow(item, fixedResources.length === 0 && index === 0)
+        }
         showsVerticalScrollIndicator={false}
+        nestedScrollEnabled
         refreshControl={
           <RefreshControl
             refreshing={refreshing ?? false}
             onRefresh={onRefresh}
           />
         }
-      >
-        {scrollableResources.map((resource, index) =>
-          renderResourceRow(
-            resource,
-            fixedResources.length === 0 && index === 0
-          )
-        )}
-        <View style={{ height: bottomSpacing }} />
-      </ScrollView>
+        ListFooterComponent={<View style={{ height: bottomSpacing }} />}
+        removeClippedSubviews={false}
+      />
     </View>
   );
 }
