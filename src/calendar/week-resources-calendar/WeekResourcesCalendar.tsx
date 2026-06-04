@@ -17,6 +17,9 @@ type WeekResourcesCalendarProps = {
   resources: CalendarResource[];
   events: CalendarEvent[];
   eventHeight?: number;
+  onPressEvent?: (event: CalendarEvent) => void;
+  onLongPressEvent?: (event: CalendarEvent) => void;
+  delayLongPressEvent?: number;
 };
 
 function getWeekStart(date: Date, weekStartsOn: WeekStartsOn): dayjs.Dayjs {
@@ -38,6 +41,9 @@ export const WeekResourcesCalendar = ({
   resources,
   events,
   eventHeight,
+  onPressEvent,
+  onLongPressEvent,
+  delayLongPressEvent,
 }: WeekResourcesCalendarProps) => {
   const [_activeIndex, setActiveIndex] = useState(HALF_PANEL_LENGTH);
   const { width } = useWindowDimensions();
@@ -85,6 +91,9 @@ export const WeekResourcesCalendar = ({
           resources={resources}
           events={events}
           eventHeight={eventHeight}
+          onPressEvent={onPressEvent}
+          onLongPressEvent={onLongPressEvent}
+          delayLongPressEvent={delayLongPressEvent}
         />
       )}
       onMomentumScrollEnd={(e) => {

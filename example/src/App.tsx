@@ -835,6 +835,12 @@ export default function App() {
           onChangeDate={(d) => {
             console.log('week changed', dayjs(d).format('YYYY-MM-DD'));
           }}
+          onPressEvent={(event) => {
+            console.log('week onPressEvent', event.id, event.title);
+          }}
+          onLongPressEvent={(event) => {
+            console.log('week onLongPressEvent', event.id, event.title);
+          }}
         />
       ) : activeTab === 'month' ? (
         <MonthCalendar

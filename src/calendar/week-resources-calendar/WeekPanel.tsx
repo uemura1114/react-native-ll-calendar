@@ -25,6 +25,9 @@ export type WeekPanelProps = {
   resources: CalendarResource[];
   events: CalendarEvent[];
   eventHeight?: number;
+  onPressEvent?: (event: CalendarEvent) => void;
+  onLongPressEvent?: (event: CalendarEvent) => void;
+  delayLongPressEvent?: number;
 };
 
 type DayCellProps = {
@@ -35,6 +38,9 @@ type DayCellProps = {
   eventHeight: number;
   eventPosition: ResourcesCalendarEventPosition;
   eventsByResourceId: Map<string, CalendarEvent[]>;
+  onPressEvent?: (event: CalendarEvent) => void;
+  onLongPressEvent?: (event: CalendarEvent) => void;
+  delayLongPressEvent?: number;
 };
 
 function DayCell({
@@ -45,6 +51,9 @@ function DayCell({
   eventHeight,
   eventPosition,
   eventsByResourceId,
+  onPressEvent,
+  onLongPressEvent,
+  delayLongPressEvent,
 }: DayCellProps) {
   const resourceEvents = eventsByResourceId.get(resource.id) ?? [];
 
@@ -157,6 +166,9 @@ function DayCell({
                 isPrevDateEvent && styles.prevDateEventInner,
               ]}
               activeOpacity={0.8}
+              onPress={() => onPressEvent?.(event)}
+              onLongPress={() => onLongPressEvent?.(event)}
+              delayLongPress={delayLongPressEvent}
             >
               <Text
                 numberOfLines={1}
@@ -178,6 +190,9 @@ export function WeekPanel({
   resources,
   events,
   eventHeight,
+  onPressEvent,
+  onLongPressEvent,
+  delayLongPressEvent,
 }: WeekPanelProps) {
   const columnWidth = width / 8;
   const startDjs = dayjs(weekKey);
@@ -247,6 +262,9 @@ export function WeekPanel({
                 eventHeight={resolvedEventHeight}
                 eventPosition={eventPosition}
                 eventsByResourceId={eventsByResourceId}
+                onPressEvent={onPressEvent}
+                onLongPressEvent={onLongPressEvent}
+                delayLongPressEvent={delayLongPressEvent}
               />
             ))}
           </View>
