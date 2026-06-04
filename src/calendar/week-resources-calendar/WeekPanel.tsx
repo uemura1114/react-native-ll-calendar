@@ -173,17 +173,27 @@ function DayCell({
           .startOf('day')
           .diff(startDjs.startOf('day'), 'day');
         const isPrevDateEvent = dateIndex === 0 && rawStartDjs.isBefore(date);
+        const remainingDaysInWeek = 6 - dateIndex;
+        const isNextWeekEvent = diffDays > remainingDaysInWeek;
+        const effectiveDiffDays = isNextWeekEvent
+          ? remainingDaysInWeek
+          : diffDays;
 
         let width =
-          (diffDays + 1) * columnWidth - EVENT_GAP * 2 - CELL_BORDER_WIDTH * 2;
+          (effectiveDiffDays + 1) * columnWidth -
+          EVENT_GAP * 2 -
+          CELL_BORDER_WIDTH * 2;
         if (isPrevDateEvent) {
           width += EVENT_GAP + 1;
+        }
+        if (isNextWeekEvent) {
+          width += EVENT_GAP + CELL_BORDER_WIDTH;
         }
 
         eventPosition.push({
           resourceId: resource.id,
           startDate: startDjs.toDate(),
-          days: diffDays + 1,
+          days: effectiveDiffDays + 1,
           rowNum: rowIndex + 1,
         });
 
@@ -220,6 +230,7 @@ function DayCell({
                   }),
                 },
                 isPrevDateEvent && styles.prevDateEventInner,
+                isNextWeekEvent && styles.nextWeekEventInner,
               ]}
               activeOpacity={0.8}
               onPress={() => onPressEvent?.(event)}
@@ -520,6 +531,11 @@ const styles = StyleSheet.create({
   prevDateEventInner: {
     borderTopStartRadius: 0,
     borderBottomStartRadius: 0,
+  },
+  nextWeekEventInner: {
+    borderTopEndRadius: 0,
+    borderBottomEndRadius: 0,
+    paddingRight: 0,
   },
   event: {
     flex: 1,
