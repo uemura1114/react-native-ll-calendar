@@ -2,7 +2,10 @@ import { FlatList, useWindowDimensions } from 'react-native';
 import dayjs from 'dayjs';
 import { useState } from 'react';
 import type { WeekStartsOn } from '../../types/month-calendar';
-import type { CalendarResource } from '../../types/resources-calendar';
+import type {
+  CalendarResource,
+  CalendarEvent,
+} from '../../types/resources-calendar';
 import { WeekPanel } from './WeekPanel';
 
 const HALF_PANEL_LENGTH = 120;
@@ -12,6 +15,8 @@ type WeekResourcesCalendarProps = {
   weekStartsOn?: WeekStartsOn;
   onChangeDate?: (date: Date) => void;
   resources: CalendarResource[];
+  events: CalendarEvent[];
+  eventHeight?: number;
 };
 
 function getWeekStart(date: Date, weekStartsOn: WeekStartsOn): dayjs.Dayjs {
@@ -31,6 +36,8 @@ export const WeekResourcesCalendar = ({
   weekStartsOn = 0,
   onChangeDate,
   resources,
+  events,
+  eventHeight,
 }: WeekResourcesCalendarProps) => {
   const [_activeIndex, setActiveIndex] = useState(HALF_PANEL_LENGTH);
   const { width } = useWindowDimensions();
@@ -72,7 +79,13 @@ export const WeekResourcesCalendar = ({
         index,
       })}
       renderItem={({ item }) => (
-        <WeekPanel weekKey={item} width={width} resources={resources} />
+        <WeekPanel
+          weekKey={item}
+          width={width}
+          resources={resources}
+          events={events}
+          eventHeight={eventHeight}
+        />
       )}
       onMomentumScrollEnd={(e) => {
         const scrollX = e.nativeEvent.contentOffset.x;

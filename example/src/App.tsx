@@ -442,7 +442,7 @@ export default function App() {
         id: 're-r1-a',
         resourceId: 'r1',
         title: 'Event A (1-5)',
-        start: new Date(y, m, 1),
+        start: new Date(y, m, 0),
         end: new Date(y, m, 5),
         backgroundColor: '#ff6b6b',
         borderColor: '#e55353',
@@ -830,6 +830,8 @@ export default function App() {
           defaultDate={new Date()}
           weekStartsOn={1}
           resources={resources}
+          events={resourceEvents}
+          eventHeight={22}
           onChangeDate={(d) => {
             console.log('week changed', dayjs(d).format('YYYY-MM-DD'));
           }}
