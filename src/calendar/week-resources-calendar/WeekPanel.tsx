@@ -157,6 +157,7 @@ function DayCell({
                     borderRadius: event.borderRadius,
                   }),
                 },
+                isPrevDateEvent && styles.prevDateEventInner,
               ]}
               activeOpacity={0.8}
             >
@@ -327,6 +328,8 @@ const styles = StyleSheet.create({
   },
   prevDateEvent: {
     marginLeft: -1,
+  },
+  prevDateEventInner: {
     borderTopStartRadius: 0,
     borderBottomStartRadius: 0,
   },
