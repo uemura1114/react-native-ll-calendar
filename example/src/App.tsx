@@ -856,6 +856,9 @@ export default function App() {
             console.log('week onLongPressEvent', event.id, event.title);
           }}
           prioritizeCellInteraction={prioritizeCellInteraction}
+          eventTextStyle={(_event) => ({ fontSize: 12 })}
+          eventEllipsizeMode={'clip'}
+          allowFontScaling={false}
         />
       ) : activeTab === 'month' ? (
         <MonthCalendar

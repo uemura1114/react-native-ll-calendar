@@ -1,4 +1,4 @@
-import { FlatList, useWindowDimensions } from 'react-native';
+import { FlatList, useWindowDimensions, type TextStyle } from 'react-native';
 import dayjs from 'dayjs';
 import { useState } from 'react';
 import type { WeekStartsOn } from '../../types/month-calendar';
@@ -29,6 +29,9 @@ type WeekResourcesCalendarProps = {
    * Event taps are disabled while this is on (overlay captures the gesture).
    */
   prioritizeCellInteraction?: boolean;
+  eventTextStyle?: (event: CalendarEvent) => TextStyle;
+  eventEllipsizeMode?: 'head' | 'middle' | 'tail' | 'clip';
+  allowFontScaling?: boolean;
 };
 
 function getWeekStart(date: Date, weekStartsOn: WeekStartsOn): dayjs.Dayjs {
@@ -57,6 +60,9 @@ export const WeekResourcesCalendar = ({
   onLongPressEvent,
   delayLongPressEvent,
   prioritizeCellInteraction,
+  eventTextStyle,
+  eventEllipsizeMode,
+  allowFontScaling,
 }: WeekResourcesCalendarProps) => {
   const [_activeIndex, setActiveIndex] = useState(HALF_PANEL_LENGTH);
   const { width } = useWindowDimensions();
@@ -111,6 +117,9 @@ export const WeekResourcesCalendar = ({
           onLongPressEvent={onLongPressEvent}
           delayLongPressEvent={delayLongPressEvent}
           prioritizeCellInteraction={prioritizeCellInteraction}
+          eventTextStyle={eventTextStyle}
+          eventEllipsizeMode={eventEllipsizeMode}
+          allowFontScaling={allowFontScaling}
         />
       )}
       onMomentumScrollEnd={(e) => {

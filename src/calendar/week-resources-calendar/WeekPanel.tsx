@@ -5,6 +5,7 @@ import {
   Text,
   TouchableOpacity,
   View,
+  type TextStyle,
 } from 'react-native';
 import dayjs from 'dayjs';
 import { useMemo } from 'react';
@@ -32,6 +33,9 @@ export type WeekPanelProps = {
   onLongPressEvent?: (event: CalendarEvent) => void;
   delayLongPressEvent?: number;
   prioritizeCellInteraction?: boolean;
+  eventTextStyle?: (event: CalendarEvent) => TextStyle;
+  eventEllipsizeMode?: 'head' | 'middle' | 'tail' | 'clip';
+  allowFontScaling?: boolean;
 };
 
 type DayCellProps = {
@@ -49,6 +53,9 @@ type DayCellProps = {
   onLongPressEvent?: (event: CalendarEvent) => void;
   delayLongPressEvent?: number;
   prioritizeCellInteraction?: boolean;
+  eventTextStyle?: (event: CalendarEvent) => TextStyle;
+  eventEllipsizeMode?: 'head' | 'middle' | 'tail' | 'clip';
+  allowFontScaling?: boolean;
 };
 
 function DayCell({
@@ -66,6 +73,9 @@ function DayCell({
   onLongPressEvent,
   delayLongPressEvent,
   prioritizeCellInteraction,
+  eventTextStyle,
+  eventEllipsizeMode,
+  allowFontScaling,
 }: DayCellProps) {
   const resourceEvents = eventsByResourceId.get(resource.id) ?? [];
 
@@ -192,7 +202,13 @@ function DayCell({
             >
               <Text
                 numberOfLines={1}
-                style={[styles.eventTitle, { color: event.color }]}
+                ellipsizeMode={eventEllipsizeMode ?? 'tail'}
+                allowFontScaling={allowFontScaling}
+                style={[
+                  styles.eventTitle,
+                  { color: event.color },
+                  eventTextStyle?.(event),
+                ]}
               >
                 {event.title}
               </Text>
@@ -241,6 +257,9 @@ export function WeekPanel({
   onLongPressEvent,
   delayLongPressEvent,
   prioritizeCellInteraction,
+  eventTextStyle,
+  eventEllipsizeMode,
+  allowFontScaling,
 }: WeekPanelProps) {
   const columnWidth = width / 8;
   const startDjs = dayjs(weekKey);
@@ -295,7 +314,11 @@ export function WeekPanel({
           >
             {/* リソース名セル */}
             <View style={[styles.resourceNameCell, { width: columnWidth }]}>
-              <Text style={styles.resourceNameText} numberOfLines={2}>
+              <Text
+                style={styles.resourceNameText}
+                numberOfLines={2}
+                allowFontScaling={allowFontScaling}
+              >
                 {resource.name}
               </Text>
             </View>
@@ -317,6 +340,9 @@ export function WeekPanel({
                 onLongPressEvent={onLongPressEvent}
                 delayLongPressEvent={delayLongPressEvent}
                 prioritizeCellInteraction={prioritizeCellInteraction}
+                eventTextStyle={eventTextStyle}
+                eventEllipsizeMode={eventEllipsizeMode}
+                allowFontScaling={allowFontScaling}
               />
             ))}
           </View>
