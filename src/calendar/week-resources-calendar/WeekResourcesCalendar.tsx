@@ -1,4 +1,4 @@
-import React, { useState, type ReactNode } from 'react';
+import React, { useState, useMemo, type ReactNode } from 'react';
 import {
   FlatList,
   useWindowDimensions,
@@ -88,31 +88,34 @@ export const WeekResourcesCalendar = ({
   fixedRowCount,
 }: WeekResourcesCalendarProps) => {
   const [_activeIndex, setActiveIndex] = useState(HALF_PANEL_LENGTH);
+  const [dateState] = useState(defaultDate);
   const { width } = useWindowDimensions();
 
-  const startOfDefaultWeek = getWeekStart(defaultDate, weekStartsOn);
+  const panels = useMemo(() => {
+    const startOfDefaultWeek = getWeekStart(dateState, weekStartsOn);
 
-  const prevPanels: string[] = Array.from(
-    { length: HALF_PANEL_LENGTH },
-    (_, i) => {
-      return startOfDefaultWeek
-        .subtract(HALF_PANEL_LENGTH - i, 'week')
-        .format('YYYY-MM-DD');
-    }
-  );
+    const prevPanels: string[] = Array.from(
+      { length: HALF_PANEL_LENGTH },
+      (_, i) => {
+        return startOfDefaultWeek
+          .subtract(HALF_PANEL_LENGTH - i, 'week')
+          .format('YYYY-MM-DD');
+      }
+    );
 
-  const nextPanels: string[] = Array.from(
-    { length: HALF_PANEL_LENGTH },
-    (_, i) => {
-      return startOfDefaultWeek.add(i + 1, 'week').format('YYYY-MM-DD');
-    }
-  );
+    const nextPanels: string[] = Array.from(
+      { length: HALF_PANEL_LENGTH },
+      (_, i) => {
+        return startOfDefaultWeek.add(i + 1, 'week').format('YYYY-MM-DD');
+      }
+    );
 
-  const panels: string[] = [
-    ...prevPanels,
-    startOfDefaultWeek.format('YYYY-MM-DD'),
-    ...nextPanels,
-  ];
+    return [
+      ...prevPanels,
+      startOfDefaultWeek.format('YYYY-MM-DD'),
+      ...nextPanels,
+    ];
+  }, [dateState, weekStartsOn]);
 
   return (
     <FlatList
