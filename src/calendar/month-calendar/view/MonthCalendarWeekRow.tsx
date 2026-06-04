@@ -9,6 +9,7 @@ import {
 import { Text, TouchableOpacity, View, type ViewStyle } from 'react-native';
 import type { CalendarEvent, WeekdayNum } from '../../../types/month-calendar';
 import type MonthCalendarEventPosition from '../../../utils/month-calendar-event-position';
+import { calcDiffDays } from '../../../utils/functions';
 import { CELL_BORDER_WIDTH, EVENT_GAP } from '../../../constants/size';
 import type { TextStyle } from 'react-native';
 
@@ -121,16 +122,7 @@ export const MonthCalendarWeekRow = (props: {
           const rawStartDjs = dayjs(event.start);
           const startDjs = dateIndex === 0 ? djs : dayjs(event.start);
           const endDjs = dayjs(event.end);
-          const isEndOnDayBoundary =
-            endDjs.hour() === 0 &&
-            endDjs.minute() === 0 &&
-            endDjs.second() === 0 &&
-            endDjs.millisecond() === 0;
-          const diffDays = Math.max(
-            0,
-            endDjs.startOf('day').diff(startDjs.startOf('day'), 'day') -
-              (isEndOnDayBoundary ? 1 : 0)
-          );
+          const diffDays = calcDiffDays(endDjs, startDjs);
 
           const isPrevDateEvent = dateIndex === 0 && rawStartDjs.isBefore(djs);
           let width =

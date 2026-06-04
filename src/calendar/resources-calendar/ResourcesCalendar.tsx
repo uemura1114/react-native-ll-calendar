@@ -22,7 +22,11 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { View } from 'react-native';
-import { generateDates, groupDatesByMonth } from '../../utils/functions';
+import {
+  calcDiffDays,
+  generateDates,
+  groupDatesByMonth,
+} from '../../utils/functions';
 import dayjs from 'dayjs';
 import ResourcesCalendarEventPosition from '../../utils/resources-calendar-event-position';
 import { EVENT_GAP } from '../../constants/size';
@@ -155,12 +159,8 @@ function ResourceRow({
             .sort((a, b) => {
               const aStartDjs = dateIndex === 0 ? djs : dayjs(a.start);
               const bStartDjs = dateIndex === 0 ? djs : dayjs(b.start);
-              const aDiffDays = dayjs(a.end)
-                .startOf('day')
-                .diff(aStartDjs.startOf('day'), 'day');
-              const bDiffDays = dayjs(b.end)
-                .startOf('day')
-                .diff(bStartDjs.startOf('day'), 'day');
+              const aDiffDays = calcDiffDays(dayjs(a.end), aStartDjs);
+              const bDiffDays = calcDiffDays(dayjs(b.end), bStartDjs);
               if (aDiffDays !== bDiffDays) {
                 return bDiffDays - aDiffDays;
               }
@@ -213,9 +213,7 @@ function ResourceRow({
             const rawStartDjs = dayjs(event.start);
             const startDjs = dateIndex === 0 ? djs : dayjs(event.start);
             const endDjs = dayjs(event.end);
-            const diffDays = endDjs
-              .startOf('day')
-              .diff(startDjs.startOf('day'), 'day');
+            const diffDays = calcDiffDays(endDjs, startDjs);
             const isPrevDateEvent =
               dateIndex === 0 && rawStartDjs.isBefore(djs);
 

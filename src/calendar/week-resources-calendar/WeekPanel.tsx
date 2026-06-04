@@ -16,6 +16,7 @@ import type {
   CalendarEvent,
 } from '../../types/resources-calendar';
 import ResourcesCalendarEventPosition from '../../utils/resources-calendar-event-position';
+import { calcDiffDays } from '../../utils/functions';
 import { EVENT_GAP } from '../../constants/size';
 
 export const CELL_BORDER_WIDTH = 0.5;
@@ -120,9 +121,7 @@ const DayCell = memo(function DayCell({
         const rawStartDjs = dayjs(event.start);
         const startDjs = dateIndex === 0 ? date : rawStartDjs;
         const endDjs = dayjs(event.end);
-        const diffDays = endDjs
-          .startOf('day')
-          .diff(startDjs.startOf('day'), 'day');
+        const diffDays = calcDiffDays(endDjs, startDjs);
         const isPrevDateEvent = dateIndex === 0 && rawStartDjs.isBefore(date);
         const remainingDaysInWeek = 6 - dateIndex;
         const isNextWeekEvent = diffDays > remainingDaysInWeek;
@@ -301,12 +300,8 @@ export function WeekPanel({
           .sort((a, b) => {
             const aStartDjs = dateIndex === 0 ? date : dayjs(a.start);
             const bStartDjs = dateIndex === 0 ? date : dayjs(b.start);
-            const aDiffDays = dayjs(a.end)
-              .startOf('day')
-              .diff(aStartDjs.startOf('day'), 'day');
-            const bDiffDays = dayjs(b.end)
-              .startOf('day')
-              .diff(bStartDjs.startOf('day'), 'day');
+            const aDiffDays = calcDiffDays(dayjs(a.end), aStartDjs);
+            const bDiffDays = calcDiffDays(dayjs(b.end), bStartDjs);
             if (aDiffDays !== bDiffDays) return bDiffDays - aDiffDays;
             return dayjs(a.start).diff(dayjs(b.start));
           });
@@ -335,9 +330,7 @@ export function WeekPanel({
             const rawStartDjs = dayjs(item.start);
             const startDjs = dateIndex === 0 ? date : rawStartDjs;
             const endDjs = dayjs(item.end);
-            const diffDays = endDjs
-              .startOf('day')
-              .diff(startDjs.startOf('day'), 'day');
+            const diffDays = calcDiffDays(endDjs, startDjs);
             const remainingDaysInWeek = 6 - dateIndex;
             const isNextWeekEvent = diffDays > remainingDaysInWeek;
             const effectiveDiffDays = isNextWeekEvent
