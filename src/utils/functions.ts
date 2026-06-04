@@ -78,6 +78,22 @@ export function getWeekIds(args: {
   return weekIds;
 }
 
+export function calcDiffDays(
+  endDjs: dayjs.Dayjs,
+  startDjs: dayjs.Dayjs
+): number {
+  const isEndOnDayBoundary =
+    endDjs.hour() === 0 &&
+    endDjs.minute() === 0 &&
+    endDjs.second() === 0 &&
+    endDjs.millisecond() === 0;
+  return Math.max(
+    0,
+    endDjs.startOf('day').diff(startDjs.startOf('day'), 'day') -
+      (isEndOnDayBoundary ? 1 : 0)
+  );
+}
+
 export function generateDates(from: Date, to: Date): Date[] {
   const dates: Date[] = [];
   const current = new Date(from);
