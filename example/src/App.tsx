@@ -835,6 +835,20 @@ export default function App() {
           onChangeDate={(d) => {
             console.log('week changed', dayjs(d).format('YYYY-MM-DD'));
           }}
+          onPressCell={(resource, d) => {
+            console.log(
+              'week onPressCell',
+              resource.name,
+              dayjs(d).format('YYYY-MM-DD')
+            );
+          }}
+          onLongPressCell={(resource, d) => {
+            console.log(
+              'week onLongPressCell',
+              resource.name,
+              dayjs(d).format('YYYY-MM-DD')
+            );
+          }}
           onPressEvent={(event) => {
             console.log('week onPressEvent', event.id, event.title);
           }}

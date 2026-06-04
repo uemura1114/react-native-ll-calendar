@@ -25,6 +25,9 @@ export type WeekPanelProps = {
   resources: CalendarResource[];
   events: CalendarEvent[];
   eventHeight?: number;
+  onPressCell?: (resource: CalendarResource, date: Date) => void;
+  onLongPressCell?: (resource: CalendarResource, date: Date) => void;
+  delayLongPressCell?: number;
   onPressEvent?: (event: CalendarEvent) => void;
   onLongPressEvent?: (event: CalendarEvent) => void;
   delayLongPressEvent?: number;
@@ -38,6 +41,9 @@ type DayCellProps = {
   eventHeight: number;
   eventPosition: ResourcesCalendarEventPosition;
   eventsByResourceId: Map<string, CalendarEvent[]>;
+  onPressCell?: (resource: CalendarResource, date: Date) => void;
+  onLongPressCell?: (resource: CalendarResource, date: Date) => void;
+  delayLongPressCell?: number;
   onPressEvent?: (event: CalendarEvent) => void;
   onLongPressEvent?: (event: CalendarEvent) => void;
   delayLongPressEvent?: number;
@@ -51,6 +57,9 @@ function DayCell({
   eventHeight,
   eventPosition,
   eventsByResourceId,
+  onPressCell,
+  onLongPressCell,
+  delayLongPressCell,
   onPressEvent,
   onLongPressEvent,
   delayLongPressEvent,
@@ -103,8 +112,12 @@ function DayCell({
   }
 
   return (
-    <View
+    <TouchableOpacity
+      activeOpacity={1}
       style={[styles.dayCell, { width: columnWidth, zIndex: 7 - dateIndex }]}
+      onPress={() => onPressCell?.(resource, date.toDate())}
+      onLongPress={() => onLongPressCell?.(resource, date.toDate())}
+      delayLongPress={delayLongPressCell}
     >
       <View style={styles.dayCellBackground} />
       {cellEvents.map((event, rowIndex) => {
@@ -180,7 +193,7 @@ function DayCell({
           </View>
         );
       })}
-    </View>
+    </TouchableOpacity>
   );
 }
 
@@ -190,6 +203,9 @@ export function WeekPanel({
   resources,
   events,
   eventHeight,
+  onPressCell,
+  onLongPressCell,
+  delayLongPressCell,
   onPressEvent,
   onLongPressEvent,
   delayLongPressEvent,
@@ -262,6 +278,9 @@ export function WeekPanel({
                 eventHeight={resolvedEventHeight}
                 eventPosition={eventPosition}
                 eventsByResourceId={eventsByResourceId}
+                onPressCell={onPressCell}
+                onLongPressCell={onLongPressCell}
+                delayLongPressCell={delayLongPressCell}
                 onPressEvent={onPressEvent}
                 onLongPressEvent={onLongPressEvent}
                 delayLongPressEvent={delayLongPressEvent}

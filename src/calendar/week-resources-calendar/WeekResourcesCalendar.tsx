@@ -17,6 +17,9 @@ type WeekResourcesCalendarProps = {
   resources: CalendarResource[];
   events: CalendarEvent[];
   eventHeight?: number;
+  onPressCell?: (resource: CalendarResource, date: Date) => void;
+  onLongPressCell?: (resource: CalendarResource, date: Date) => void;
+  delayLongPressCell?: number;
   onPressEvent?: (event: CalendarEvent) => void;
   onLongPressEvent?: (event: CalendarEvent) => void;
   delayLongPressEvent?: number;
@@ -41,6 +44,9 @@ export const WeekResourcesCalendar = ({
   resources,
   events,
   eventHeight,
+  onPressCell,
+  onLongPressCell,
+  delayLongPressCell,
   onPressEvent,
   onLongPressEvent,
   delayLongPressEvent,
@@ -91,6 +97,9 @@ export const WeekResourcesCalendar = ({
           resources={resources}
           events={events}
           eventHeight={eventHeight}
+          onPressCell={onPressCell}
+          onLongPressCell={onLongPressCell}
+          delayLongPressCell={delayLongPressCell}
           onPressEvent={onPressEvent}
           onLongPressEvent={onLongPressEvent}
           delayLongPressEvent={delayLongPressEvent}
