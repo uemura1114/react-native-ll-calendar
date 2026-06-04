@@ -176,7 +176,6 @@ const DayCell = memo(function DayCell({
                 isPrevDateEvent && styles.prevDateEventInner,
                 isNextWeekEvent && styles.nextWeekEventInner,
               ]}
-              activeOpacity={0.8}
               onPress={() => onPressEvent?.(event)}
               onLongPress={() => onLongPressEvent?.(event)}
               delayLongPress={delayLongPressEvent}
@@ -575,13 +574,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
     flexDirection: 'row',
     alignItems: 'center',
-    ...Platform.select({
-      android: { elevation: 2 },
-      default: {},
-    }),
+    boxShadow: '0 0 2px 0 rgba(0, 0, 0, 0.1)',
   },
   eventTitle: {
-    fontSize: 11,
+    fontSize: 12,
   },
   eventOverlayHost: {
     ...StyleSheet.absoluteFillObject,
