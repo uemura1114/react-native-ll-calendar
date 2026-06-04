@@ -831,6 +831,8 @@ export default function App() {
           weekStartsOn={1}
           resources={resources}
           events={resourceEvents}
+          onRefresh={handleRefresh}
+          refreshing={refreshing}
           eventHeight={22}
           onChangeDate={(d) => {
             console.log('week changed', dayjs(d).format('YYYY-MM-DD'));

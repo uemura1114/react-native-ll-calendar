@@ -1,6 +1,7 @@
 import React, { useMemo, type ReactNode } from 'react';
 import {
   Platform,
+  RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
@@ -42,6 +43,8 @@ export type WeekPanelProps = {
   cellContainerStyle?: (resource: CalendarResource, date: Date) => ViewStyle;
   renderDateLabel?: (date: Date) => React.JSX.Element;
   renderResourceNameLabel?: (resource: CalendarResource) => React.JSX.Element;
+  onRefresh?: () => void;
+  refreshing?: boolean;
 };
 
 type DayCellProps = {
@@ -291,6 +294,8 @@ export function WeekPanel({
   cellContainerStyle,
   renderDateLabel,
   renderResourceNameLabel,
+  onRefresh,
+  refreshing,
 }: WeekPanelProps) {
   const columnWidth = width / 8;
   const startDjs = dayjs(weekKey);
@@ -349,7 +354,15 @@ export function WeekPanel({
       </View>
 
       {/* リソース行（縦スクロール） */}
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing ?? false}
+            onRefresh={onRefresh}
+          />
+        }
+      >
         {resources.map((resource, index) => (
           <View
             key={resource.id}
