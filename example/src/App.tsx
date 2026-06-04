@@ -878,6 +878,34 @@ export default function App() {
               }),
             };
           }}
+          renderDateLabel={(d) => {
+            const isToday = dayjs(d).isSame(dayjs(), 'day');
+            const todayStyle = {
+              backgroundColor: 'green',
+              borderRadius: 12,
+              width: '100%',
+            };
+            const todayTextStyle = { color: 'white' };
+            return (
+              <View style={[styles.dateLabel, isToday ? todayStyle : {}]}>
+                <Text
+                  style={[styles.dateLabelText, isToday ? todayTextStyle : {}]}
+                >
+                  {dayjs(d).locale(ja).format('M/D')}
+                </Text>
+                <Text
+                  style={[styles.dateLabelText, isToday ? todayTextStyle : {}]}
+                >
+                  {dayjs(d).locale(ja).format('(ddd)')}
+                </Text>
+              </View>
+            );
+          }}
+          renderResourceNameLabel={(resource) => (
+            <View>
+              <Text style={styles.resourceNameText}>{resource.name}</Text>
+            </View>
+          )}
         />
       ) : activeTab === 'month' ? (
         <MonthCalendar
@@ -1053,6 +1081,11 @@ const styles = StyleSheet.create({
   },
   monthLabelText: {
     fontSize: 12,
+    color: '#333',
+    fontWeight: '600',
+  },
+  resourceNameText: {
+    fontSize: 11,
     color: '#333',
     fontWeight: '600',
   },

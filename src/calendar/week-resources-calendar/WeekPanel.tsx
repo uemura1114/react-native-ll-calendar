@@ -1,3 +1,4 @@
+import React, { useMemo, type ReactNode } from 'react';
 import {
   Platform,
   ScrollView,
@@ -9,7 +10,6 @@ import {
   type ViewStyle,
 } from 'react-native';
 import dayjs from 'dayjs';
-import { useMemo, type ReactNode } from 'react';
 import type {
   CalendarResource,
   CalendarEvent,
@@ -40,6 +40,8 @@ export type WeekPanelProps = {
   renderEventOverlay?: (event: CalendarEvent) => ReactNode;
   dateCellContainerStyle?: (date: Date) => ViewStyle;
   cellContainerStyle?: (resource: CalendarResource, date: Date) => ViewStyle;
+  renderDateLabel?: (date: Date) => React.JSX.Element;
+  renderResourceNameLabel?: (resource: CalendarResource) => React.JSX.Element;
 };
 
 type DayCellProps = {
@@ -287,6 +289,8 @@ export function WeekPanel({
   renderEventOverlay,
   dateCellContainerStyle,
   cellContainerStyle,
+  renderDateLabel,
+  renderResourceNameLabel,
 }: WeekPanelProps) {
   const columnWidth = width / 8;
   const startDjs = dayjs(weekKey);
@@ -330,8 +334,16 @@ export function WeekPanel({
               dateCellContainerStyle?.(day.toDate()),
             ]}
           >
-            <Text style={styles.headerDayOfWeekText}>{day.format('ddd')}</Text>
-            <Text style={styles.headerDateText}>{day.format('M/D')}</Text>
+            {renderDateLabel ? (
+              renderDateLabel(day.toDate())
+            ) : (
+              <>
+                <Text style={styles.headerDayOfWeekText}>
+                  {day.format('ddd')}
+                </Text>
+                <Text style={styles.headerDateText}>{day.format('M/D')}</Text>
+              </>
+            )}
           </View>
         ))}
       </View>
@@ -345,13 +357,17 @@ export function WeekPanel({
           >
             {/* リソース名セル */}
             <View style={[styles.resourceNameCell, { width: columnWidth }]}>
-              <Text
-                style={styles.resourceNameText}
-                numberOfLines={2}
-                allowFontScaling={allowFontScaling}
-              >
-                {resource.name}
-              </Text>
+              {renderResourceNameLabel ? (
+                renderResourceNameLabel(resource)
+              ) : (
+                <Text
+                  style={styles.resourceNameText}
+                  numberOfLines={2}
+                  allowFontScaling={allowFontScaling}
+                >
+                  {resource.name}
+                </Text>
+              )}
             </View>
             {/* 日付セル */}
             {days.map((day, dateIndex) => (
@@ -398,7 +414,6 @@ const styles = StyleSheet.create({
   headerCell: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 6,
     borderRightWidth: CELL_BORDER_WIDTH,
     borderRightColor: BORDER_COLOR,
   },
