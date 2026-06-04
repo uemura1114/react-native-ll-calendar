@@ -398,38 +398,11 @@ export default function App() {
   }, []);
 
   const resources: CalendarResource[] = useMemo(
-    () => [
-      { id: 'r1', name: 'Room A' },
-      { id: 'r2', name: 'Room B' },
-      { id: 'r3', name: 'Seminar Room' },
-      { id: 'r4', name: 'Reception Room' },
-      { id: 'r5', name: 'Focus Room' },
-      { id: 'r6', name: 'Room C' },
-      { id: 'r7', name: 'Room D' },
-      { id: 'r8', name: 'Training Room' },
-      { id: 'r9', name: 'Lounge' },
-      { id: 'r10', name: 'Server Room' },
-      { id: 'r11', name: 'Room E' },
-      { id: 'r12', name: 'Executive Room' },
-      { id: 'r13', name: 'Brainstorm Space' },
-      { id: 'r14', name: 'Phone Booth 1' },
-      { id: 'r15', name: 'Phone Booth 2' },
-      { id: 'r16', name: 'Open Space' },
-      { id: 'r17', name: 'Workshop Room' },
-      { id: 'r18', name: 'Recording Studio' },
-      { id: 'r19', name: 'Design Studio' },
-      { id: 'r20', name: 'Relaxation Room' },
-      { id: 'r21', name: 'Conference Room 1' },
-      { id: 'r22', name: 'Conference Room 2' },
-      { id: 'r23', name: 'Meeting Pod A' },
-      { id: 'r24', name: 'Meeting Pod B' },
-      { id: 'r25', name: 'Rooftop Space' },
-      { id: 'r26', name: 'Cafeteria' },
-      { id: 'r27', name: 'Library Room' },
-      { id: 'r28', name: 'Innovation Lab' },
-      { id: 'r29', name: 'Media Room' },
-      { id: 'r30', name: 'Wellness Room' },
-    ],
+    () =>
+      Array.from({ length: 200 }, (_, i) => ({
+        id: `r${i + 1}`,
+        name: `Room ${i + 1}`,
+      })),
     []
   );
 
@@ -910,6 +883,7 @@ export default function App() {
           )}
           bottomSpacing={200}
           fixedRowCount={2}
+          panelWindowSize={10}
         />
       ) : activeTab === 'month' ? (
         <MonthCalendar
