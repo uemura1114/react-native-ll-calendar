@@ -8,7 +8,7 @@ import {
   type TextStyle,
 } from 'react-native';
 import dayjs from 'dayjs';
-import { useMemo } from 'react';
+import { useMemo, type ReactNode } from 'react';
 import type {
   CalendarResource,
   CalendarEvent,
@@ -36,6 +36,7 @@ export type WeekPanelProps = {
   eventTextStyle?: (event: CalendarEvent) => TextStyle;
   eventEllipsizeMode?: 'head' | 'middle' | 'tail' | 'clip';
   allowFontScaling?: boolean;
+  renderEventOverlay?: (event: CalendarEvent) => ReactNode;
 };
 
 type DayCellProps = {
@@ -56,6 +57,7 @@ type DayCellProps = {
   eventTextStyle?: (event: CalendarEvent) => TextStyle;
   eventEllipsizeMode?: 'head' | 'middle' | 'tail' | 'clip';
   allowFontScaling?: boolean;
+  renderEventOverlay?: (event: CalendarEvent) => ReactNode;
 };
 
 function DayCell({
@@ -76,6 +78,7 @@ function DayCell({
   eventTextStyle,
   eventEllipsizeMode,
   allowFontScaling,
+  renderEventOverlay,
 }: DayCellProps) {
   const resourceEvents = eventsByResourceId.get(resource.id) ?? [];
 
@@ -167,6 +170,12 @@ function DayCell({
           rowNum: rowIndex + 1,
         });
 
+        const eventOverlayNode = renderEventOverlay?.(event);
+        const showEventOverlay =
+          renderEventOverlay != null &&
+          eventOverlayNode != null &&
+          eventOverlayNode !== false;
+
         return (
           <View
             key={event.id}
@@ -213,6 +222,11 @@ function DayCell({
                 {event.title}
               </Text>
             </TouchableOpacity>
+            {showEventOverlay ? (
+              <View style={styles.eventOverlayHost} pointerEvents="box-none">
+                {eventOverlayNode}
+              </View>
+            ) : null}
           </View>
         );
       })}
@@ -260,6 +274,7 @@ export function WeekPanel({
   eventTextStyle,
   eventEllipsizeMode,
   allowFontScaling,
+  renderEventOverlay,
 }: WeekPanelProps) {
   const columnWidth = width / 8;
   const startDjs = dayjs(weekKey);
@@ -343,6 +358,7 @@ export function WeekPanel({
                 eventTextStyle={eventTextStyle}
                 eventEllipsizeMode={eventEllipsizeMode}
                 allowFontScaling={allowFontScaling}
+                renderEventOverlay={renderEventOverlay}
               />
             ))}
           </View>
@@ -451,5 +467,9 @@ const styles = StyleSheet.create({
   },
   eventTitle: {
     fontSize: 11,
+  },
+  eventOverlayHost: {
+    ...StyleSheet.absoluteFillObject,
+    pointerEvents: 'box-none' as const,
   },
 });

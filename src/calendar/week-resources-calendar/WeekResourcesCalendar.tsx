@@ -1,6 +1,6 @@
 import { FlatList, useWindowDimensions, type TextStyle } from 'react-native';
 import dayjs from 'dayjs';
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import type { WeekStartsOn } from '../../types/month-calendar';
 import type {
   CalendarResource,
@@ -32,6 +32,7 @@ type WeekResourcesCalendarProps = {
   eventTextStyle?: (event: CalendarEvent) => TextStyle;
   eventEllipsizeMode?: 'head' | 'middle' | 'tail' | 'clip';
   allowFontScaling?: boolean;
+  renderEventOverlay?: (event: CalendarEvent) => ReactNode;
 };
 
 function getWeekStart(date: Date, weekStartsOn: WeekStartsOn): dayjs.Dayjs {
@@ -63,6 +64,7 @@ export const WeekResourcesCalendar = ({
   eventTextStyle,
   eventEllipsizeMode,
   allowFontScaling,
+  renderEventOverlay,
 }: WeekResourcesCalendarProps) => {
   const [_activeIndex, setActiveIndex] = useState(HALF_PANEL_LENGTH);
   const { width } = useWindowDimensions();
@@ -120,6 +122,7 @@ export const WeekResourcesCalendar = ({
           eventTextStyle={eventTextStyle}
           eventEllipsizeMode={eventEllipsizeMode}
           allowFontScaling={allowFontScaling}
+          renderEventOverlay={renderEventOverlay}
         />
       )}
       onMomentumScrollEnd={(e) => {

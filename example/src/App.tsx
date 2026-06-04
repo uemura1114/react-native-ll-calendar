@@ -859,6 +859,7 @@ export default function App() {
           eventTextStyle={(_event) => ({ fontSize: 12 })}
           eventEllipsizeMode={'clip'}
           allowFontScaling={false}
+          renderEventOverlay={renderResourcesEventOverlay}
         />
       ) : activeTab === 'month' ? (
         <MonthCalendar
