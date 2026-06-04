@@ -1,6 +1,10 @@
 # react-native-ll-calendar
 
-A horizontally scrollable monthly calendar component for React Native with event support.
+A collection of horizontally scrollable calendar components for React Native with event support.
+
+- **MonthCalendar** — month view, swipe left/right to change months
+- **ResourcesCalendar** — resource × date grid, horizontal scroll across a date range
+- **WeekResourcesCalendar** — resource × date grid, swipe left/right to change weeks
 
 <img src="assets/screen-shot.png" width="320px">
 
@@ -138,26 +142,111 @@ You can access these methods by passing a `ref` to the `MonthCalendar` component
 | `borderWidth`     | `number`                                | No       | Border width                   |
 | `borderRadius`    | `number`                                | No       | Border radius                  |
 
+---
+
+### ResourcesCalendar Props
+
+| Prop | Type | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `fromDate` | `Date` | Yes | - | Start of the displayed date range |
+| `toDate` | `Date` | Yes | - | End of the displayed date range |
+| `resources` | `CalendarResource[]` | Yes | - | List of resources (rows) |
+| `events` | `ResourcesCalendarEvent[]` | Yes | - | Array of resource events |
+| `renderDateLabel` | `(date: Date) => JSX.Element` | No | - | Custom header date cell content |
+| `renderMonthLabel` | `(year: number, month: number) => JSX.Element` | No | - | Custom month label content |
+| `renderResourceNameLabel` | `(resource: CalendarResource) => JSX.Element` | No | - | Custom resource name cell content |
+| `resourceColumnWidth` | `number` | No | `80` | Width of the resource name column |
+| `dateColumnWidth` | `number` | No | `60` | Width of each date column |
+| `onRefresh` | `() => void` | No | - | Callback for pull-to-refresh |
+| `refreshing` | `boolean` | No | - | Whether the calendar is refreshing |
+| `fixedRowCount` | `number` | No | `0` | Number of resource rows pinned above the scroll area |
+| `onPressCell` | `(resource: CalendarResource, date: Date) => void` | No | - | Callback when a cell is pressed |
+| `onLongPressCell` | `(resource: CalendarResource, date: Date) => void` | No | - | Callback when a cell is long pressed |
+| `delayLongPressCell` | `number` | No | - | Delay in ms before long press is triggered |
+| `onPressEvent` | `(event: ResourcesCalendarEvent) => void` | No | - | Callback when an event is pressed |
+| `onLongPressEvent` | `(event: ResourcesCalendarEvent) => void` | No | - | Callback when an event is long pressed |
+| `delayLongPressEvent` | `number` | No | - | Delay in ms before long press is triggered |
+| `eventHeight` | `number` | No | `22` | Height of event items in pixels |
+| `bottomSpacing` | `number` | No | - | Bottom spacing in pixels for scrollable content |
+| `eventTextStyle` | `(event: ResourcesCalendarEvent) => TextStyle` | No | - | Style function for event text |
+| `eventEllipsizeMode` | `'head' \| 'middle' \| 'tail' \| 'clip'` | No | `'tail'` | Ellipsize mode for event text |
+| `renderEventOverlay` | `(event: ResourcesCalendarEvent) => ReactNode` | No | - | Optional overlay above each event |
+| `dateCellContainerStyle` | `(date: Date) => ViewStyle` | No | - | Style for header date cells |
+| `cellContainerStyle` | `(resource: CalendarResource, date: Date) => ViewStyle` | No | - | Style for resource day cell background |
+| `hiddenMonth` | `boolean` | No | `false` | Hide the month header row |
+| `allowFontScaling` | `boolean` | No | - | Enable font scaling for text elements |
+| `resourceNameLayout` | `'fixed-column' \| 'inline-band'` | No | `'fixed-column'` | Layout mode for the resource name |
+| `prioritizeCellInteraction` | `boolean` | No | `false` | Overlay to prioritize cell taps over events |
+
+### CalendarResource
+
+| Property | Type | Required | Description |
+| --- | --- | --- | --- |
+| `id` | `string` | Yes | Unique identifier |
+| `name` | `string` | Yes | Display name |
+
+### ResourcesCalendarEvent
+
+Same fields as `CalendarEvent` with the addition of:
+
+| Property | Type | Required | Description |
+| --- | --- | --- | --- |
+| `resourceId` | `string` | Yes | ID of the resource this event belongs to |
+
+---
+
+### WeekResourcesCalendar Props
+
+| Prop | Type | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `defaultDate` | `Date` | Yes | - | Initial date to display |
+| `weekStartsOn` | `0 \| 1` | No | `0` | Week start day (0 = Sunday, 1 = Monday) |
+| `onChangeDate` | `(date: Date) => void` | No | - | Callback when the displayed week changes |
+| `resources` | `CalendarResource[]` | Yes | - | List of resources (rows) |
+| `events` | `ResourcesCalendarEvent[]` | Yes | - | Array of resource events |
+| `eventHeight` | `number` | No | `22` | Height of event items in pixels |
+| `onPressCell` | `(resource: CalendarResource, date: Date) => void` | No | - | Callback when a cell is pressed |
+| `onLongPressCell` | `(resource: CalendarResource, date: Date) => void` | No | - | Callback when a cell is long pressed |
+| `delayLongPressCell` | `number` | No | - | Delay in ms before long press is triggered |
+| `onPressEvent` | `(event: ResourcesCalendarEvent) => void` | No | - | Callback when an event is pressed |
+| `onLongPressEvent` | `(event: ResourcesCalendarEvent) => void` | No | - | Callback when an event is long pressed |
+| `delayLongPressEvent` | `number` | No | - | Delay in ms before long press is triggered |
+| `prioritizeCellInteraction` | `boolean` | No | `false` | Overlay to prioritize cell taps over events |
+| `eventTextStyle` | `(event: ResourcesCalendarEvent) => TextStyle` | No | - | Style function for event text |
+| `eventEllipsizeMode` | `'head' \| 'middle' \| 'tail' \| 'clip'` | No | `'tail'` | Ellipsize mode for event text |
+| `allowFontScaling` | `boolean` | No | - | Enable font scaling for text elements |
+| `renderEventOverlay` | `(event: ResourcesCalendarEvent) => ReactNode` | No | - | Optional overlay above each event |
+| `dateCellContainerStyle` | `(date: Date) => ViewStyle` | No | - | Style for header date cells |
+| `cellContainerStyle` | `(resource: CalendarResource, date: Date) => ViewStyle` | No | - | Style for resource day cell background |
+| `renderDateLabel` | `(date: Date) => JSX.Element` | No | - | Custom header date cell content |
+| `renderResourceNameLabel` | `(resource: CalendarResource) => JSX.Element` | No | - | Custom resource name cell content |
+| `onRefresh` | `() => void` | No | - | Callback for pull-to-refresh |
+| `refreshing` | `boolean` | No | - | Whether the calendar is refreshing |
+| `bottomSpacing` | `number` | No | - | Bottom spacing in pixels for scrollable content |
+| `fixedRowCount` | `number` | No | `0` | Number of resource rows pinned above the scroll area |
+
+---
+
 ## Features
 
-- Horizontally scrollable month view
-- Multi-day event support
+- Horizontally scrollable month view (±10 years)
+- Horizontally scrollable week resource view (±120 weeks)
+- Resource × date grid view across a custom date range
+- Multi-day event support with overlap stacking
 - Customizable event colors and border styles
 - Event press handlers (tap and long press)
-- Date cell press handlers (tap and long press)
+- Cell press handlers (tap and long press)
+- `prioritizeCellInteraction` to route taps to cells over events
 - Configurable week start day (Sunday or Monday)
-- Customizable styling for day cells, weekday cells, and today's cell
 - Pull-to-refresh support
+- Fixed row pinning for resource calendars
+- Custom render props for date labels, month labels, and resource names
+- Event overlay support (e.g. badge counts)
 - Locale support for internationalization
-- Optional month header visibility control
-- Custom month format display
-- Sticky header support for month and week rows
-- Customizable cell border colors
 - Font scaling control for text elements
 - Customizable event height and text styles
-- Spans 10 years before and after the default date
-- **Programmatic scroll control via Ref**
-- **Dynamic row height retrieval via Ref**
+- **Programmatic scroll control via Ref** (MonthCalendar)
+- **Dynamic row height retrieval via Ref** (MonthCalendar)
 
 ## License
 

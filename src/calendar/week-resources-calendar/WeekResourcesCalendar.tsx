@@ -1,0 +1,174 @@
+import React, { useState, type ReactNode } from 'react';
+import {
+  FlatList,
+  useWindowDimensions,
+  type TextStyle,
+  type ViewStyle,
+} from 'react-native';
+import dayjs from 'dayjs';
+import type { WeekStartsOn } from '../../types/month-calendar';
+import type {
+  CalendarResource,
+  CalendarEvent,
+} from '../../types/resources-calendar';
+import { WeekPanel } from './WeekPanel';
+
+const HALF_PANEL_LENGTH = 120;
+
+type WeekResourcesCalendarProps = {
+  defaultDate: Date;
+  weekStartsOn?: WeekStartsOn;
+  onChangeDate?: (date: Date) => void;
+  resources: CalendarResource[];
+  events: CalendarEvent[];
+  eventHeight?: number;
+  onPressCell?: (resource: CalendarResource, date: Date) => void;
+  onLongPressCell?: (resource: CalendarResource, date: Date) => void;
+  delayLongPressCell?: number;
+  onPressEvent?: (event: CalendarEvent) => void;
+  onLongPressEvent?: (event: CalendarEvent) => void;
+  delayLongPressEvent?: number;
+  /**
+   * When true, a transparent layer is placed above events in each cell so
+   * `onPressCell` / `onLongPressCell` receive touches for the full cell area.
+   * Event taps are disabled while this is on (overlay captures the gesture).
+   */
+  prioritizeCellInteraction?: boolean;
+  eventTextStyle?: (event: CalendarEvent) => TextStyle;
+  eventEllipsizeMode?: 'head' | 'middle' | 'tail' | 'clip';
+  allowFontScaling?: boolean;
+  renderEventOverlay?: (event: CalendarEvent) => ReactNode;
+  dateCellContainerStyle?: (date: Date) => ViewStyle;
+  cellContainerStyle?: (resource: CalendarResource, date: Date) => ViewStyle;
+  renderDateLabel?: (date: Date) => React.JSX.Element;
+  renderResourceNameLabel?: (resource: CalendarResource) => React.JSX.Element;
+  onRefresh?: () => void;
+  refreshing?: boolean;
+  bottomSpacing?: number;
+  fixedRowCount?: number;
+};
+
+function getWeekStart(date: Date, weekStartsOn: WeekStartsOn): dayjs.Dayjs {
+  const djs = dayjs(date);
+  if (weekStartsOn === 0) {
+    return djs.startOf('week');
+  }
+  const day = djs.day();
+  if (day === 0) {
+    return djs.subtract(6, 'day').startOf('day');
+  }
+  return djs.subtract(day - 1, 'day').startOf('day');
+}
+
+export const WeekResourcesCalendar = ({
+  defaultDate,
+  weekStartsOn = 0,
+  onChangeDate,
+  resources,
+  events,
+  eventHeight,
+  onPressCell,
+  onLongPressCell,
+  delayLongPressCell,
+  onPressEvent,
+  onLongPressEvent,
+  delayLongPressEvent,
+  prioritizeCellInteraction,
+  eventTextStyle,
+  eventEllipsizeMode,
+  allowFontScaling,
+  renderEventOverlay,
+  dateCellContainerStyle,
+  cellContainerStyle,
+  renderDateLabel,
+  renderResourceNameLabel,
+  onRefresh,
+  refreshing,
+  bottomSpacing,
+  fixedRowCount,
+}: WeekResourcesCalendarProps) => {
+  const [_activeIndex, setActiveIndex] = useState(HALF_PANEL_LENGTH);
+  const { width } = useWindowDimensions();
+
+  const startOfDefaultWeek = getWeekStart(defaultDate, weekStartsOn);
+
+  const prevPanels: string[] = Array.from(
+    { length: HALF_PANEL_LENGTH },
+    (_, i) => {
+      return startOfDefaultWeek
+        .subtract(HALF_PANEL_LENGTH - i, 'week')
+        .format('YYYY-MM-DD');
+    }
+  );
+
+  const nextPanels: string[] = Array.from(
+    { length: HALF_PANEL_LENGTH },
+    (_, i) => {
+      return startOfDefaultWeek.add(i + 1, 'week').format('YYYY-MM-DD');
+    }
+  );
+
+  const panels: string[] = [
+    ...prevPanels,
+    startOfDefaultWeek.format('YYYY-MM-DD'),
+    ...nextPanels,
+  ];
+
+  return (
+    <FlatList
+      horizontal
+      pagingEnabled
+      data={panels}
+      keyExtractor={(item) => item}
+      initialScrollIndex={HALF_PANEL_LENGTH}
+      getItemLayout={(_data, index) => ({
+        length: width,
+        offset: width * index,
+        index,
+      })}
+      renderItem={({ item }) => (
+        <WeekPanel
+          weekKey={item}
+          width={width}
+          resources={resources}
+          events={events}
+          eventHeight={eventHeight}
+          onPressCell={onPressCell}
+          onLongPressCell={onLongPressCell}
+          delayLongPressCell={delayLongPressCell}
+          onPressEvent={onPressEvent}
+          onLongPressEvent={onLongPressEvent}
+          delayLongPressEvent={delayLongPressEvent}
+          prioritizeCellInteraction={prioritizeCellInteraction}
+          eventTextStyle={eventTextStyle}
+          eventEllipsizeMode={eventEllipsizeMode}
+          allowFontScaling={allowFontScaling}
+          renderEventOverlay={renderEventOverlay}
+          dateCellContainerStyle={dateCellContainerStyle}
+          cellContainerStyle={cellContainerStyle}
+          renderDateLabel={renderDateLabel}
+          renderResourceNameLabel={renderResourceNameLabel}
+          onRefresh={onRefresh}
+          refreshing={refreshing}
+          bottomSpacing={bottomSpacing}
+          fixedRowCount={fixedRowCount}
+        />
+      )}
+      onMomentumScrollEnd={(e) => {
+        const scrollX = e.nativeEvent.contentOffset.x;
+        const newIndex = Math.round(scrollX / width);
+        setActiveIndex(newIndex);
+        const weekKey = panels[newIndex];
+        if (weekKey) {
+          onChangeDate?.(dayjs(weekKey).toDate());
+        }
+      }}
+      showsHorizontalScrollIndicator={false}
+      decelerationRate="fast"
+      windowSize={5}
+      initialNumToRender={5}
+      maxToRenderPerBatch={5}
+      removeClippedSubviews={false}
+    />
+  );
+};

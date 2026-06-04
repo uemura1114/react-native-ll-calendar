@@ -7,6 +7,7 @@ import {
   MonthCalendar,
   MonthCalendarEventOverlay,
   ResourcesCalendar,
+  WeekResourcesCalendar,
   type CalendarEvent,
   type ResourcesCalendarEvent,
   type CalendarResource,
@@ -15,7 +16,11 @@ import type { WeekdayNum } from '../../src/types/month-calendar';
 import type { TextStyle } from 'react-native';
 import type { MonthCalendarRef } from '../../src/calendar/month-calendar/MonthCalendar';
 
-type TabType = 'month' | 'resources-fixed-column' | 'resources-inline-band';
+type TabType =
+  | 'month'
+  | 'resources-fixed-column'
+  | 'resources-inline-band'
+  | 'week-resources';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<TabType>('month');
@@ -437,7 +442,7 @@ export default function App() {
         id: 're-r1-a',
         resourceId: 'r1',
         title: 'Event A (1-5)',
-        start: new Date(y, m, 1),
+        start: new Date(y, m, 0),
         end: new Date(y, m, 5),
         backgroundColor: '#ff6b6b',
         borderColor: '#e55353',
@@ -791,6 +796,22 @@ export default function App() {
             Inline Band
           </Text>
         </TouchableOpacity>
+        <TouchableOpacity
+          style={[
+            styles.tab,
+            activeTab === 'week-resources' && styles.activeTab,
+          ]}
+          onPress={() => setActiveTab('week-resources')}
+        >
+          <Text
+            style={[
+              styles.tabText,
+              activeTab === 'week-resources' && styles.activeTabText,
+            ]}
+          >
+            Week
+          </Text>
+        </TouchableOpacity>
       </View>
 
       <View style={styles.resourcesOptionRow}>
@@ -804,7 +825,93 @@ export default function App() {
       </View>
 
       {/* Content */}
-      {activeTab === 'month' ? (
+      {activeTab === 'week-resources' ? (
+        <WeekResourcesCalendar
+          defaultDate={new Date()}
+          weekStartsOn={1}
+          resources={resources}
+          events={resourceEvents}
+          onRefresh={handleRefresh}
+          refreshing={refreshing}
+          eventHeight={22}
+          onChangeDate={(d) => {
+            console.log('week changed', dayjs(d).format('YYYY-MM-DD'));
+          }}
+          onPressCell={(resource, d) => {
+            console.log(
+              'week onPressCell',
+              resource.name,
+              dayjs(d).format('YYYY-MM-DD')
+            );
+          }}
+          onLongPressCell={(resource, d) => {
+            console.log(
+              'week onLongPressCell',
+              resource.name,
+              dayjs(d).format('YYYY-MM-DD')
+            );
+          }}
+          onPressEvent={(event) => {
+            console.log('week onPressEvent', event.id, event.title);
+          }}
+          onLongPressEvent={(event) => {
+            console.log('week onLongPressEvent', event.id, event.title);
+          }}
+          prioritizeCellInteraction={prioritizeCellInteraction}
+          eventTextStyle={(_event) => ({ fontSize: 12 })}
+          eventEllipsizeMode={'clip'}
+          allowFontScaling={false}
+          renderEventOverlay={renderResourcesEventOverlay}
+          dateCellContainerStyle={(d) => {
+            if (d.getDay() === 0 || d.getDay() === 6) {
+              return { backgroundColor: '#f5f5f5' };
+            }
+            return { backgroundColor: '#fff' };
+          }}
+          cellContainerStyle={(resource, d) => {
+            const isWeekend = d.getDay() === 0 || d.getDay() === 6;
+            const isToday = dayjs(d).isSame(dayjs(), 'day');
+            const isHighlighted = resource.id === 'r1' && isToday;
+            return {
+              backgroundColor: isWeekend ? '#f5f5f5' : '#fff',
+              ...(isHighlighted && {
+                borderWidth: 3,
+                borderColor: '#ff0000',
+              }),
+            };
+          }}
+          renderDateLabel={(d) => {
+            const isToday = dayjs(d).isSame(dayjs(), 'day');
+            const todayStyle = {
+              backgroundColor: 'green',
+              borderRadius: 12,
+              width: '100%',
+            };
+            const todayTextStyle = { color: 'white' };
+            return (
+              <View style={[styles.dateLabel, isToday ? todayStyle : {}]}>
+                <Text
+                  style={[styles.dateLabelText, isToday ? todayTextStyle : {}]}
+                >
+                  {dayjs(d).locale(ja).format('M/D')}
+                </Text>
+                <Text
+                  style={[styles.dateLabelText, isToday ? todayTextStyle : {}]}
+                >
+                  {dayjs(d).locale(ja).format('(ddd)')}
+                </Text>
+              </View>
+            );
+          }}
+          renderResourceNameLabel={(resource) => (
+            <View>
+              <Text style={styles.resourceNameText}>{resource.name}</Text>
+            </View>
+          )}
+          bottomSpacing={200}
+          fixedRowCount={2}
+        />
+      ) : activeTab === 'month' ? (
         <MonthCalendar
           ref={calendarRef}
           defaultDate={date}
@@ -978,6 +1085,11 @@ const styles = StyleSheet.create({
   },
   monthLabelText: {
     fontSize: 12,
+    color: '#333',
+    fontWeight: '600',
+  },
+  resourceNameText: {
+    fontSize: 11,
     color: '#333',
     fontWeight: '600',
   },

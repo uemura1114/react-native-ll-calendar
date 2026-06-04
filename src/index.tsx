@@ -9,3 +9,5 @@ export type {
   CalendarEvent as ResourcesCalendarEvent,
   CalendarResource,
 } from './types/resources-calendar';
+
+export { WeekResourcesCalendar } from './calendar/week-resources-calendar/WeekResourcesCalendar';
