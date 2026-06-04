@@ -44,6 +44,7 @@ type WeekResourcesCalendarProps = {
   renderResourceNameLabel?: (resource: CalendarResource) => React.JSX.Element;
   onRefresh?: () => void;
   refreshing?: boolean;
+  bottomSpacing?: number;
 };
 
 function getWeekStart(date: Date, weekStartsOn: WeekStartsOn): dayjs.Dayjs {
@@ -82,6 +83,7 @@ export const WeekResourcesCalendar = ({
   renderResourceNameLabel,
   onRefresh,
   refreshing,
+  bottomSpacing,
 }: WeekResourcesCalendarProps) => {
   const [_activeIndex, setActiveIndex] = useState(HALF_PANEL_LENGTH);
   const { width } = useWindowDimensions();
@@ -146,6 +148,7 @@ export const WeekResourcesCalendar = ({
           renderResourceNameLabel={renderResourceNameLabel}
           onRefresh={onRefresh}
           refreshing={refreshing}
+          bottomSpacing={bottomSpacing}
         />
       )}
       onMomentumScrollEnd={(e) => {

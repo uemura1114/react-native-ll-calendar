@@ -908,6 +908,7 @@ export default function App() {
               <Text style={styles.resourceNameText}>{resource.name}</Text>
             </View>
           )}
+          bottomSpacing={200}
         />
       ) : activeTab === 'month' ? (
         <MonthCalendar

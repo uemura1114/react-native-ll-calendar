@@ -45,6 +45,7 @@ export type WeekPanelProps = {
   renderResourceNameLabel?: (resource: CalendarResource) => React.JSX.Element;
   onRefresh?: () => void;
   refreshing?: boolean;
+  bottomSpacing?: number;
 };
 
 type DayCellProps = {
@@ -296,6 +297,7 @@ export function WeekPanel({
   renderResourceNameLabel,
   onRefresh,
   refreshing,
+  bottomSpacing,
 }: WeekPanelProps) {
   const columnWidth = width / 8;
   const startDjs = dayjs(weekKey);
@@ -409,6 +411,7 @@ export function WeekPanel({
             ))}
           </View>
         ))}
+        <View style={{ height: bottomSpacing }} />
       </ScrollView>
     </View>
   );
