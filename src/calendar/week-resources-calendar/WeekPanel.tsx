@@ -288,7 +288,7 @@ const styles = StyleSheet.create({
   },
   resourceRow: {
     flexDirection: 'row',
-    minHeight: 48,
+    minHeight: 30,
     borderBottomWidth: CELL_BORDER_WIDTH,
     borderBottomColor: BORDER_COLOR,
     backgroundColor: 'white',
@@ -311,7 +311,7 @@ const styles = StyleSheet.create({
   dayCell: {
     borderRightWidth: CELL_BORDER_WIDTH,
     borderRightColor: BORDER_COLOR,
-    minHeight: 48,
+    minHeight: 30,
     paddingBottom: EVENT_GAP,
     position: 'relative',
   },
