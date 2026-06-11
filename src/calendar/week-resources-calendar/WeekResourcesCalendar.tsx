@@ -15,6 +15,8 @@ import { WeekPanel } from './WeekPanel';
 
 const HALF_PANEL_LENGTH = 120;
 
+const EMPTY_EVENTS: CalendarEvent[] = [];
+
 type WeekResourcesCalendarProps = {
   defaultDate: Date;
   weekStartsOn?: WeekStartsOn;
@@ -117,6 +119,39 @@ export const WeekResourcesCalendar = ({
     ];
   }, [dateState, weekStartsOn]);
 
+  const eventsByWeek = useMemo(() => {
+    const map = new Map<string, CalendarEvent[]>();
+    if (panels.length === 0) return map;
+
+    const panelSet = new Set(panels);
+    const firstWeek = dayjs(panels[0]);
+    const lastWeek = dayjs(panels[panels.length - 1]!);
+
+    for (const event of events) {
+      const startWeek = getWeekStart(new Date(event.start), weekStartsOn);
+      const endWeek = getWeekStart(new Date(event.end), weekStartsOn);
+
+      // Clamp the iteration range to the available panels.
+      let cursor = startWeek.isBefore(firstWeek) ? firstWeek : startWeek;
+      const last = endWeek.isAfter(lastWeek) ? lastWeek : endWeek;
+
+      while (!cursor.isAfter(last)) {
+        const weekKey = cursor.format('YYYY-MM-DD');
+        if (panelSet.has(weekKey)) {
+          const list = map.get(weekKey);
+          if (list) {
+            list.push(event);
+          } else {
+            map.set(weekKey, [event]);
+          }
+        }
+        cursor = cursor.add(1, 'week');
+      }
+    }
+
+    return map;
+  }, [events, panels, weekStartsOn]);
+
   return (
     <FlatList
       horizontal
@@ -134,7 +169,7 @@ export const WeekResourcesCalendar = ({
           weekKey={item}
           width={width}
           resources={resources}
-          events={events}
+          events={eventsByWeek.get(item) ?? EMPTY_EVENTS}
           eventHeight={eventHeight}
           onPressCell={onPressCell}
           onLongPressCell={onLongPressCell}
