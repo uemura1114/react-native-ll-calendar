@@ -1,7 +1,6 @@
 import React, { memo, useMemo, type ReactNode } from 'react';
 import {
   FlatList,
-  Platform,
   RefreshControl,
   StyleSheet,
   Text,
@@ -204,17 +203,7 @@ const DayCell = memo(function DayCell({
   );
 
   return showPrioritizedCellOverlay ? (
-    <View style={cellWrapperStyle}>
-      {cellInner}
-      <TouchableOpacity
-        accessible={false}
-        style={styles.cellInteractionOverlay}
-        activeOpacity={1}
-        onPress={() => onPressCell?.(resource, date.toDate())}
-        onLongPress={() => onLongPressCell?.(resource, date.toDate())}
-        delayLongPress={delayLongPressCell}
-      />
-    </View>
+    <View style={cellWrapperStyle}>{cellInner}</View>
   ) : (
     <TouchableOpacity
       activeOpacity={1}
@@ -362,6 +351,38 @@ export function WeekPanel({
     [resources, resolvedFixedRowCount]
   );
 
+  const showPrioritizedRowOverlay =
+    prioritizeCellInteraction === true &&
+    (onPressCell != null || onLongPressCell != null);
+
+  const handleRowPress = (
+    e: { nativeEvent: { locationX: number } },
+    resource: CalendarResource
+  ) => {
+    const dayIndex = Math.max(
+      0,
+      Math.min(
+        days.length - 1,
+        Math.floor(e.nativeEvent.locationX / columnWidth)
+      )
+    );
+    onPressCell?.(resource, days[dayIndex]!.toDate());
+  };
+
+  const handleRowLongPress = (
+    e: { nativeEvent: { locationX: number } },
+    resource: CalendarResource
+  ) => {
+    const dayIndex = Math.max(
+      0,
+      Math.min(
+        days.length - 1,
+        Math.floor(e.nativeEvent.locationX / columnWidth)
+      )
+    );
+    onLongPressCell?.(resource, days[dayIndex]!.toDate());
+  };
+
   const renderResourceRow = (
     resource: CalendarResource,
     showTopBorder: boolean
@@ -408,6 +429,16 @@ export function WeekPanel({
           cellContainerStyle={cellContainerStyle}
         />
       ))}
+      {showPrioritizedRowOverlay && (
+        <TouchableOpacity
+          accessible={false}
+          activeOpacity={1}
+          style={[styles.rowInteractionOverlay, { left: columnWidth }]}
+          onPress={(e) => handleRowPress(e, resource)}
+          onLongPress={(e) => handleRowLongPress(e, resource)}
+          delayLongPress={delayLongPressCell}
+        />
+      )}
     </View>
   );
 
@@ -531,14 +562,13 @@ const styles = StyleSheet.create({
   dayCellBackground: {
     ...StyleSheet.absoluteFillObject,
   },
-  cellInteractionOverlay: {
-    ...StyleSheet.absoluteFillObject,
+  rowInteractionOverlay: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    bottom: 0,
     zIndex: 1000,
     backgroundColor: 'transparent',
-    ...Platform.select({
-      android: { elevation: 12 },
-      default: {},
-    }),
   },
   eventOuter: {
     position: 'relative',
