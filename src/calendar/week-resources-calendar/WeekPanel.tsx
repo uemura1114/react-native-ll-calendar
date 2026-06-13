@@ -62,7 +62,6 @@ type DayCellProps = {
   onPressEvent?: (event: CalendarEvent) => void;
   onLongPressEvent?: (event: CalendarEvent) => void;
   delayLongPressEvent?: number;
-  prioritizeCellInteraction?: boolean;
   eventTextStyle?: (event: CalendarEvent) => TextStyle;
   eventEllipsizeMode?: 'head' | 'middle' | 'tail' | 'clip';
   allowFontScaling?: boolean;
@@ -83,17 +82,12 @@ const DayCell = memo(function DayCell({
   onPressEvent,
   onLongPressEvent,
   delayLongPressEvent,
-  prioritizeCellInteraction,
   eventTextStyle,
   eventEllipsizeMode,
   allowFontScaling,
   renderEventOverlay,
   cellContainerStyle,
 }: DayCellProps) {
-  const showPrioritizedCellOverlay =
-    prioritizeCellInteraction === true &&
-    (onPressCell != null || onLongPressCell != null);
-
   const cellWrapperStyle = [
     styles.dayCell,
     { width: columnWidth, zIndex: 7 - dateIndex },
@@ -148,7 +142,6 @@ const DayCell = memo(function DayCell({
         return (
           <View
             key={event.id}
-            pointerEvents={showPrioritizedCellOverlay ? 'none' : 'auto'}
             style={[
               styles.eventOuter,
               { width, height: eventHeight },
@@ -202,9 +195,7 @@ const DayCell = memo(function DayCell({
     </>
   );
 
-  return showPrioritizedCellOverlay ? (
-    <View style={cellWrapperStyle}>{cellInner}</View>
-  ) : (
+  return (
     <TouchableOpacity
       activeOpacity={1}
       style={cellWrapperStyle}
@@ -421,7 +412,6 @@ export function WeekPanel({
           onPressEvent={onPressEvent}
           onLongPressEvent={onLongPressEvent}
           delayLongPressEvent={delayLongPressEvent}
-          prioritizeCellInteraction={prioritizeCellInteraction}
           eventTextStyle={eventTextStyle}
           eventEllipsizeMode={eventEllipsizeMode}
           allowFontScaling={allowFontScaling}
