@@ -399,7 +399,7 @@ export default function App() {
 
   const resources: CalendarResource[] = useMemo(
     () =>
-      Array.from({ length: 200 }, (_, i) => ({
+      Array.from({ length: 100 }, (_, i) => ({
         id: `r${i + 1}`,
         name: `Room ${i + 1}`,
       })),
@@ -720,6 +720,100 @@ export default function App() {
     };
   }, []);
 
+  const handleWeekChangeDate = useCallback((d: Date) => {
+    console.log('week changed', dayjs(d).format('YYYY-MM-DD'));
+  }, []);
+
+  const handleWeekPressCell = useCallback(
+    (resource: CalendarResource, d: Date) => {
+      console.log(
+        'week onPressCell',
+        resource.name,
+        dayjs(d).format('YYYY-MM-DD')
+      );
+    },
+    []
+  );
+
+  const handleWeekLongPressCell = useCallback(
+    (resource: CalendarResource, d: Date) => {
+      console.log(
+        'week onLongPressCell',
+        resource.name,
+        dayjs(d).format('YYYY-MM-DD')
+      );
+    },
+    []
+  );
+
+  const handleWeekPressEvent = useCallback((event: ResourcesCalendarEvent) => {
+    console.log('week onPressEvent', event.id, event.title);
+  }, []);
+
+  const handleWeekLongPressEvent = useCallback(
+    (event: ResourcesCalendarEvent) => {
+      console.log('week onLongPressEvent', event.id, event.title);
+    },
+    []
+  );
+
+  const weekEventTextStyle = useCallback(
+    (_event: ResourcesCalendarEvent): TextStyle => ({ fontSize: 12 }),
+    []
+  );
+
+  const weekDateCellContainerStyle = useCallback((d: Date): ViewStyle => {
+    if (d.getDay() === 0 || d.getDay() === 6) {
+      return { backgroundColor: '#f5f5f5' };
+    }
+    return { backgroundColor: '#fff' };
+  }, []);
+
+  const weekCellContainerStyle = useCallback(
+    (resource: CalendarResource, d: Date): ViewStyle => {
+      const isWeekend = d.getDay() === 0 || d.getDay() === 6;
+      const isToday = dayjs(d).isSame(dayjs(), 'day');
+      const isHighlighted = resource.id === 'r1' && isToday;
+      return {
+        backgroundColor: isWeekend ? '#f5f5f5' : '#fff',
+        ...(isHighlighted && {
+          borderWidth: 3,
+          borderColor: '#ff0000',
+        }),
+      };
+    },
+    []
+  );
+
+  const renderWeekDateLabel = useCallback((d: Date) => {
+    const isToday = dayjs(d).isSame(dayjs(), 'day');
+    const todayStyle = {
+      backgroundColor: 'green',
+      borderRadius: 12,
+      width: '100%' as const,
+    };
+    const todayTextStyle = { color: 'white' };
+    return (
+      <View style={[styles.dateLabel, isToday ? todayStyle : {}]}>
+        <Text style={[styles.dateLabelText, isToday ? todayTextStyle : {}]}>
+          {dayjs(d).locale(ja).format('M/D')}
+        </Text>
+        <Text style={[styles.dateLabelText, isToday ? todayTextStyle : {}]}>
+          {dayjs(d).locale(ja).format('(ddd)')}
+        </Text>
+      </View>
+    );
+  }, []);
+
+  const renderWeekResourceNameLabel = useCallback(
+    (resource: CalendarResource) => (
+      <View>
+        <Text style={styles.resourceNameText}>{resource.name}</Text>
+      </View>
+    ),
+    []
+  );
+
   return (
     <View style={styles.container}>
       {/* Tab bar */}
@@ -807,80 +901,20 @@ export default function App() {
           onRefresh={handleRefresh}
           refreshing={refreshing}
           eventHeight={22}
-          onChangeDate={(d) => {
-            console.log('week changed', dayjs(d).format('YYYY-MM-DD'));
-          }}
-          onPressCell={(resource, d) => {
-            console.log(
-              'week onPressCell',
-              resource.name,
-              dayjs(d).format('YYYY-MM-DD')
-            );
-          }}
-          onLongPressCell={(resource, d) => {
-            console.log(
-              'week onLongPressCell',
-              resource.name,
-              dayjs(d).format('YYYY-MM-DD')
-            );
-          }}
-          onPressEvent={(event) => {
-            console.log('week onPressEvent', event.id, event.title);
-          }}
-          onLongPressEvent={(event) => {
-            console.log('week onLongPressEvent', event.id, event.title);
-          }}
+          onChangeDate={handleWeekChangeDate}
+          onPressCell={handleWeekPressCell}
+          onLongPressCell={handleWeekLongPressCell}
+          onPressEvent={handleWeekPressEvent}
+          onLongPressEvent={handleWeekLongPressEvent}
           prioritizeCellInteraction={prioritizeCellInteraction}
-          eventTextStyle={(_event) => ({ fontSize: 12 })}
+          eventTextStyle={weekEventTextStyle}
           eventEllipsizeMode={'clip'}
           allowFontScaling={false}
           renderEventOverlay={renderResourcesEventOverlay}
-          dateCellContainerStyle={(d) => {
-            if (d.getDay() === 0 || d.getDay() === 6) {
-              return { backgroundColor: '#f5f5f5' };
-            }
-            return { backgroundColor: '#fff' };
-          }}
-          cellContainerStyle={(resource, d) => {
-            const isWeekend = d.getDay() === 0 || d.getDay() === 6;
-            const isToday = dayjs(d).isSame(dayjs(), 'day');
-            const isHighlighted = resource.id === 'r1' && isToday;
-            return {
-              backgroundColor: isWeekend ? '#f5f5f5' : '#fff',
-              ...(isHighlighted && {
-                borderWidth: 3,
-                borderColor: '#ff0000',
-              }),
-            };
-          }}
-          renderDateLabel={(d) => {
-            const isToday = dayjs(d).isSame(dayjs(), 'day');
-            const todayStyle = {
-              backgroundColor: 'green',
-              borderRadius: 12,
-              width: '100%',
-            };
-            const todayTextStyle = { color: 'white' };
-            return (
-              <View style={[styles.dateLabel, isToday ? todayStyle : {}]}>
-                <Text
-                  style={[styles.dateLabelText, isToday ? todayTextStyle : {}]}
-                >
-                  {dayjs(d).locale(ja).format('M/D')}
-                </Text>
-                <Text
-                  style={[styles.dateLabelText, isToday ? todayTextStyle : {}]}
-                >
-                  {dayjs(d).locale(ja).format('(ddd)')}
-                </Text>
-              </View>
-            );
-          }}
-          renderResourceNameLabel={(resource) => (
-            <View>
-              <Text style={styles.resourceNameText}>{resource.name}</Text>
-            </View>
-          )}
+          dateCellContainerStyle={weekDateCellContainerStyle}
+          cellContainerStyle={weekCellContainerStyle}
+          renderDateLabel={renderWeekDateLabel}
+          renderResourceNameLabel={renderWeekResourceNameLabel}
           bottomSpacing={200}
           fixedRowCount={2}
         />
