@@ -43,6 +43,9 @@ export type WeekPanelProps = {
   cellContainerStyle?: (resource: CalendarResource, date: Date) => ViewStyle;
   renderDateLabel?: (date: Date) => React.JSX.Element;
   renderResourceNameLabel?: (resource: CalendarResource) => React.JSX.Element;
+  renderHeaderCorner?: () => React.JSX.Element;
+  headerCornerContainerStyle?: ViewStyle;
+  resourceColumnWidth?: number;
   onRefresh?: () => void;
   refreshing?: boolean;
   bottomSpacing?: number;
@@ -229,12 +232,16 @@ export function WeekPanel({
   cellContainerStyle,
   renderDateLabel,
   renderResourceNameLabel,
+  renderHeaderCorner,
+  headerCornerContainerStyle,
+  resourceColumnWidth,
   onRefresh,
   refreshing,
   bottomSpacing,
   fixedRowCount,
 }: WeekPanelProps) {
-  const columnWidth = width / 8;
+  const resolvedResourceColumnWidth = resourceColumnWidth ?? width / 8;
+  const columnWidth = (width - resolvedResourceColumnWidth) / 7;
   const resolvedEventHeight = eventHeight ?? DEFAULT_EVENT_HEIGHT;
   const resolvedFixedRowCount = fixedRowCount ?? 0;
 
@@ -382,7 +389,12 @@ export function WeekPanel({
       key={resource.id}
       style={[styles.resourceRow, showTopBorder && styles.resourceRowFirst]}
     >
-      <View style={[styles.resourceNameCell, { width: columnWidth }]}>
+      <View
+        style={[
+          styles.resourceNameCell,
+          { width: resolvedResourceColumnWidth },
+        ]}
+      >
         {renderResourceNameLabel ? (
           renderResourceNameLabel(resource)
         ) : (
@@ -423,7 +435,10 @@ export function WeekPanel({
         <TouchableOpacity
           accessible={false}
           activeOpacity={1}
-          style={[styles.rowInteractionOverlay, { left: columnWidth }]}
+          style={[
+            styles.rowInteractionOverlay,
+            { left: resolvedResourceColumnWidth },
+          ]}
           onPress={(e) => handleRowPress(e, resource)}
           onLongPress={(e) => handleRowLongPress(e, resource)}
           delayLongPress={delayLongPressCell}
@@ -439,9 +454,12 @@ export function WeekPanel({
           style={[
             styles.headerCell,
             styles.resourceNameHeaderCell,
-            { width: columnWidth },
+            { width: resolvedResourceColumnWidth },
+            headerCornerContainerStyle,
           ]}
-        />
+        >
+          {renderHeaderCorner?.()}
+        </View>
         {days.map((day) => (
           <View
             key={day.format('YYYY-MM-DD')}

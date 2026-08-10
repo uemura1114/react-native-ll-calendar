@@ -44,6 +44,19 @@ type WeekResourcesCalendarProps = {
   cellContainerStyle?: (resource: CalendarResource, date: Date) => ViewStyle;
   renderDateLabel?: (date: Date) => React.JSX.Element;
   renderResourceNameLabel?: (resource: CalendarResource) => React.JSX.Element;
+  /**
+   * Content rendered in the empty top-left header cell (above the resource
+   * name column). A tall element grows the header row height; use
+   * `resourceColumnWidth` when it also needs a wider column.
+   */
+  renderHeaderCorner?: () => React.JSX.Element;
+  /** Style for the top-left header cell container. */
+  headerCornerContainerStyle?: ViewStyle;
+  /**
+   * Width of the resource name column in pixels.
+   * Defaults to 1/8 of the calendar width; the 7 day columns share the rest.
+   */
+  resourceColumnWidth?: number;
   onRefresh?: () => void;
   refreshing?: boolean;
   bottomSpacing?: number;
@@ -84,6 +97,9 @@ export const WeekResourcesCalendar = ({
   cellContainerStyle,
   renderDateLabel,
   renderResourceNameLabel,
+  renderHeaderCorner,
+  headerCornerContainerStyle,
+  resourceColumnWidth,
   onRefresh,
   refreshing,
   bottomSpacing,
@@ -186,6 +202,9 @@ export const WeekResourcesCalendar = ({
           cellContainerStyle={cellContainerStyle}
           renderDateLabel={renderDateLabel}
           renderResourceNameLabel={renderResourceNameLabel}
+          renderHeaderCorner={renderHeaderCorner}
+          headerCornerContainerStyle={headerCornerContainerStyle}
+          resourceColumnWidth={resourceColumnWidth}
           onRefresh={onRefresh}
           refreshing={refreshing}
           bottomSpacing={bottomSpacing}

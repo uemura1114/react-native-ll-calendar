@@ -220,10 +220,17 @@ Same fields as `CalendarEvent` with the addition of:
 | `cellContainerStyle` | `(resource: CalendarResource, date: Date) => ViewStyle` | No | - | Style for resource day cell background |
 | `renderDateLabel` | `(date: Date) => JSX.Element` | No | - | Custom header date cell content |
 | `renderResourceNameLabel` | `(resource: CalendarResource) => JSX.Element` | No | - | Custom resource name cell content |
+| `renderHeaderCorner` | `() => JSX.Element` | No | - | Content for the top-left header cell (above the resource column) |
+| `headerCornerContainerStyle` | `ViewStyle` | No | - | Style for the top-left header cell container |
+| `resourceColumnWidth` | `number` | No | `width / 8` | Width of the resource name column; the 7 day columns share the rest |
 | `onRefresh` | `() => void` | No | - | Callback for pull-to-refresh |
 | `refreshing` | `boolean` | No | - | Whether the calendar is refreshing |
 | `bottomSpacing` | `number` | No | - | Bottom spacing in pixels for scrollable content |
 | `fixedRowCount` | `number` | No | `0` | Number of resource rows pinned above the scroll area |
+
+A tall `renderHeaderCorner` element grows the header row height, and the day
+header cells stretch to match. Pair it with `resourceColumnWidth` when the
+content also needs a wider resource column.
 
 ---
 
