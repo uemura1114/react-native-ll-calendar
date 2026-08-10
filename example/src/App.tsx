@@ -814,6 +814,15 @@ export default function App() {
     []
   );
 
+  const renderWeekHeaderCorner = useCallback(
+    () => (
+      <View style={styles.weekHeaderCorner}>
+        <Text style={styles.weekHeaderCornerText}>Room</Text>
+      </View>
+    ),
+    []
+  );
+
   return (
     <View style={styles.container}>
       {/* Tab bar */}
@@ -915,6 +924,8 @@ export default function App() {
           cellContainerStyle={weekCellContainerStyle}
           renderDateLabel={renderWeekDateLabel}
           renderResourceNameLabel={renderWeekResourceNameLabel}
+          renderHeaderCorner={renderWeekHeaderCorner}
+          resourceColumnWidth={70}
           bottomSpacing={200}
           fixedRowCount={2}
         />
@@ -1096,6 +1107,16 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   resourceNameText: {
+    fontSize: 11,
+    color: '#333',
+    fontWeight: '600',
+  },
+  weekHeaderCorner: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 4,
+  },
+  weekHeaderCornerText: {
     fontSize: 11,
     color: '#333',
     fontWeight: '600',
