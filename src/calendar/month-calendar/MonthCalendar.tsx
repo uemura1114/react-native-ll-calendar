@@ -21,6 +21,7 @@ import {
   MonthCalendarViewItem,
   type MonthCalendarViewItemRef,
 } from './view/MonthCalendarViewItem';
+import { usePagerWidthAdjustment } from '../hooks/usePagerWidthAdjustment';
 
 const HALF_PANEL_LENGTH = 120; // 10 years
 
@@ -73,7 +74,6 @@ type MonthCalendarProps = {
 export const MonthCalendar = forwardRef<MonthCalendarRef, MonthCalendarProps>(
   (props, ref) => {
     const [dateState] = useState(props.defaultDate);
-    const [_activeIndex, setActiveIndex] = useState(HALF_PANEL_LENGTH);
     const defaultDateDjs = dayjs(dateState);
     const startOfDefaultDateDjs = defaultDateDjs.startOf('month');
     const prevPanels: string[] = Array.from(
@@ -97,6 +97,9 @@ export const MonthCalendar = forwardRef<MonthCalendarRef, MonthCalendarProps>(
     ];
 
     const { width } = useWindowDimensions();
+
+    const { listRef, activeIndexRef, isAdjustingRef } =
+      usePagerWidthAdjustment<string>(width, HALF_PANEL_LENGTH);
 
     const monthViewRefs = useRef<
       Record<string, MonthCalendarViewItemRef | null>
@@ -128,6 +131,7 @@ export const MonthCalendar = forwardRef<MonthCalendarRef, MonthCalendarProps>(
 
     return (
       <FlatList
+        ref={listRef}
         horizontal
         pagingEnabled={true}
         getItemLayout={(_data, index) => {
@@ -138,6 +142,7 @@ export const MonthCalendar = forwardRef<MonthCalendarRef, MonthCalendarProps>(
           };
         }}
         onMomentumScrollEnd={(e) => {
+          if (isAdjustingRef.current) return;
           const scrollX = e.nativeEvent.contentOffset.x;
           const newIndex = Math.round(scrollX / width);
           const month = panels[newIndex];
@@ -145,7 +150,7 @@ export const MonthCalendar = forwardRef<MonthCalendarRef, MonthCalendarProps>(
             const newDate = new Date(month);
             props.onChangeDate?.(newDate);
           }
-          setActiveIndex(newIndex);
+          activeIndexRef.current = newIndex;
         }}
         initialScrollIndex={HALF_PANEL_LENGTH}
         decelerationRate={'fast'}

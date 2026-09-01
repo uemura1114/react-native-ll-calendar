@@ -12,6 +12,7 @@ import type {
   CalendarEvent,
 } from '../../types/resources-calendar';
 import { WeekPanel } from './WeekPanel';
+import { usePagerWidthAdjustment } from '../hooks/usePagerWidthAdjustment';
 
 const HALF_PANEL_LENGTH = 120;
 
@@ -105,9 +106,11 @@ export const WeekResourcesCalendar = ({
   bottomSpacing,
   fixedRowCount,
 }: WeekResourcesCalendarProps) => {
-  const [_activeIndex, setActiveIndex] = useState(HALF_PANEL_LENGTH);
   const [dateState] = useState(defaultDate);
   const { width } = useWindowDimensions();
+
+  const { listRef, activeIndexRef, isAdjustingRef } =
+    usePagerWidthAdjustment<string>(width, HALF_PANEL_LENGTH);
 
   const panels = useMemo(() => {
     const startOfDefaultWeek = getWeekStart(dateState, weekStartsOn);
@@ -170,6 +173,7 @@ export const WeekResourcesCalendar = ({
 
   return (
     <FlatList
+      ref={listRef}
       horizontal
       pagingEnabled
       data={panels}
@@ -212,9 +216,10 @@ export const WeekResourcesCalendar = ({
         />
       )}
       onMomentumScrollEnd={(e) => {
+        if (isAdjustingRef.current) return;
         const scrollX = e.nativeEvent.contentOffset.x;
         const newIndex = Math.round(scrollX / width);
-        setActiveIndex(newIndex);
+        activeIndexRef.current = newIndex;
         const weekKey = panels[newIndex];
         if (weekKey) {
           onChangeDate?.(dayjs(weekKey).toDate());
