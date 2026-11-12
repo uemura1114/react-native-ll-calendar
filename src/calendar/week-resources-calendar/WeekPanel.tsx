@@ -568,7 +568,11 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   dayCellBackground: {
-    ...StyleSheet.absoluteFillObject,
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
   },
   rowInteractionOverlay: {
     position: 'absolute',
@@ -610,7 +614,11 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
   eventOverlayHost: {
-    ...StyleSheet.absoluteFillObject,
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
     pointerEvents: 'box-none' as const,
   },
 });

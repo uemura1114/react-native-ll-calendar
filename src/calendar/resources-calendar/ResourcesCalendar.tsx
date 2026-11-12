@@ -761,7 +761,11 @@ const styles = StyleSheet.create({
     bottom: 0,
   },
   cellInteractionOverlay: {
-    ...StyleSheet.absoluteFillObject,
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
     zIndex: 1000,
     backgroundColor: 'transparent',
     ...Platform.select({
@@ -828,7 +832,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   eventOverlayHost: {
-    ...StyleSheet.absoluteFillObject,
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
     pointerEvents: 'box-none',
   },
   prevDateEvent: {
