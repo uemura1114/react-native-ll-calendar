@@ -46,7 +46,7 @@ export function getWeekIds(args: {
 }) {
   const { start, end, weekStartsOn } = args;
   const startDjs = dayjs(start).startOf('day');
-  const endDjs = dayjs(end).startOf('day');
+  const endDjs = getLastDay(start, end);
   const weekIds: string[] = [];
   let current = startDjs;
   if (weekStartsOn === 0) {
@@ -78,19 +78,36 @@ export function getWeekIds(args: {
   return weekIds;
 }
 
+export function isOnDayBoundary(djs: dayjs.Dayjs): boolean {
+  return (
+    djs.hour() === 0 &&
+    djs.minute() === 0 &&
+    djs.second() === 0 &&
+    djs.millisecond() === 0
+  );
+}
+
+/**
+ * Returns the start of the last day an event occupies.
+ * An event ending exactly at 00:00 does not occupy that day (same as calcDiffDays),
+ * except for a zero-length event.
+ */
+export function getLastDay(start: Date, end: Date): dayjs.Dayjs {
+  const endDjs = dayjs(end);
+  if (isOnDayBoundary(endDjs) && endDjs.isAfter(dayjs(start))) {
+    return endDjs.subtract(1, 'day').startOf('day');
+  }
+  return endDjs.startOf('day');
+}
+
 export function calcDiffDays(
   endDjs: dayjs.Dayjs,
   startDjs: dayjs.Dayjs
 ): number {
-  const isEndOnDayBoundary =
-    endDjs.hour() === 0 &&
-    endDjs.minute() === 0 &&
-    endDjs.second() === 0 &&
-    endDjs.millisecond() === 0;
   return Math.max(
     0,
     endDjs.startOf('day').diff(startDjs.startOf('day'), 'day') -
-      (isEndOnDayBoundary ? 1 : 0)
+      (isOnDayBoundary(endDjs) ? 1 : 0)
   );
 }
 

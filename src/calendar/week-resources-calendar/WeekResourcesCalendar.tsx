@@ -13,6 +13,7 @@ import type {
 } from '../../types/resources-calendar';
 import { WeekPanel } from './WeekPanel';
 import { usePagerWidthAdjustment } from '../hooks/usePagerWidthAdjustment';
+import { getLastDay } from '../../utils/functions';
 
 const HALF_PANEL_LENGTH = 120;
 
@@ -148,7 +149,10 @@ export const WeekResourcesCalendar = ({
 
     for (const event of events) {
       const startWeek = getWeekStart(new Date(event.start), weekStartsOn);
-      const endWeek = getWeekStart(new Date(event.end), weekStartsOn);
+      const endWeek = getWeekStart(
+        getLastDay(event.start, event.end).toDate(),
+        weekStartsOn
+      );
 
       // Clamp the iteration range to the available panels.
       let cursor = startWeek.isBefore(firstWeek) ? firstWeek : startWeek;
