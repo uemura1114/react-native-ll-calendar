@@ -22,6 +22,21 @@ type TabType =
   | 'resources-inline-band'
   | 'week-resources';
 
+// Sunday 22:00 - Monday 00:00 of the current week (weekStartsOn: 1).
+// The event ends exactly at midnight of the first day of the next week,
+// so it should be rendered only on Sunday.
+function getEndAtMidnightRange(): { start: Date; end: Date } {
+  const today = new Date();
+  const daysUntilSunday = (7 - today.getDay()) % 7;
+  const y = today.getFullYear();
+  const m = today.getMonth();
+  const d = today.getDate() + daysUntilSunday;
+  return {
+    start: new Date(y, m, d, 22, 0),
+    end: new Date(y, m, d + 1, 0, 0),
+  };
+}
+
 export default function App() {
   const [activeTab, setActiveTab] = useState<TabType>('month');
   const [prioritizeCellInteraction, setPrioritizeCellInteraction] =
@@ -39,6 +54,14 @@ export default function App() {
     const currentYear = today.getFullYear();
 
     return [
+      {
+        id: 'end-at-midnight',
+        title: 'Ends at 00:00',
+        ...getEndAtMidnightRange(),
+        backgroundColor: '#ffa94d',
+        borderColor: '#e8590c',
+        color: '#0e0e0e',
+      },
       {
         id: '1−1',
         title: '😃!Meeting',
@@ -411,6 +434,15 @@ export default function App() {
     const y = now.getFullYear();
     const m = now.getMonth();
     return [
+      {
+        id: 're-end-at-midnight',
+        resourceId: 'r4',
+        title: 'Ends at 00:00',
+        ...getEndAtMidnightRange(),
+        backgroundColor: '#ffa94d',
+        borderColor: '#e8590c',
+        color: '#333',
+      },
       {
         id: 're-r1-a',
         resourceId: 'r1',
