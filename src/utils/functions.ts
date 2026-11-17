@@ -46,7 +46,12 @@ export function getWeekIds(args: {
 }) {
   const { start, end, weekStartsOn } = args;
   const startDjs = dayjs(start).startOf('day');
-  const endDjs = dayjs(end).startOf('day');
+  const rawEndDjs = dayjs(end);
+  // An event ending exactly at 00:00 does not occupy that day (same as calcDiffDays)
+  const endDjs =
+    isOnDayBoundary(rawEndDjs) && rawEndDjs.isAfter(dayjs(start))
+      ? rawEndDjs.subtract(1, 'day').startOf('day')
+      : rawEndDjs.startOf('day');
   const weekIds: string[] = [];
   let current = startDjs;
   if (weekStartsOn === 0) {
@@ -78,19 +83,23 @@ export function getWeekIds(args: {
   return weekIds;
 }
 
+export function isOnDayBoundary(djs: dayjs.Dayjs): boolean {
+  return (
+    djs.hour() === 0 &&
+    djs.minute() === 0 &&
+    djs.second() === 0 &&
+    djs.millisecond() === 0
+  );
+}
+
 export function calcDiffDays(
   endDjs: dayjs.Dayjs,
   startDjs: dayjs.Dayjs
 ): number {
-  const isEndOnDayBoundary =
-    endDjs.hour() === 0 &&
-    endDjs.minute() === 0 &&
-    endDjs.second() === 0 &&
-    endDjs.millisecond() === 0;
   return Math.max(
     0,
     endDjs.startOf('day').diff(startDjs.startOf('day'), 'day') -
-      (isEndOnDayBoundary ? 1 : 0)
+      (isOnDayBoundary(endDjs) ? 1 : 0)
   );
 }
 

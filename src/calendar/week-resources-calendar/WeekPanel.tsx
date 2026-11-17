@@ -281,7 +281,7 @@ export function WeekPanel({
               startDjs.format('YYYY-MM-DD') === date.format('YYYY-MM-DD') ||
               (dateIndex === 0 &&
                 startDjs.isBefore(date) &&
-                !endDjs.startOf('day').isBefore(date.startOf('day')))
+                endDjs.isAfter(date.startOf('day')))
             );
           })
           .sort((a, b) => {
