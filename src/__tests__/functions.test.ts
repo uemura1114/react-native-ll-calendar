@@ -3,6 +3,7 @@ import {
   monthlyStartDate,
   monthlyEndDate,
   getWeekIds,
+  getLastDay,
   calcDiffDays,
 } from '../utils/functions';
 
@@ -96,6 +97,26 @@ describe('getWeekIds', () => {
     const start = new Date(2026, 10, 23, 0, 0);
     const end = new Date(2026, 10, 23, 0, 0);
     expect(getWeekIds({ start, end, weekStartsOn: 1 })).toEqual(['2026-11-23']);
+  });
+});
+
+describe('getLastDay', () => {
+  it('should return the previous day when the event ends exactly at 00:00', () => {
+    const start = new Date(2026, 10, 22, 22, 0);
+    const end = new Date(2026, 10, 23, 0, 0);
+    expect(getLastDay(start, end).format('YYYY-MM-DD')).toBe('2026-11-22');
+  });
+
+  it('should return the end day when the event ends after 00:00', () => {
+    const start = new Date(2026, 10, 22, 22, 0);
+    const end = new Date(2026, 10, 23, 0, 1);
+    expect(getLastDay(start, end).format('YYYY-MM-DD')).toBe('2026-11-23');
+  });
+
+  it('should return the end day for a zero-length event at 00:00', () => {
+    const start = new Date(2026, 10, 23, 0, 0);
+    const end = new Date(2026, 10, 23, 0, 0);
+    expect(getLastDay(start, end).format('YYYY-MM-DD')).toBe('2026-11-23');
   });
 });
 
